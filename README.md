@@ -4,6 +4,10 @@
 * /docs : project documents
 * /source : project code
 
+## terms
+* server : target device with camera (i.e. jetson nano)
+* client : pc program which has some interface to control target 
+
 ## commit message rule
 <pre>
 <code>
