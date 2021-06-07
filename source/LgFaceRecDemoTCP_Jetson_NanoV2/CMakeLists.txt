@@ -29,6 +29,7 @@ if(CUDA_VERSION_MAJOR GREATER 9)
 endif()
 
 set(CMAKE_CXX_FLAGS  "-Wno-deprecated-declarations")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -s")
 
 # tensorRT
 message("CUDA_TOOLKIT_ROOT_DIR = ${CUDA_TOOLKIT_ROOT_DIR}")
