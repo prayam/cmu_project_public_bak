@@ -1,0 +1,207 @@
+Flawfinder version 2.0.17, (C) 2001-2019 David A. Wheeler.
+Number of rules (primarily dangerous function names) in C/C++ ruleset: 222
+Examining ../cmu_project/source/SendImageUDP/SendImageUDP.cpp
+Examining ../cmu_project/source/Common/KeyboardSetup.h
+Examining ../cmu_project/source/Common/KeyboardSetup.cpp
+Examining ../cmu_project/source/Common/NetworkTCP.h
+Examining ../cmu_project/source/Common/NetworkUDP.h
+Examining ../cmu_project/source/Common/utils.cpp
+Examining ../cmu_project/source/Common/UdpSendRecvJpeg.cpp
+Examining ../cmu_project/source/Common/UdpSendRecvJpeg.h
+Examining ../cmu_project/source/Common/utils.h
+Examining ../cmu_project/source/Common/NetworkTCP.cpp
+Examining ../cmu_project/source/Common/SG_InputBoxLib.h
+Examining ../cmu_project/source/Common/SG_InputBox.h
+Examining ../cmu_project/source/Common/TcpSendRecvJpeg.cpp
+Examining ../cmu_project/source/Common/SG_InputBox.cpp
+Examining ../cmu_project/source/Common/NetworkUDP.cpp
+Examining ../cmu_project/source/Common/TcpSendRecvJpeg.h
+Examining ../cmu_project/source/RecvImageTCP/RecvImageTCP.cpp
+Examining ../cmu_project/source/SendImageTCP/SendImageTCP.cpp
+Examining ../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/src/network.cpp
+Examining ../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/src/baseEngine.cpp
+Examining ../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/src/onet_rt.cpp
+Examining ../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/src/videoStreamer.cpp
+Examining ../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/src/onet_rt.h
+Examining ../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/src/rnet_rt.h
+Examining ../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/src/main.cpp
+Examining ../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/src/faceNet.cpp
+Examining ../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/src/NetworkTCP.h
+Examining ../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/src/mtcnn.cpp
+Examining ../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/src/mtcnn.h
+Examining ../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/src/pBox.h
+Examining ../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/src/network.h
+Examining ../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/src/NetworkTCP.cpp
+Examining ../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/src/rnet_rt.cpp
+Examining ../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/src/common.h
+Examining ../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/src/pnet_rt.cpp
+Examining ../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/src/pnet_rt.h
+Examining ../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/src/baseEngine.h
+Examining ../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/src/faceNet.h
+Examining ../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/src/videoStreamer.h
+Examining ../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/src/TcpSendRecvJpeg.cpp
+Examining ../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/src/common.cpp
+Examining ../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/src/TcpSendRecvJpeg.h
+Examining ../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/MTCNN_FaceDetection_TensorRT/src/network.cpp
+Examining ../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/MTCNN_FaceDetection_TensorRT/src/baseEngine.cpp
+Examining ../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/MTCNN_FaceDetection_TensorRT/src/onet_rt.cpp
+Examining ../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/MTCNN_FaceDetection_TensorRT/src/demo.cpp
+Examining ../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/MTCNN_FaceDetection_TensorRT/src/onet_rt.h
+Examining ../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/MTCNN_FaceDetection_TensorRT/src/rnet_rt.h
+Examining ../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/MTCNN_FaceDetection_TensorRT/src/mtcnn.cpp
+Examining ../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/MTCNN_FaceDetection_TensorRT/src/mtcnn.h
+Examining ../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/MTCNN_FaceDetection_TensorRT/src/pBox.h
+Examining ../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/MTCNN_FaceDetection_TensorRT/src/network.h
+Examining ../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/MTCNN_FaceDetection_TensorRT/src/rnet_rt.cpp
+Examining ../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/MTCNN_FaceDetection_TensorRT/src/common.h
+Examining ../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/MTCNN_FaceDetection_TensorRT/src/pnet_rt.cpp
+Examining ../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/MTCNN_FaceDetection_TensorRT/src/pnet_rt.h
+Examining ../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/MTCNN_FaceDetection_TensorRT/src/baseEngine.h
+Examining ../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/MTCNN_FaceDetection_TensorRT/src/common.cpp
+Examining ../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/trt_l2norm_helper/l2norm_helper.h
+Examining ../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/trt_l2norm_helper/l2norm_helper.cpp
+Examining ../cmu_project/source/RecvImageUDP/RecvImageUDP.cpp
+
+FINAL RESULTS:
+
+../cmu_project/source/Common/SG_InputBox.cpp:51:  [4] (buffer) lstrcpy:
+  Does not check for buffer overflows when copying to destination [MS-banned]
+  (CWE-120). Consider using a function version that stops copying at the end
+  of the buffer.
+../cmu_project/source/Common/SG_InputBox.h:36:  [2] (buffer) wchar_t:
+  Statically-sized arrays can be improperly restricted, leading to potential
+  overflows or other issues (CWE-119!/CWE-120). Perform bounds checking, use
+  functions that limit length, or ensure that the size is larger than the
+  maximum possible length.
+../cmu_project/source/Common/SG_InputBox.h:50:  [2] (buffer) wchar_t:
+  Statically-sized arrays can be improperly restricted, leading to potential
+  overflows or other issues (CWE-119!/CWE-120). Perform bounds checking, use
+  functions that limit length, or ensure that the size is larger than the
+  maximum possible length.
+../cmu_project/source/Common/UdpSendRecvJpeg.cpp:37:  [2] (buffer) char:
+  Statically-sized arrays can be improperly restricted, leading to potential
+  overflows or other issues (CWE-119!/CWE-120). Perform bounds checking, use
+  functions that limit length, or ensure that the size is larger than the
+  maximum possible length.
+../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/MTCNN_FaceDetection_TensorRT/src/mtcnn.cpp:113:  [2] (buffer) memcpy:
+  Does not check for buffer overflows when copying to destination (CWE-120).
+  Make sure destination can always hold the source data.
+../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/MTCNN_FaceDetection_TensorRT/src/mtcnn.cpp:145:  [2] (buffer) memcpy:
+  Does not check for buffer overflows when copying to destination (CWE-120).
+  Make sure destination can always hold the source data.
+../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/MTCNN_FaceDetection_TensorRT/src/pnet_rt.cpp:24:  [2] (misc) open:
+  Check when opening files - can an attacker redirect it (via symlinks),
+  force the opening of special file type (e.g., device files), move things
+  around to create a race condition, control its ancestors, or change its
+  contents? (CWE-362).
+../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/MTCNN_FaceDetection_TensorRT/src/pnet_rt.cpp:40:  [2] (misc) open:
+  Check when opening files - can an attacker redirect it (via symlinks),
+  force the opening of special file type (e.g., device files), move things
+  around to create a race condition, control its ancestors, or change its
+  contents? (CWE-362).
+../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/src/baseEngine.cpp:92:  [2] (misc) open:
+  Check when opening files - can an attacker redirect it (via symlinks),
+  force the opening of special file type (e.g., device files), move things
+  around to create a race condition, control its ancestors, or change its
+  contents? (CWE-362).
+../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/src/faceNet.cpp:92:  [2] (misc) open:
+  Check when opening files - can an attacker redirect it (via symlinks),
+  force the opening of special file type (e.g., device files), move things
+  around to create a race condition, control its ancestors, or change its
+  contents? (CWE-362).
+../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/src/main.cpp:118:  [2] (integer) atoi:
+  Unless checked, the resulting number can exceed the expected range
+  (CWE-190). If source untrusted, check both minimum and maximum, even if the
+  input had no minus sign (large numbers can roll over into negative number;
+  consider saving to an unsigned value if that is intended).
+../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/src/mtcnn.cpp:125:  [2] (buffer) memcpy:
+  Does not check for buffer overflows when copying to destination (CWE-120).
+  Make sure destination can always hold the source data.
+../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/src/mtcnn.cpp:157:  [2] (buffer) memcpy:
+  Does not check for buffer overflows when copying to destination (CWE-120).
+  Make sure destination can always hold the source data.
+../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/src/pnet_rt.cpp:24:  [2] (misc) open:
+  Check when opening files - can an attacker redirect it (via symlinks),
+  force the opening of special file type (e.g., device files), move things
+  around to create a race condition, control its ancestors, or change its
+  contents? (CWE-362).
+../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/src/pnet_rt.cpp:41:  [2] (misc) open:
+  Check when opening files - can an attacker redirect it (via symlinks),
+  force the opening of special file type (e.g., device files), move things
+  around to create a race condition, control its ancestors, or change its
+  contents? (CWE-362).
+../cmu_project/source/RecvImageUDP/RecvImageUDP.cpp:41:  [2] (integer) atoi:
+  Unless checked, the resulting number can exceed the expected range
+  (CWE-190). If source untrusted, check both minimum and maximum, even if the
+  input had no minus sign (large numbers can roll over into negative number;
+  consider saving to an unsigned value if that is intended).
+../cmu_project/source/SendImageTCP/SendImageTCP.cpp:73:  [2] (integer) atoi:
+  Unless checked, the resulting number can exceed the expected range
+  (CWE-190). If source untrusted, check both minimum and maximum, even if the
+  input had no minus sign (large numbers can roll over into negative number;
+  consider saving to an unsigned value if that is intended).
+../cmu_project/source/SendImageUDP/SendImageUDP.cpp:62:  [2] (misc) open:
+  Check when opening files - can an attacker redirect it (via symlinks),
+  force the opening of special file type (e.g., device files), move things
+  around to create a race condition, control its ancestors, or change its
+  contents? (CWE-362).
+../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/MTCNN_FaceDetection_TensorRT/src/common.cpp:36:  [1] (buffer) read:
+  Check buffer boundaries if used in a loop including recursive loops
+  (CWE-120, CWE-20).
+../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/src/baseEngine.cpp:55:  [1] (buffer) read:
+  Check buffer boundaries if used in a loop including recursive loops
+  (CWE-120, CWE-20).
+../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/src/faceNet.cpp:43:  [1] (buffer) read:
+  Check buffer boundaries if used in a loop including recursive loops
+  (CWE-120, CWE-20).
+../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/src/main.cpp:31:  [1] (buffer) read:
+  Check buffer boundaries if used in a loop including recursive loops
+  (CWE-120, CWE-20).
+../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/trt_l2norm_helper/l2norm_helper.cpp:27:  [1] (buffer) read:
+  Check buffer boundaries if used in a loop including recursive loops
+  (CWE-120, CWE-20).
+../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/trt_l2norm_helper/l2norm_helper.cpp:28:  [1] (buffer) read:
+  Check buffer boundaries if used in a loop including recursive loops
+  (CWE-120, CWE-20).
+../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/trt_l2norm_helper/l2norm_helper.cpp:29:  [1] (buffer) read:
+  Check buffer boundaries if used in a loop including recursive loops
+  (CWE-120, CWE-20).
+../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/trt_l2norm_helper/l2norm_helper.cpp:30:  [1] (buffer) read:
+  Check buffer boundaries if used in a loop including recursive loops
+  (CWE-120, CWE-20).
+../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/trt_l2norm_helper/l2norm_helper.cpp:31:  [1] (buffer) read:
+  Check buffer boundaries if used in a loop including recursive loops
+  (CWE-120, CWE-20).
+../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/trt_l2norm_helper/l2norm_helper.cpp:32:  [1] (buffer) read:
+  Check buffer boundaries if used in a loop including recursive loops
+  (CWE-120, CWE-20).
+../cmu_project/source/LgFaceRecDemoTCP_Jetson_NanoV2/trt_l2norm_helper/l2norm_helper.h:126:  [1] (buffer) read:
+  Check buffer boundaries if used in a loop including recursive loops
+  (CWE-120, CWE-20).
+../cmu_project/source/SendImageTCP/SendImageTCP.cpp:96:  [1] (buffer) read:
+  Check buffer boundaries if used in a loop including recursive loops
+  (CWE-120, CWE-20).
+../cmu_project/source/SendImageUDP/SendImageUDP.cpp:89:  [1] (buffer) read:
+  Check buffer boundaries if used in a loop including recursive loops
+  (CWE-120, CWE-20).
+
+ANALYSIS SUMMARY:
+
+Hits = 31
+Lines analyzed = 5559 in approximately 0.06 seconds (90710 lines/second)
+Physical Source Lines of Code (SLOC) = 4089
+Hits@level = [0]  48 [1]  13 [2]  17 [3]   0 [4]   1 [5]   0
+Hits@level+ = [0+]  79 [1+]  31 [2+]  18 [3+]   1 [4+]   1 [5+]   0
+Hits/KSLOC@level+ = [0+] 19.3201 [1+] 7.58132 [2+] 4.40205 [3+] 0.244559 [4+] 0.244559 [5+]   0
+Dot directories skipped = 1 (--followdotdir overrides)
+Minimum risk level = 1
+
+Not every hit is necessarily a security vulnerability.
+You can inhibit a report by adding a comment in this form:
+// flawfinder: ignore
+Make *sure* it's a false positive!
+You can use the option --neverignore to show these.
+
+There may be other security vulnerabilities; review your code!
+See 'Secure Programming HOWTO'
+(https://dwheeler.com/secure-programs) for more information.
