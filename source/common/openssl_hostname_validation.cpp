@@ -87,7 +87,7 @@ static HostnameValidationResult matches_subject_alternative_name(const char *hos
 	// Try to extract the names within the SAN extension from the certificate
 
 	//:TODO: Need to review 
-	// 	cmu_project/source/Common/openssl_hostname_validation.cpp:88:30: error: invalid conversion from ‘void*’ to ‘stack_st_GENERAL_NAME*’ [-fpermissive]
+	// 	cmu_project/source/common/openssl_hostname_validation.cpp:88:30: error: invalid conversion from ‘void*’ to ‘stack_st_GENERAL_NAME*’ [-fpermissive]
 	//   san_names = X509_get_ext_d2i((X509 *) server_cert, NID_subject_alt_name, NULL, NULL);
 	san_names = (STACK_OF(GENERAL_NAME) *)X509_get_ext_d2i((X509 *) server_cert, NID_subject_alt_name, NULL, NULL);
 	if (san_names == NULL) {
@@ -143,7 +143,7 @@ HostnameValidationResult validate_hostname(const char *hostname, const X509 *ser
 	// First try the Subject Alternative Names extension
 	result = matches_subject_alternative_name(hostname, server_cert);
 	if (result == NoSANPresent) {
-		// Extension was not found: try the Common Name
+		// Extension was not found: try the common Name
 		result = matches_common_name(hostname, server_cert);
 	}
 

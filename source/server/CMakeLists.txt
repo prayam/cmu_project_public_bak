@@ -81,17 +81,17 @@ include_directories(
   ${GOBJECT2_INCLUDE_DIRS}
   ${OPENSSL_INCLUDE_DIRS}
   ${OPENCV_INCLUDE_DIRS}
-  ../Common
+  ../common
 )
 
 message("TENSORRT_LIBRARY = ${TENSORRT_LIBRARY}")
 
 file(GLOB DIR_SRCS
         "src/*.cpp"
-        "../Common/NetworkTCP.cpp"
-        "../Common/TcpSendRecvJpeg.cpp"
-        "../Common/TcpSendRecvJpeg.cpp"
-        "../Common/openssl_hostname_validation.cpp"
+        "../common/NetworkTCP.cpp"
+        "../common/TcpSendRecvJpeg.cpp"
+        "../common/TcpSendRecvJpeg.cpp"
+        "../common/openssl_hostname_validation.cpp"
 )
 
 message("DIR_SRCS = ${DIR_SRCS}")

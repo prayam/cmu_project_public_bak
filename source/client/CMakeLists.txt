@@ -22,14 +22,14 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
 file(GLOB CLIENT_SRC
         "src/*.h"
         "src/*.cpp"
-        "../Common/NetworkTCP.cpp"
-        "../Common/TcpSendRecvJpeg.cpp"
-        "../Common/openssl_hostname_validation.cpp"
+        "../common/NetworkTCP.cpp"
+        "../common/TcpSendRecvJpeg.cpp"
+        "../common/openssl_hostname_validation.cpp"
 )
 
 include_directories(
         "src/"
-        "../Common/"
+        "../common/"
         ${GLIB2_INCLUDE_DIRS}
         ${GIO2_INCLUDE_DIRS}
         ${GOBJECT2_INCLUDE_DIRS}

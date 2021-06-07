@@ -3,6 +3,10 @@
 ## folder
 * /docs : project documents
 * /source : project code
+* /source/client : client code
+* /source/server : server code
+* /source/common : common code for server & client
+* /source/custom : tls sample code and keys
 
 ## terms
 * server : target device with camera (i.e. jetson nano)
