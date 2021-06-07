@@ -37,6 +37,8 @@ endif()
 
 set(CMAKE_CXX_FLAGS  "-Wno-deprecated-declarations")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -s")
+set(CMAKE_SKIP_RPATH TRUE)
+set(CMAKE_INSTALL_RPATH "")
 
 # tensorRT
 message("CUDA_TOOLKIT_ROOT_DIR = ${CUDA_TOOLKIT_ROOT_DIR}")
