@@ -4,8 +4,15 @@ project(${PROJECT_NAME})# LANGUAGES CXX CUDA)
 
 set (CMAKE_CXX_STANDARD 11)
 
+include(FindPkgConfig)
+
 # OpenCV
-find_package(OpenCV REQUIRED)
+pkg_check_modules(GLIB2 REQUIRED glib-2.0)
+pkg_check_modules(GIO2 REQUIRED gio-2.0)
+pkg_check_modules(GOBJECT2 REQUIRED gobject-2.0)
+pkg_check_modules(OPENSSL REQUIRED openssl)
+pkg_check_modules(OPENCV REQUIRED opencv4)
+
 find_package(CUDA)
 message("-- CUDA version: ${CUDA_VERSION}")
 
@@ -68,14 +75,34 @@ include_directories(
   ${TENSORRT_INCLUDE_DIR}
 )
 
+include_directories(
+  ${GLIB2_INCLUDE_DIRS}
+  ${GIO2_INCLUDE_DIRS}
+  ${GOBJECT2_INCLUDE_DIRS}
+  ${OPENSSL_INCLUDE_DIRS}
+  ${OPENCV_INCLUDE_DIRS}
+  ../Common
+)
+
 message("TENSORRT_LIBRARY = ${TENSORRT_LIBRARY}")
 
-AUX_SOURCE_DIRECTORY(./src DIR_SRCS)
+file(GLOB DIR_SRCS
+        "src/*.cpp"
+        "../Common/NetworkTCP.cpp"
+        "../Common/TcpSendRecvJpeg.cpp"
+        "../Common/TcpSendRecvJpeg.cpp"
+        "../Common/openssl_hostname_validation.cpp"
+)
+
 message("DIR_SRCS = ${DIR_SRCS}")
 cuda_add_executable(${PROJECT_NAME} ${DIR_SRCS})
 
 target_link_libraries(${PROJECT_NAME}
   trt_l2norm_helper
   ${TENSORRT_LIBRARY}
+  ${GLIB2_LIBRARIES}
+  ${GIO2_LIBRARIES}
+  ${GOBJECT2_LIBRARIES}
+  ${OPENSSL_LIBRARIES}
+  ${OPENCV_LIBRARIES}
 )
-target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS}) 

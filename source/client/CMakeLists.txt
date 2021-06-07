@@ -24,6 +24,7 @@ file(GLOB CLIENT_SRC
         "src/*.cpp"
         "../Common/NetworkTCP.cpp"
         "../Common/TcpSendRecvJpeg.cpp"
+        "../Common/openssl_hostname_validation.cpp"
 )
 
 include_directories(

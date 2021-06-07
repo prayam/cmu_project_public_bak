@@ -10,6 +10,10 @@
 #include <stdio.h>
 #include <string.h>
 #include "NetworkTCP.h"
+#include "openssl_hostname_validation.h"
+
+#define TARGET_HOST "face.recog.server.Jetson"
+
 //-----------------------------------------------------------------
 // OpenTCPListenPort - Creates a Listen TCP port to accept
 // connection requests
@@ -38,6 +42,7 @@ TTcpListenPort *OpenTcpListenPort(short localport)
      return(NULL);
     }
 #endif
+
   // create a socket
   if ((TcpListenPort->ListenFd= socket(AF_INET, SOCK_STREAM, 0)) == BAD_SOCKET_FD)
      {
@@ -99,14 +104,102 @@ void CloseTcpListenPort(TTcpListenPort **TcpListenPort)
 //-----------------------------------------------------------------
 // END CloseTcpListenPort
 //-----------------------------------------------------------------
+
+
+/* [START] by jh.ahn */
+static void ShowCerts(SSL* ssl)
+{
+    X509 *cert;
+    char *line;
+    cert = SSL_get_peer_certificate(ssl); /* Get certificates (if available) */
+    if ( cert != NULL )
+    {
+        printf("Server certificates:\n");
+        line = X509_NAME_oneline(X509_get_subject_name(cert), 0, 0);
+        printf("Subject: %s\n", line);
+        free(line);
+        line = X509_NAME_oneline(X509_get_issuer_name(cert), 0, 0);
+        printf("Issuer: %s\n", line);
+        free(line);
+        X509_free(cert);
+    }
+    else
+    {
+        printf("No certificates.\n");
+    }
+}
+/* [END] by jh.ahn */
+
+static SSL_CTX *get_server_context(const char *ca_pem,
+                            const char *cert_pem,
+                            const char *key_pem) {
+    SSL_CTX *ctx;
+
+    /* Get a default context */
+    // if (!(ctx = SSL_CTX_new(SSLv23_server_method()))) {
+    if (!(ctx = SSL_CTX_new(TLS_server_method()))) {
+        fprintf(stderr, "SSL_CTX_new failed\n");
+        return NULL;
+    }
+
+    /* Set the CA file location for the server */
+    if (SSL_CTX_load_verify_locations(ctx, ca_pem, NULL) != 1) {
+        fprintf(stderr, "Could not set the CA file location\n");
+        goto fail;
+    }
+
+    /* Load the client's CA file location as well */
+    SSL_CTX_set_client_CA_list(ctx, SSL_load_client_CA_file(ca_pem));
+
+    /* Set the server's certificate signed by the CA */
+    if (SSL_CTX_use_certificate_file(ctx, cert_pem, SSL_FILETYPE_PEM) != 1) {
+        fprintf(stderr, "Could not set the server's certificate\n");
+        goto fail;
+    }
+
+    /* Set the server's key for the above certificate */
+    if (SSL_CTX_use_PrivateKey_file(ctx, key_pem, SSL_FILETYPE_PEM) != 1) {
+        fprintf(stderr, "Could not set the server's key\n");
+        goto fail;
+    }
+
+    /* We've loaded both certificate and the key, check if they match */
+    if (SSL_CTX_check_private_key(ctx) != 1) {
+        fprintf(stderr, "Server's certificate and the key don't match\n");
+        goto fail;
+    }
+
+    /* We won't handle incomplete read/writes due to renegotiation */
+    SSL_CTX_set_mode(ctx, SSL_MODE_AUTO_RETRY);
+
+    /* Specify that we need to verify the client as well */
+    SSL_CTX_set_verify(ctx,
+                       SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT,
+                       NULL);
+
+    /* We accept only certificates signed only by the CA himself */
+    SSL_CTX_set_verify_depth(ctx, 1);
+
+    /* Done, return the context */
+    return ctx;
+
+fail:
+    SSL_CTX_free(ctx);
+    return NULL;
+}
+
+
 //-----------------------------------------------------------------
 // AcceptTcpConnection -Accepts a TCP Connection request from a 
 // Listening port
 //-----------------------------------------------------------------
 TTcpConnectedPort *AcceptTcpConnection(TTcpListenPort *TcpListenPort, 
-                       struct sockaddr_in *cli_addr,socklen_t *clilen)
+                       struct sockaddr_in *cli_addr,socklen_t *clilen,
+                       const char *ca_pem, const char *cert_pem, const char *key_pem)
 {
   TTcpConnectedPort *TcpConnectedPort;
+  gboolean isSsl = false;
+  int rc = -1;
 
   TcpConnectedPort= new (std::nothrow) TTcpConnectedPort;  
   
@@ -115,6 +208,23 @@ TTcpConnectedPort *AcceptTcpConnection(TTcpListenPort *TcpListenPort,
       fprintf(stderr, "TUdpPort memory allocation failed\n");
       return(NULL);
      }
+
+  if(ca_pem != NULL && cert_pem != NULL && key_pem != NULL) {
+    isSsl = true;
+  }
+
+  if(isSsl) {
+    /* Initialize OpenSSL */
+    SSL_load_error_strings();
+    OpenSSL_add_ssl_algorithms();
+
+    /* Get a server context for our use */
+    if (!(TcpConnectedPort->ctx = get_server_context(ca_pem, cert_pem, key_pem))) {
+        fprintf(stderr, "get_server_context failed\n");
+        return(NULL);
+    }
+  }
+
   TcpConnectedPort->ConnectedFd= accept(TcpListenPort->ListenFd,
                       (struct sockaddr *) cli_addr,clilen);
 					  
@@ -141,23 +251,116 @@ TTcpConnectedPort *AcceptTcpConnection(TTcpListenPort *TcpListenPort,
          return(NULL);
 	}
 
+  if(isSsl) {
+    /* Get an SSL handle from the context */
+    if (!(TcpConnectedPort->ssl = SSL_new(TcpConnectedPort->ctx))) {
+        fprintf(stderr, "Could not get an SSL handle from the context\n");
+        goto ssl_exit;
+    }
+
+    /* Associate the newly accepted connection with this handle */
+    SSL_set_fd(TcpConnectedPort->ssl, TcpConnectedPort->ConnectedFd);
+
+    /* Now perform handshake */
+    if ((rc = SSL_accept(TcpConnectedPort->ssl)) != 1) {
+        fprintf(stderr, "Could not perform SSL handshake\n");
+        if (rc != 0) {
+            SSL_shutdown(TcpConnectedPort->ssl);
+        }
+        SSL_free(TcpConnectedPort->ssl);
+        goto ssl_exit;
+    }
+
+    ShowCerts(TcpConnectedPort->ssl);
+    /* Print success connection message on the server */
+    printf("SSL handshake successful with %s:%d\n",
+                inet_ntoa(cli_addr->sin_addr), ntohs(cli_addr->sin_port));
+
+    TcpConnectedPort->isSsl = isSsl;
+  }
 
  return TcpConnectedPort;
+
+ssl_exit:
+  if(isSsl) {
+    SSL_CTX_free(TcpConnectedPort->ctx);
+  }
+  return NULL;
 }
 //-----------------------------------------------------------------
 // END AcceptTcpConnection
 //-----------------------------------------------------------------
+
+static SSL_CTX *get_client_context(const char *ca_pem,
+                              const char *cert_pem,
+                              const char *key_pem) {
+    SSL_CTX *ctx;
+
+    /* Create a generic context */
+    // if (!(ctx = SSL_CTX_new(SSLv23_client_method()))) {
+    if (!(ctx = SSL_CTX_new(TLS_client_method()))) {
+        fprintf(stderr, "Cannot create a client context\n");
+        return NULL;
+    }
+
+    /* Load the client's CA file location */
+    if (SSL_CTX_load_verify_locations(ctx, ca_pem, NULL) != 1) {
+        fprintf(stderr, "Cannot load client's CA file\n");
+        goto fail;
+    }
+
+    /* Load the client's certificate */
+    if (SSL_CTX_use_certificate_file(ctx, cert_pem, SSL_FILETYPE_PEM) != 1) {
+        fprintf(stderr, "Cannot load client's certificate file\n");
+        goto fail;
+    }
+
+    /* Load the client's key */
+    if (SSL_CTX_use_PrivateKey_file(ctx, key_pem, SSL_FILETYPE_PEM) != 1) {
+        fprintf(stderr, "Cannot load client's key file\n");
+        goto fail;
+    }
+
+    /* Verify that the client's certificate and the key match */
+    if (SSL_CTX_check_private_key(ctx) != 1) {
+        fprintf(stderr, "Client's certificate and key don't match\n");
+        goto fail;
+    }
+
+    /* We won't handle incomplete read/writes due to renegotiation */
+    SSL_CTX_set_mode(ctx, SSL_MODE_AUTO_RETRY);
+
+    /* Specify that we need to verify the server's certificate */
+    SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, NULL);
+
+    /* We accept only certificates signed only by the CA himself */
+    SSL_CTX_set_verify_depth(ctx, 1);
+
+    /* Done, return the context */
+    return ctx;
+
+fail:
+    SSL_CTX_free(ctx);
+    return NULL;
+}
+
 //-----------------------------------------------------------------
 // OpenTCPConnection - Creates a TCP Connection to a TCP port
 // accepting connection requests
 //-----------------------------------------------------------------
-TTcpConnectedPort *OpenTcpConnection(const char *remotehostname, const char * remoteportno)
+TTcpConnectedPort *OpenTcpConnection(const char *remotehostname, const char * remoteportno,
+            const char *ca_pem, const char *cert_pem, const char *key_pem)
 {
   TTcpConnectedPort *TcpConnectedPort;
   struct sockaddr_in myaddr;
   int                s;
   struct addrinfo   hints;
   struct addrinfo   *result = NULL;
+  gboolean isSsl = false;
+  BIO *sbio;
+  SSL *ssl;
+  SSL_CTX *ctx;
+  X509 *server_cert;
 
   TcpConnectedPort= new (std::nothrow) TTcpConnectedPort;  
   
@@ -167,9 +370,8 @@ TTcpConnectedPort *OpenTcpConnection(const char *remotehostname, const char * re
       return(NULL);
      }
   TcpConnectedPort->ConnectedFd=BAD_SOCKET_FD;
-  #if  defined(_WIN32) || defined(_WIN64)
-  WSADATA wsaData;
-  int     iResult;
+#if  defined(_WIN32) || defined(_WIN64)
+  WSADATA wsaData;ssl
   iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
   if (iResult != 0) 
     {
@@ -221,15 +423,91 @@ TTcpConnectedPort *OpenTcpConnection(const char *remotehostname, const char * re
          return(NULL);
 	}
 	 
-  if (connect(TcpConnectedPort->ConnectedFd,result->ai_addr,result->ai_addrlen) < 0) 
-          {
-	    CloseTcpConnectedPort(&TcpConnectedPort);
-	    freeaddrinfo(result);
-            perror("connect failed");
-            return(NULL);
-	  }
+  if(ca_pem != NULL && cert_pem != NULL && key_pem != NULL) {
+    isSsl = true;
+  }
+
+  if (isSsl) {
+    /* Initialize OpenSSL */
+    SSL_load_error_strings();
+    OpenSSL_add_ssl_algorithms(); 
+
+    /* Get a context */
+    if (!(ctx = get_client_context(ca_pem, cert_pem, key_pem))) {
+        return (NULL);
+    }
+
+    /* Get a BIO */
+    if (!(sbio = BIO_new_ssl_connect(ctx))) {
+        fprintf(stderr, "Could not get a BIO object from context\n");
+        goto fail1;
+    }
+
+    /* Get the SSL handle from the BIO */
+    BIO_get_ssl(sbio, &ssl);
+    gchar conn_str[128];
+	  g_snprintf(conn_str, sizeof(conn_str), "%s:%s", remotehostname, remoteportno);
+    /* Connect to the server */
+    if (BIO_set_conn_hostname(sbio, conn_str) != 1) {
+        fprintf(stderr, "Could not connecto to the server\n");
+        goto fail2;
+    }
+
+    /* Perform SSL handshake with the server */
+    if (SSL_do_handshake(ssl) != 1) {
+        fprintf(stderr, "SSL Handshake failed\n");
+        goto fail2;
+    }
+
+    /* Verify that SSL handshake completed successfully */
+    if (SSL_get_verify_result(ssl) != X509_V_OK) {
+        fprintf(stderr, "Verification of handshake failed\n");
+        goto fail2;
+    }
+
+    /* Host name Verification is required!!!*/
+    // Recover the server's certificate
+    server_cert =  SSL_get_peer_certificate(ssl);
+    if (server_cert == NULL) {
+      // The handshake was successful although the server did not provide a certificate
+      // Most likely using an insecure anonymous cipher suite... get out!
+      fprintf(stderr, "SSL_get_peer_certificate failed.\n");
+      goto fail3;
+    }
+
+    // Validate the hostname
+    if (validate_hostname(TARGET_HOST, server_cert) != MatchFound) {
+      fprintf(stderr, "Hostname validation failed.\n");
+      goto fail_4;
+    }
+
+    /* Inform the user that we've successfully connected */
+    printf("SSL handshake successful with %s\n", conn_str);
+    TcpConnectedPort->isSsl = true;
+    TcpConnectedPort->ssl = ssl;
+  }
+  else {
+    if (connect(TcpConnectedPort->ConnectedFd,result->ai_addr,result->ai_addrlen) < 0) 
+            {
+        CloseTcpConnectedPort(&TcpConnectedPort);
+        freeaddrinfo(result);
+              perror("connect failed");
+              return(NULL);
+      }
+  }
   freeaddrinfo(result);	 
   return(TcpConnectedPort);
+
+/* Cleanup and exit */
+fail_4:
+  X509_free(server_cert);
+fail3:
+  BIO_ssl_shutdown(sbio);
+fail2:
+  BIO_free_all(sbio);
+fail1:
+  SSL_CTX_free(ctx);
+  return NULL;
 }
 //-----------------------------------------------------------------
 // END OpenTcpConnection
@@ -242,8 +520,17 @@ void CloseTcpConnectedPort(TTcpConnectedPort **TcpConnectedPort)
   if ((*TcpConnectedPort)==NULL) return;
   if ((*TcpConnectedPort)->ConnectedFd!=BAD_SOCKET_FD)  
      {
-      CLOSE_SOCKET((*TcpConnectedPort)->ConnectedFd);
-      (*TcpConnectedPort)->ConnectedFd=BAD_SOCKET_FD;
+
+      if ((*TcpConnectedPort)->isSsl)
+      {
+        /* SSL Finalize */
+        SSL_shutdown((*TcpConnectedPort)->ssl);
+        SSL_free((*TcpConnectedPort)->ssl);
+        SSL_CTX_free((*TcpConnectedPort)->ctx);
+
+        CLOSE_SOCKET((*TcpConnectedPort)->ConnectedFd);
+        (*TcpConnectedPort)->ConnectedFd=BAD_SOCKET_FD;
+      }
      }
    delete (*TcpConnectedPort);
   (*TcpConnectedPort)=NULL;
@@ -261,13 +548,21 @@ ssize_t ReadDataTcp(TTcpConnectedPort *TcpConnectedPort,unsigned char *data, siz
 {
  ssize_t bytes;
  
- for (size_t i = 0; i < length; i += bytes)
-    {
-      if ((bytes = recv(TcpConnectedPort->ConnectedFd, (char *)(data+i), length  - i,0)) == -1) 
+  for (size_t i = 0; i < length; i += bytes)
       {
-       return (-1);
+        if (TcpConnectedPort->isSsl) {
+          if ((bytes = SSL_read(TcpConnectedPort->ssl, (char *)(data+i), length - i)) == -1) 
+          {
+          return (-1);
+          }
+        }
+        else {
+          if ((bytes = recv(TcpConnectedPort->ConnectedFd, (char *)(data+i), length  - i,0)) == -1) 
+          {
+          return (-1);
+          }
+        }
       }
-    }
   return(length);
 }
 //-----------------------------------------------------------------
@@ -282,9 +577,18 @@ ssize_t WriteDataTcp(TTcpConnectedPort *TcpConnectedPort,unsigned char *data, si
   ssize_t bytes_written;
   while (total_bytes_written != length)
     {
-     bytes_written = send(TcpConnectedPort->ConnectedFd,
-	                               (char *)(data+total_bytes_written),
-                                  length - total_bytes_written,0);
+      if (TcpConnectedPort->isSsl) {
+        bytes_written = SSL_write(TcpConnectedPort->ssl,
+                                    (char *)(data+total_bytes_written),
+                                      length - total_bytes_written);
+      }
+      else {
+        bytes_written = send(TcpConnectedPort->ConnectedFd,
+                                    (char *)(data+total_bytes_written),
+                                      length - total_bytes_written,0);
+
+      }
+
      if (bytes_written == -1)
        {
        return(-1);

@@ -30,6 +30,13 @@ typedef SSIZE_T ssize_t;
 #define  BAD_SOCKET_FD  -1
 #endif
 
+#include <openssl/ssl.h>
+#include <openssl/rand.h>
+#include <openssl/bio.h>
+#include <netinet/in.h>
+
+#include <glib.h>
+
 //------------------------------------------------------------------------------------------------
 // Types
 //------------------------------------------------------------------------------------------------
@@ -42,6 +49,9 @@ typedef struct
 typedef struct
 {
  SOCKET_FD_TYPE ConnectedFd;
+ gboolean isSsl;
+ SSL *ssl;
+ SSL_CTX *ctx;
 } TTcpConnectedPort;
 
 //------------------------------------------------------------------------------------------------
@@ -50,8 +60,10 @@ typedef struct
 TTcpListenPort *OpenTcpListenPort(short localport);
 void CloseTcpListenPort(TTcpListenPort **TcpListenPort);
 TTcpConnectedPort *AcceptTcpConnection(TTcpListenPort *TcpListenPort, 
-                       struct sockaddr_in *cli_addr,socklen_t *clilen);
-TTcpConnectedPort *OpenTcpConnection(const char *remotehostname, const char * remoteportno);
+                       struct sockaddr_in *cli_addr,socklen_t *clilen,
+                       const char *ca_pem, const char *cert_pem, const char *key_pem);
+TTcpConnectedPort *OpenTcpConnection(const char *remotehostname, const char * remoteportno,
+                       const char *ca_pem, const char *cert_pem, const char *key_pem);
 void CloseTcpConnectedPort(TTcpConnectedPort **TcpConnectedPort);
 ssize_t ReadDataTcp(TTcpConnectedPort *TcpConnectedPort,unsigned char *data, size_t length);
 ssize_t WriteDataTcp(TTcpConnectedPort *TcpConnectedPort,unsigned char *data, size_t length);

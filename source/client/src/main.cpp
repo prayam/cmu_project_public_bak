@@ -32,7 +32,10 @@ int main(int argc, char *argv[])
        exit(0);
     }
 
-  if  ((TcpConnectedPort=OpenTcpConnection(argv[1],argv[2]))==NULL)  // Open UDP Network port
+  if  ((TcpConnectedPort=OpenTcpConnection(argv[1],argv[2],
+        "../../custom/keys/ca/ca.crt",
+        "../../custom/keys/client/client.crt",
+        "../../custom/keys/client/client.key"))==NULL)  // Open UDP Network port
      {
        printf("OpenTcpConnection\n");
        return(-1); 

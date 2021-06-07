@@ -126,7 +126,10 @@ int main(int argc, char *argv[])
     
    printf("Listening for connections\n");
 
-   if  ((TcpConnectedPort=AcceptTcpConnection(TcpListenPort,&cli_addr,&clilen))==NULL)
+   if  ((TcpConnectedPort=AcceptTcpConnection(TcpListenPort,&cli_addr,&clilen,
+        "../../custom/keys/ca/ca.crt",
+        "../../custom/keys/server/server.crt",
+        "../../custom/keys/server/server.key"))==NULL)
      {  
        printf("AcceptTcpConnection Failed\n");
        return(-1); 
