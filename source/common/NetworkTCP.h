@@ -43,27 +43,27 @@ typedef SSIZE_T ssize_t;
 
 typedef struct
 {
- SOCKET_FD_TYPE ListenFd;
+	SOCKET_FD_TYPE ListenFd;
 } TTcpListenPort;
 
 typedef struct
 {
- SOCKET_FD_TYPE ConnectedFd;
- gboolean isSsl;
- SSL *ssl;
- SSL_CTX *ctx;
+	SOCKET_FD_TYPE ConnectedFd;
+	gboolean isSsl;
+	SSL *ssl;
+	SSL_CTX *ctx;
 } TTcpConnectedPort;
 
 //------------------------------------------------------------------------------------------------
-//  Function Prototypes 
+//  Function Prototypes
 //------------------------------------------------------------------------------------------------
 TTcpListenPort *OpenTcpListenPort(short localport);
 void CloseTcpListenPort(TTcpListenPort **TcpListenPort);
-TTcpConnectedPort *AcceptTcpConnection(TTcpListenPort *TcpListenPort, 
-                       struct sockaddr_in *cli_addr,socklen_t *clilen,
-                       const char *ca_pem, const char *cert_pem, const char *key_pem);
+TTcpConnectedPort *AcceptTcpConnection(TTcpListenPort *TcpListenPort,
+		struct sockaddr_in *cli_addr,socklen_t *clilen,
+		const char *ca_pem, const char *cert_pem, const char *key_pem);
 TTcpConnectedPort *OpenTcpConnection(const char *remotehostname, const char * remoteportno,
-                       const char *ca_pem, const char *cert_pem, const char *key_pem);
+		const char *ca_pem, const char *cert_pem, const char *key_pem);
 void CloseTcpConnectedPort(TTcpConnectedPort **TcpConnectedPort);
 ssize_t ReadDataTcp(TTcpConnectedPort *TcpConnectedPort,unsigned char *data, size_t length);
 ssize_t WriteDataTcp(TTcpConnectedPort *TcpConnectedPort,unsigned char *data, size_t length);

@@ -34,16 +34,16 @@
 
 typedef struct
 {
- SOCKET_FD_TYPE UdpFd;
+	SOCKET_FD_TYPE UdpFd;
 } TUdpLocalPort;
 
 typedef struct
 {
- struct sockaddr_in remaddr;
+	struct sockaddr_in remaddr;
 } TUdpDest;
 
 //------------------------------------------------------------------------------------------------
-//  Function Prototypes 
+//  Function Prototypes
 //------------------------------------------------------------------------------------------------
 TUdpLocalPort* OpenUdpPort(short localport);
 

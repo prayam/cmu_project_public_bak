@@ -16,20 +16,20 @@ struct pBox
 };
 struct Bbox
 {
-    float score;
-    int x1;
-    int y1;
-    int x2;
-    int y2;
-    float area;
-    bool exist;
-    mydataFmt ppoint[10];
-    mydataFmt regreCoord[4];
+	float score;
+	int x1;
+	int y1;
+	int x2;
+	int y2;
+	float area;
+	bool exist;
+	mydataFmt ppoint[10];
+	mydataFmt regreCoord[4];
 };
 
 struct orderScore
 {
-    mydataFmt score;
-    int oriOrder;
+	mydataFmt score;
+	int oriOrder;
 };
 #endif

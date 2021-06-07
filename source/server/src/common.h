@@ -30,38 +30,38 @@
 // Logger for GIE info/warning/errors
 class Logger : public nvinfer1::ILogger
 {
-public:
-    void log(nvinfer1::ILogger::Severity severity, const char* msg) override
-    {
-        // suppress info-level messages
-        //if (severity == Severity::kINFO) return;
+	public:
+		void log(nvinfer1::ILogger::Severity severity, const char* msg) override
+		{
+			// suppress info-level messages
+			//if (severity == Severity::kINFO) return;
 
-        switch (severity)
-        {
-            case Severity::kINTERNAL_ERROR: std::cerr << "INTERNAL_ERROR: "; break;
-            case Severity::kERROR: std::cerr << "ERROR: "; break;
-            case Severity::kWARNING: std::cerr << "WARNING: "; break;
-            case Severity::kINFO: std::cerr << "INFO: "; break;
-            default: std::cerr << "UNKNOWN: "; break;
-        }
-        std::cerr << msg << std::endl;
-    }
+			switch (severity)
+			{
+				case Severity::kINTERNAL_ERROR: std::cerr << "INTERNAL_ERROR: "; break;
+				case Severity::kERROR: std::cerr << "ERROR: "; break;
+				case Severity::kWARNING: std::cerr << "WARNING: "; break;
+				case Severity::kINFO: std::cerr << "INFO: "; break;
+				default: std::cerr << "UNKNOWN: "; break;
+			}
+			std::cerr << msg << std::endl;
+		}
 };
 
 struct Paths {
-    std::string absPath;
-    std::string fileName;
+	std::string absPath;
+	std::string fileName;
 };
 
 struct KnownID {
-    std::string className;
-    int classNumber;
-    std::vector<float> embeddedFace;
+	std::string className;
+	int classNumber;
+	std::vector<float> embeddedFace;
 };
 
 inline bool fileExists(const std::string &name) {
-    std::ifstream f(name.c_str());
-    return f.good();
+	std::ifstream f(name.c_str());
+	return f.good();
 }
 
 void* safeCudaMalloc(size_t memSize);
