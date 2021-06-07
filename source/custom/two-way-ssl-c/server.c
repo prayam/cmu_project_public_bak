@@ -16,6 +16,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "openssl_hostname_validation.h"
 #include "server.h"
 
 /* Global variable that indicates work is present */
@@ -23,6 +24,7 @@ static int do_work = 1;
 
 /* Buffer size to be used for transfers */
 #define BUFSIZE 128
+#define TARGET_CLIENT "face.recog.client.PC"
 
 /* [START] by jh.ahn */
 void ShowCerts(SSL* ssl)
@@ -157,6 +159,7 @@ int server(const char *port_str, const char *ca_pem,
     socklen_t sin_len;
     SSL_CTX *ctx;
     SSL *ssl;
+    X509 *client_cert;
     int port_num, listen_fd, net_fd, rc, len;
 
  	// Check OpenSSL PRNG
@@ -216,6 +219,20 @@ int server(const char *port_str, const char *ca_pem,
             continue;
         }
 
+        /* Client name Verification ... for TEST */
+        // Recover the client's certificate
+        client_cert =  SSL_get_peer_certificate(ssl);
+        if (client_cert == NULL) {
+            // The handshake was successful although the server did not provide a certificate
+            // Most likely using an insecure anonymous cipher suite... get out!
+            goto fail;
+        }
+
+        // Validate the clientname using validate_hostname function
+        if (validate_hostname(TARGET_CLIENT, client_cert) != MatchFound) {
+            fprintf(stderr, "Clientname validation failed.\n");
+            goto fail_4;
+        }
         ShowCerts(ssl);
         /* Print success connection message on the server */
         printf("SSL handshake successful with %s:%d\n",
@@ -243,6 +260,8 @@ int server(const char *port_str, const char *ca_pem,
     /* Close the listening socket */
     close(listen_fd);
 
+fail_4:
+	X509_free(client_cert);
 fail:
     SSL_CTX_free(ctx);
     return 0;
