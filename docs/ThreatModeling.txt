@@ -1,0 +1,61 @@
+
+Assets
+. Images for transmission over camera cable
+. Images for transmission over network
+. Group of images accessed by operator
+. Group of images accessed by admin
+. User info. data (ID, type, password)
+. User login system
+. Record of entrance time
+. TLS private key on server
+. TLS private key on client
+. The Friend video
+. Client program itself
+. Client program hash code on server side
+. Server program itself (assume it's out of interest)
+
+(T)threat listing - (V)vuleriability - (S)seaurity requirement - (M)mitigation
+---
+(T) Sniffing in the middle of communication between camera and Jetson
+(V) Possibility sniffing via cable(hw) itself -> Rarely happen
+(S)
+(M)
+---
+(T) Sniffing in the middle of communication between clent and server -> big impact
+(V) non-secure channel(TCP) -> high possibility
+(S) Use secure channel communication
+(M) Use TLS the latest version
+---
+(T) Leak pictures from the directory to unathorized users
+(V) Assigned permission more than what it needs 
+(S)
+(M) Set proper permission for accessing the directory for admin/operator files
+---
+(T) Leak pictures from the admin directory to operator or someone who has less permission
+(V)
+(S) Assign least privilige to each user
+(M1) Use setuid set program
+(M2) Separate processes for each service 
+---
+(T) Anyone can view video stream from Jetson
+(S) Only allow athorized users to use the system(including client and server)
+(M) Introduce login system so that athenticated/athorized user can view the stream
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
