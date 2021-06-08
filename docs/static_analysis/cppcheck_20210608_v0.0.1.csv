@@ -1,0 +1,155 @@
+File, Line, Severity, Id, Summary
+cmu_project\source\Common\NetworkTCP.cpp,282,style,variableScope,The scope of the variable 'bytes_written' can be reduced.
+cmu_project\source\Common\SG_InputBox.cpp,244,style,variableScope,The scope of the variable 'ret' can be reduced.
+cmu_project\source\Common\SG_InputBox.cpp,244,style,unreadVariable,Variable 'ret' is assigned a value that is never used.
+cmu_project\source\Common\SG_InputBox.cpp,257,style,unreadVariable,Variable 'ret' is assigned a value that is never used.
+cmu_project\source\Common\SG_InputBox.cpp,265,style,unreadVariable,Variable 'ret' is assigned a value that is never used.
+cmu_project\source\Common\SG_InputBox.cpp,170,style,unusedFunction,The function 'GetString' is never used.
+cmu_project\source\Common\TcpSendRecvJpeg.cpp,46,style,unsignedLessThanZero,Checking if unsigned expression 'imagesize' is less than zero.
+cmu_project\source\Common\utils.cpp,17,style,variableScope,The scope of the variable 's' can be reduced.
+cmu_project\source\Common\utils.cpp,70,style,unreadVariable,Variable 'bufLen' is assigned a value that is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\MTCNN_FaceDetection_TensorRT\src\baseEngine.cpp,6,warning,uninitMemberVar,Member variable 'baseEngine::context' is not initialized in the constructor.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\MTCNN_FaceDetection_TensorRT\src\rnet_rt.h,24,style,noExplicitConstructor,Class 'Rnet' has a constructor with 1 argument that is not explicit.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\MTCNN_FaceDetection_TensorRT\src\rnet_rt.h,17,style,missingOverride,The function 'init' overrides a function in a base class but is not marked with a 'override' specifier.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\rnet_rt.h,22,error,ctuOneDefinitionRuleViolation,The one definition rule is violated, different classes/structs have the same name 'Rnet'
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\rnet_rt.h,24,style,noExplicitConstructor,Class 'Rnet' has a constructor with 1 argument that is not explicit.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\rnet_rt.h,17,style,missingOverride,The function 'init' overrides a function in a base class but is not marked with a 'override' specifier.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\MTCNN_FaceDetection_TensorRT\src\onet_rt.h,23,style,noExplicitConstructor,Class 'Onet' has a constructor with 1 argument that is not explicit.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\MTCNN_FaceDetection_TensorRT\src\onet_rt.h,16,style,missingOverride,The function 'init' overrides a function in a base class but is not marked with a 'override' specifier.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\onet_rt.h,21,error,ctuOneDefinitionRuleViolation,The one definition rule is violated, different classes/structs have the same name 'Onet'
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\onet_rt.h,23,style,noExplicitConstructor,Class 'Onet' has a constructor with 1 argument that is not explicit.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\onet_rt.h,16,style,missingOverride,The function 'init' overrides a function in a base class but is not marked with a 'override' specifier.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\MTCNN_FaceDetection_TensorRT\src\pnet_rt.h,21,style,missingOverride,The function 'init' overrides a function in a base class but is not marked with a 'override' specifier.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\pnet_rt.h,28,error,ctuOneDefinitionRuleViolation,The one definition rule is violated, different classes/structs have the same name 'Pnet'
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\pnet_rt.h,21,style,missingOverride,The function 'init' overrides a function in a base class but is not marked with a 'override' specifier.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\MTCNN_FaceDetection_TensorRT\src\demo.cpp,17,style,variableScope,The scope of the variable 'start' can be reduced.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\MTCNN_FaceDetection_TensorRT\src\demo.cpp,31,style,unusedFunction,The function 'image_test' is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\MTCNN_FaceDetection_TensorRT\src\mtcnn.cpp,39,warning,noCopyConstructor,Class 'mtcnn' does not have a copy constructor which is recommended since it has dynamic memory/resource allocation(s).
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\MTCNN_FaceDetection_TensorRT\src\mtcnn.cpp,39,warning,noOperatorEq,Class 'mtcnn' does not have a operator= which is recommended since it has dynamic memory/resource allocation(s).
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\MTCNN_FaceDetection_TensorRT\src\mtcnn.cpp,68,style,unreadVariable,Variable 'first_time' is assigned a value that is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\MTCNN_FaceDetection_TensorRT\src\mtcnn.cpp,129,style,unreadVariable,Variable 'second_time' is assigned a value that is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\MTCNN_FaceDetection_TensorRT\src\mtcnn.cpp,135,style,unreadVariable,Variable 'third_time' is assigned a value that is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\MTCNN_FaceDetection_TensorRT\src\mtcnn.cpp,25,performance,postfixOperator,Prefer prefix ++/-- operators for non-primitive types.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\MTCNN_FaceDetection_TensorRT\src\mtcnn.cpp,82,performance,postfixOperator,Prefer prefix ++/-- operators for non-primitive types.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\MTCNN_FaceDetection_TensorRT\src\mtcnn.cpp,105,performance,postfixOperator,Prefer prefix ++/-- operators for non-primitive types.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\MTCNN_FaceDetection_TensorRT\src\mtcnn.cpp,136,performance,postfixOperator,Prefer prefix ++/-- operators for non-primitive types.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\MTCNN_FaceDetection_TensorRT\src\mtcnn.cpp,173,performance,postfixOperator,Prefer prefix ++/-- operators for non-primitive types.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\MTCNN_FaceDetection_TensorRT\src\network.cpp,34,style,variableScope,The scope of the variable 'order' can be reduced.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\MTCNN_FaceDetection_TensorRT\src\network.cpp,34,style,unreadVariable,Variable 'order' is assigned a value that is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\MTCNN_FaceDetection_TensorRT\src\network.cpp,84,style,unreadVariable,Variable 'bbw' is assigned a value that is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\MTCNN_FaceDetection_TensorRT\src\network.cpp,84,style,unreadVariable,Variable 'bbh' is assigned a value that is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\MTCNN_FaceDetection_TensorRT\src\network.cpp,84,style,unreadVariable,Variable 'maxSide' is assigned a value that is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\MTCNN_FaceDetection_TensorRT\src\network.cpp,85,style,unreadVariable,Variable 'h' is assigned a value that is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\MTCNN_FaceDetection_TensorRT\src\network.cpp,85,style,unreadVariable,Variable 'w' is assigned a value that is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\MTCNN_FaceDetection_TensorRT\src\network.cpp,86,style,unreadVariable,Variable 'x1' is assigned a value that is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\MTCNN_FaceDetection_TensorRT\src\network.cpp,86,style,unreadVariable,Variable 'y1' is assigned a value that is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\MTCNN_FaceDetection_TensorRT\src\network.cpp,86,style,unreadVariable,Variable 'x2' is assigned a value that is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\MTCNN_FaceDetection_TensorRT\src\network.cpp,86,style,unreadVariable,Variable 'y2' is assigned a value that is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\MTCNN_FaceDetection_TensorRT\src\network.cpp,66,performance,postfixOperator,Prefer prefix ++/-- operators for non-primitive types.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\MTCNN_FaceDetection_TensorRT\src\network.cpp,87,performance,postfixOperator,Prefer prefix ++/-- operators for non-primitive types.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\MTCNN_FaceDetection_TensorRT\src\onet_rt.cpp,36,warning,noCopyConstructor,Class 'Onet' does not have a copy constructor which is recommended since it has dynamic memory/resource allocation(s).
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\MTCNN_FaceDetection_TensorRT\src\onet_rt.cpp,36,warning,noOperatorEq,Class 'Onet' does not have a operator= which is recommended since it has dynamic memory/resource allocation(s).
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\MTCNN_FaceDetection_TensorRT\src\onet_rt.cpp,89,style,constParameter,Parameter 'image' can be declared with const
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\MTCNN_FaceDetection_TensorRT\src\pnet_rt.cpp,56,warning,noCopyConstructor,Class 'Pnet' does not have a copy constructor which is recommended since it has dynamic memory/resource allocation(s).
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\MTCNN_FaceDetection_TensorRT\src\pnet_rt.cpp,56,warning,noOperatorEq,Class 'Pnet' does not have a operator= which is recommended since it has dynamic memory/resource allocation(s).
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\MTCNN_FaceDetection_TensorRT\src\pnet_rt.cpp,99,style,constParameter,Parameter 'image' can be declared with const
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\MTCNN_FaceDetection_TensorRT\src\rnet_rt.cpp,37,warning,noCopyConstructor,Class 'Rnet' does not have a copy constructor which is recommended since it has dynamic memory/resource allocation(s).
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\MTCNN_FaceDetection_TensorRT\src\rnet_rt.cpp,37,warning,noOperatorEq,Class 'Rnet' does not have a operator= which is recommended since it has dynamic memory/resource allocation(s).
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\MTCNN_FaceDetection_TensorRT\src\rnet_rt.cpp,77,style,constParameter,Parameter 'image' can be declared with const
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\NetworkTCP.cpp,282,style,variableScope,The scope of the variable 'bytes_written' can be reduced.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\TcpSendRecvJpeg.cpp,46,style,unsignedLessThanZero,Checking if unsigned expression 'imagesize' is less than zero.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\baseEngine.cpp,9,warning,uninitMemberVar,Member variable 'baseEngine::context' is not initialized in the constructor.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\common.cpp,50,style,variableScope,The scope of the variable 'entry' can be reduced.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\common.cpp,22,style,unusedFunction,The function 'calculateBindingBufferSizes' is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\common.cpp,8,style,unusedFunction,The function 'safeCudaMalloc' is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\faceNet.cpp,5,warning,uninitMemberVar,Member variable 'FaceNetClassifier::m_output' is not initialized in the constructor.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\faceNet.cpp,14,performance,useInitializationList,Variable 'm_gLogger' is assigned in constructor body. Consider performing initialization in initialization list.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\faceNet.cpp,15,performance,useInitializationList,Variable 'm_dtype' is assigned in constructor body. Consider performing initialization in initialization list.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\faceNet.cpp,16,performance,useInitializationList,Variable 'm_uffFile' is assigned in constructor body. Consider performing initialization in initialization list.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\faceNet.cpp,17,performance,useInitializationList,Variable 'm_engineFile' is assigned in constructor body. Consider performing initialization in initialization list.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\faceNet.cpp,212,style,variableScope,The scope of the variable 'currDistance' can be reduced.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\faceNet.cpp,215,style,unusedLabel,Label 'std' is not used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\faceNet.cpp,6,performance,passedByValue,Function parameter 'uffFile' should be passed by const reference.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\faceNet.cpp,6,performance,passedByValue,Function parameter 'engineFile' should be passed by const reference.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\faceNet.cpp,181,performance,passedByValue,Function parameter 'outputBbox' should be passed by const reference.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\faceNet.cpp,182,performance,passedByValue,Function parameter 'className' should be passed by const reference.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\faceNet.cpp,199,performance,passedByValue,Function parameter 'outputBbox' should be passed by const reference.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\faceNet.cpp,246,performance,passedByValue,Function parameter 'outputBbox' should be passed by const reference.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\faceNet.cpp,108,performance,postfixOperator,Prefer prefix ++/-- operators for non-primitive types.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\faceNet.cpp,287,style,unusedFunction,The function 'elementSize' is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\faceNet.h,34,performance,passedByValue,Function parameter 'uffFile' should be passed by const reference.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\faceNet.h,34,performance,passedByValue,Function parameter 'engineFile' should be passed by const reference.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\faceNet.h,42,performance,passedByValue,Function parameter 'className' should be passed by const reference.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\mtcnn.cpp,39,warning,noCopyConstructor,Class 'mtcnn' does not have a copy constructor which is recommended since it has dynamic memory/resource allocation(s).
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\mtcnn.cpp,39,warning,noOperatorEq,Class 'mtcnn' does not have a operator= which is recommended since it has dynamic memory/resource allocation(s).
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\mtcnn.cpp,79,style,unreadVariable,Variable 'first_time' is assigned a value that is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\mtcnn.cpp,141,style,unreadVariable,Variable 'second_time' is assigned a value that is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\mtcnn.cpp,147,style,unreadVariable,Variable 'third_time' is assigned a value that is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\mtcnn.cpp,25,performance,postfixOperator,Prefer prefix ++/-- operators for non-primitive types.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\mtcnn.cpp,93,performance,postfixOperator,Prefer prefix ++/-- operators for non-primitive types.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\mtcnn.cpp,117,performance,postfixOperator,Prefer prefix ++/-- operators for non-primitive types.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\mtcnn.cpp,148,performance,postfixOperator,Prefer prefix ++/-- operators for non-primitive types.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\network.cpp,34,style,variableScope,The scope of the variable 'order' can be reduced.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\network.cpp,34,style,unreadVariable,Variable 'order' is assigned a value that is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\network.cpp,84,style,unreadVariable,Variable 'bbw' is assigned a value that is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\network.cpp,84,style,unreadVariable,Variable 'bbh' is assigned a value that is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\network.cpp,84,style,unreadVariable,Variable 'maxSide' is assigned a value that is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\network.cpp,85,style,unreadVariable,Variable 'h' is assigned a value that is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\network.cpp,85,style,unreadVariable,Variable 'w' is assigned a value that is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\network.cpp,86,style,unreadVariable,Variable 'x1' is assigned a value that is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\network.cpp,86,style,unreadVariable,Variable 'y1' is assigned a value that is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\network.cpp,86,style,unreadVariable,Variable 'x2' is assigned a value that is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\network.cpp,86,style,unreadVariable,Variable 'y2' is assigned a value that is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\network.cpp,66,performance,postfixOperator,Prefer prefix ++/-- operators for non-primitive types.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\network.cpp,87,performance,postfixOperator,Prefer prefix ++/-- operators for non-primitive types.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\onet_rt.cpp,36,warning,noCopyConstructor,Class 'Onet' does not have a copy constructor which is recommended since it has dynamic memory/resource allocation(s).
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\onet_rt.cpp,36,warning,noOperatorEq,Class 'Onet' does not have a operator= which is recommended since it has dynamic memory/resource allocation(s).
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\onet_rt.cpp,89,style,constParameter,Parameter 'image' can be declared with const
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\pnet_rt.cpp,57,warning,noCopyConstructor,Class 'Pnet' does not have a copy constructor which is recommended since it has dynamic memory/resource allocation(s).
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\pnet_rt.cpp,57,warning,noOperatorEq,Class 'Pnet' does not have a operator= which is recommended since it has dynamic memory/resource allocation(s).
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\pnet_rt.cpp,100,style,constParameter,Parameter 'image' can be declared with const
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\rnet_rt.cpp,37,warning,noCopyConstructor,Class 'Rnet' does not have a copy constructor which is recommended since it has dynamic memory/resource allocation(s).
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\rnet_rt.cpp,37,warning,noOperatorEq,Class 'Rnet' does not have a operator= which is recommended since it has dynamic memory/resource allocation(s).
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\rnet_rt.cpp,77,style,constParameter,Parameter 'image' can be declared with const
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\videoStreamer.cpp,31,warning,uninitMemberVar,Member variable 'VideoStreamer::m_videoWidth' is not initialized in the constructor.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\videoStreamer.cpp,31,warning,uninitMemberVar,Member variable 'VideoStreamer::m_videoHeight' is not initialized in the constructor.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\videoStreamer.cpp,31,warning,uninitMemberVar,Member variable 'VideoStreamer::m_frameRate' is not initialized in the constructor.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\videoStreamer.cpp,32,warning,noCopyConstructor,Class 'VideoStreamer' does not have a copy constructor which is recommended since it has dynamic memory/resource allocation(s).
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\videoStreamer.cpp,32,warning,noOperatorEq,Class 'VideoStreamer' does not have a operator= which is recommended since it has dynamic memory/resource allocation(s).
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\videoStreamer.cpp,55,style,unusedFunction,The function 'assertResolution' is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\videoStreamer.cpp,47,style,unusedFunction,The function 'setResoltionFile' is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\videoStreamer.cpp,40,style,unusedFunction,The function 'setResolutionDevice' is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\trt_l2norm_helper\l2norm_helper.cpp,19,warning,uninitMemberVar,Member variable 'L2NormHelper::C' is not initialized in the constructor.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\trt_l2norm_helper\l2norm_helper.cpp,19,warning,uninitMemberVar,Member variable 'L2NormHelper::H' is not initialized in the constructor.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\trt_l2norm_helper\l2norm_helper.cpp,19,warning,uninitMemberVar,Member variable 'L2NormHelper::W' is not initialized in the constructor.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\trt_l2norm_helper\l2norm_helper.cpp,19,warning,uninitMemberVar,Member variable 'L2NormHelper::mPluginNamespace' is not initialized in the constructor.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\trt_l2norm_helper\l2norm_helper.cpp,21,warning,uninitMemberVar,Member variable 'L2NormHelper::mPluginNamespace' is not initialized in the constructor.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\trt_l2norm_helper\l2norm_helper.cpp,24,warning,uninitMemberVar,Member variable 'L2NormHelper::mPluginNamespace' is not initialized in the constructor.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\trt_l2norm_helper\l2norm_helper.cpp,144,warning,uninitMemberVar,Member variable 'L2NormHelperPluginCreator::mOpType' is not initialized in the constructor.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\trt_l2norm_helper\l2norm_helper.cpp,144,warning,uninitMemberVar,Member variable 'L2NormHelperPluginCreator::mEps' is not initialized in the constructor.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\trt_l2norm_helper\l2norm_helper.cpp,133,style,unusedFunction,The function 'clone' is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\trt_l2norm_helper\l2norm_helper.cpp,99,style,unusedFunction,The function 'configureWithFormat' is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\trt_l2norm_helper\l2norm_helper.cpp,178,style,unusedFunction,The function 'createPlugin' is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\trt_l2norm_helper\l2norm_helper.cpp,200,style,unusedFunction,The function 'deserializePlugin' is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\trt_l2norm_helper\l2norm_helper.cpp,173,style,unusedFunction,The function 'getFieldNames' is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\trt_l2norm_helper\l2norm_helper.cpp,36,style,unusedFunction,The function 'getNbOutputs' is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\trt_l2norm_helper\l2norm_helper.cpp,42,style,unusedFunction,The function 'getOutputDimensions' is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\trt_l2norm_helper\l2norm_helper.cpp,153,style,unusedFunction,The function 'getPluginName' is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\trt_l2norm_helper\l2norm_helper.cpp,168,style,unusedFunction,The function 'getPluginNamespace' is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\trt_l2norm_helper\l2norm_helper.cpp,117,style,unusedFunction,The function 'getPluginType' is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\trt_l2norm_helper\l2norm_helper.cpp,158,style,unusedFunction,The function 'getPluginVersion' is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\trt_l2norm_helper\l2norm_helper.cpp,57,style,unusedFunction,The function 'getWorkspaceSize' is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\trt_l2norm_helper\l2norm_helper.cpp,50,style,unusedFunction,The function 'initialize' is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\trt_l2norm_helper\l2norm_helper.cpp,81,style,unusedFunction,The function 'supportsFormat' is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\trt_l2norm_helper\l2norm_helper.cpp,55,style,unusedFunction,The function 'terminate' is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\trt_l2norm_helper\l2norm_helper.h,128,portability,invalidPointerCast,Casting between const char * & and const float * which have an incompatible binary data representation.
+cmu_project\source\RecvImageTCP\RecvImageTCP.cpp,27,style,variableScope,The scope of the variable 'retvalue' can be reduced.
+cmu_project\source\RecvImageUDP\RecvImageUDP.cpp,33,style,variableScope,The scope of the variable 'retvalue' can be reduced.
+cmu_project\source\Common\KeyboardSetup.cpp,24,style,unusedFunction,The function 'ConfigKeyboardNoEnterBlockEcho' is never used.
+cmu_project\source\Common\KeyboardSetup.cpp,54,style,unusedFunction,The function 'RestoreKeyboard' is never used.
+cmu_project\source\Common\NetworkUDP.cpp,149,style,unusedFunction,The function 'DeleteUdpDest' is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\MTCNN_FaceDetection_TensorRT\src\common.cpp,6,style,unusedFunction,The function 'locateFile' is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\MTCNN_FaceDetection_TensorRT\src\common.cpp,29,style,unusedFunction,The function 'readPGMFile' is never used.
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\MTCNN_FaceDetection_TensorRT\src\common.h,25,error,ctuOneDefinitionRuleViolation,The one definition rule is violated, different classes/structs have the same name 'Logger'
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\MTCNN_FaceDetection_TensorRT\src\baseEngine.h,20,error,ctuOneDefinitionRuleViolation,The one definition rule is violated, different classes/structs have the same name 'baseEngine'
+cmu_project\source\LgFaceRecDemoTCP_Jetson_NanoV2\src\mtcnn.h,7,error,ctuOneDefinitionRuleViolation,The one definition rule is violated, different classes/structs have the same name 'mtcnn'
