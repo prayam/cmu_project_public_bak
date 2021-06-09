@@ -1,0 +1,7 @@
+System Requirement:
+Mandatory requirements described in the "LG May 2021 Lecture Secure Coding Project Intro V1.1.pptx.pdf" document.
+- no vulnerability in the system
+- secure architecture
+- implement 5 modes (run, test run, learning, secure, non-secure)
+- Jetson Nano sends the Camera Image and Face Recognized information. It should be separated.
+- Client receives the data above, and displays it after combining it
