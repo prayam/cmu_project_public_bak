@@ -1,10 +1,9 @@
 #include "app.h"
-#include "NetworkTCP.h"
 #include "TcpSendRecvJpeg.h"
 #include <iostream>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
-
+// #include <X11/Xlib.h>
 
 // Label: https://developer.gnome.org/gtkmm/3.24/classGtk_1_1Label.html
 // Box: https://developer.gnome.org/gtkmm/3.24/classGtk_1_1Box.html
@@ -14,6 +13,12 @@
 
 using namespace cv;
 using namespace std;
+
+static gboolean change_thread_priority(gpointer data)
+{
+	g_print("hello timer");
+	return G_SOURCE_REMOVE;
+}
 
 App::App()
     : m_VBox_Left(Gtk::ORIENTATION_VERTICAL),
@@ -29,6 +34,8 @@ App::App()
       m_Label_Login("Login: "),
       m_Label_Name("Name:  ")
 {
+	// XInitThreads();
+
     // set_size_request(800, 600);
     set_title("App");
 
@@ -88,38 +95,59 @@ App::App()
     m_Button_LearnSave.grab_default();
 
     show_all_children();
+	g_timeout_add_seconds(5, (GSourceFunc) change_thread_priority, NULL);
+
+	this->tcp_connected_port = NULL;
 }
 
 App::~App()
 {
 }
-    
+
+static gboolean compute_func(gpointer data) {
+	bool retvalue;
+	App *app = static_cast<App *>(data);
+	namedWindow( "Server", WINDOW_AUTOSIZE );// Create a window for displa.
+
+	Mat Image; 
+	
+	while (!app->disconn_req) {
+		retvalue = TcpRecvImageAsJpeg(app->tcp_connected_port, &Image);
+
+		if (retvalue) {
+			imshow( "Server", Image ); // If a valid image is received then display it
+		}
+		else {
+			break;
+		}
+
+		waitKey(10);
+	}
+	destroyWindow("Server");
+
+	app->compute_func_id = 0;
+	g_print("end func");
+	return G_SOURCE_REMOVE;
+}
+
 gboolean App::connect_server ()
 {
-	TTcpConnectedPort *TcpConnectedPort=NULL;
-	bool retvalue;
-
-	if ((TcpConnectedPort=OpenTcpConnection("192.168.0.228", "5000",
-			"../../custom/keys/ca/ca.crt",
-			"../../custom/keys/client/client.crt",
-			"../../custom/keys/client/client.key"))==NULL)	// Open UDP Network port
-	{
-		printf("OpenTcpConnection\n");
-		return(-1);
+	if (this->tcp_connected_port != NULL) {
+		printf("this.tcp_connected_port is not NULL\n");
+		return FALSE;
 	}
 
-	namedWindow( "Server", WINDOW_AUTOSIZE );// Create a window for display.
+	if ((this->tcp_connected_port = OpenTcpConnection("192.168.0.228", "5000",
+			"../../custom/keys/ca/ca.crt",
+			"../../custom/keys/client/client.crt",
+			"../../custom/keys/client/client.key"))==NULL)	// Open TCP TLS port for control data flow
+	{
+		printf("OpenTcpConnection\n");
+		return FALSE;
+	}
 
-	Mat Image;
-	do {
-		retvalue=TcpRecvImageAsJpeg(TcpConnectedPort,&Image);
+	this->compute_func_id = g_idle_add(compute_func, this);
 
-		if( retvalue) imshow( "Server", Image ); // If a valid image is received then display it
-		else break;
-
-	} while (waitKey(10) != 'q'); // loop until user hits quit
-
-	CloseTcpConnectedPort(&TcpConnectedPort); // Close network port;
 	return TRUE;
 }
 
@@ -147,6 +175,7 @@ void App::on_button_login()
         m_Entry_Name.set_sensitive(true);
     }
 
+	this->disconn_req = FALSE;
     this->connect_server();
 }
 
@@ -168,6 +197,16 @@ void App::on_button_logout()
         m_CheckButton_Secure.set_sensitive(false);
         m_Entry_Name.set_sensitive(false);
     }
+
+	this->disconn_req = TRUE;
+	if (this->tcp_connected_port != NULL) {
+		CloseTcpConnectedPort(&this->tcp_connected_port); // Close network port;
+		this->tcp_connected_port = NULL;
+	}
+	if(this->compute_func_id) {
+		g_source_remove(this->compute_func_id);
+		this->compute_func_id = 0;
+	}
 }
 
 void App::on_button_run()
