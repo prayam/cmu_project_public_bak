@@ -41,7 +41,7 @@ class FaceNetClassifier
 		void doInference(float* inputData, float* output);
 		void forwardAddFace(cv::Mat image, std::vector<struct Bbox> outputBbox, const string className);
 		void forward(cv::Mat image, std::vector<struct Bbox> outputBbox);
-		void featureMatching(cv::Mat &image);
+		void featureMatching(cv::Mat &image, std::vector<struct APP_meta> &meta);
 		void addNewFace(cv::Mat &image, std::vector<struct Bbox> outputBbox);
 		void resetVariables();
 

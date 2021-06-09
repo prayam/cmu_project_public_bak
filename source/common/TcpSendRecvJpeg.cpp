@@ -7,6 +7,8 @@
 //------------------------------------------------------------------------------------------------
 #include <opencv2/highgui/highgui.hpp>
 #include "TcpSendRecvJpeg.h"
+#include "CommonStruct.h"
+
 static  int init_values[2] = { cv::IMWRITE_JPEG_QUALITY,80 }; //default(95) 0-100
 static  std::vector<int> param (&init_values[0], &init_values[0]+2);
 static  std::vector<uchar> sendbuff;//buffer for coding
@@ -58,6 +60,22 @@ bool TcpRecvImageAsJpeg(TTcpConnectedPort * TcpConnectedPort,cv::Mat *Image)
 	delete [] buff;
 	return false;
 }
+
+bool TcpReceiveLoginData(TTcpConnectedPort * TcpConnectedPort,std::string &userid,std::string &userpw)
+{
+	return 0;
+}
+
+int TcpSendLoginRes(TTcpConnectedPort * TcpConnectedPort, int res)
+{
+	return 0;
+}
+
+int TcpSendMeta(TTcpConnectedPort * TcpConnectedPort, std::vector<struct APP_meta> meta)
+{
+	return 0;
+}
+
 
 //-----------------------------------------------------------------
 // END TcpRecvImageAsJpeg

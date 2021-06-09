@@ -1,4 +1,5 @@
 #include "faceNet.h"
+#include "CommonStruct.h"
 
 int FaceNetClassifier::m_classCount = 0;
 
@@ -205,7 +206,7 @@ void FaceNetClassifier::forward(cv::Mat frame, std::vector<struct Bbox> outputBb
 	}
 }
 
-void FaceNetClassifier::featureMatching(cv::Mat &image) {
+void FaceNetClassifier::featureMatching(cv::Mat &image, std::vector<struct APP_meta> &meta) {
 
 	for(int i = 0; i < (m_embeddings.size()/128); i++) {
 		double minDistance = 10.* m_knownPersonThresh;
@@ -229,16 +230,28 @@ std:vector<float> currEmbedding(128);
 		if (minDistance <= m_knownPersonThresh) {
 			// cv::putText(image, m_knownFaces[winner].className, cv::Point(m_croppedFaces[i].y1+2, m_croppedFaces[i].x2-3),
 			//         cv::FONT_HERSHEY_DUPLEX, 0.1 + 2*fontScaler*4,  cv::Scalar(0,0,255,255), 1);
-			cv::putText(image, m_knownFaces[winner].className, cv::Point(m_croppedFaces[i].y1+2, m_croppedFaces[i].x2-3),
-					cv::FONT_HERSHEY_DUPLEX, 0.1 + 2*fontScaler*4,  cv::Scalar(0,0,255,255), 1);
-
+			//cv::putText(image, m_knownFaces[winner].className, cv::Point(m_croppedFaces[i].y1+2, m_croppedFaces[i].x2-3),
+			//		cv::FONT_HERSHEY_DUPLEX, 0.1 + 2*fontScaler*4,  cv::Scalar(0,0,255,255), 1);
+			struct APP_meta tmp;
+			//tmp.name = m_knownFaces[winner].className;
+			tmp.x1 = m_croppedFaces[i].x1;
+			tmp.y1 = m_croppedFaces[i].y1;
+			tmp.x2 = m_croppedFaces[i].x2;
+			tmp.y2 = m_croppedFaces[i].y2;
+			meta.push_back(tmp);
 		}
 		else if (minDistance > m_knownPersonThresh || winner == -1){
 			//cv::putText(image, "New Person", cv::Point(m_croppedFaces[i].y1+2, m_croppedFaces[i].x2-3),
 			//        cv::FONT_HERSHEY_DUPLEX, 0.1 + 2*fontScaler*4 ,  cv::Scalar(0,0,255,255), 1);
-			cv::putText(image, "New Person", cv::Point(m_croppedFaces[i].y1+2, m_croppedFaces[i].x2-3),
-					cv::FONT_HERSHEY_DUPLEX, 0.1 + 2*fontScaler*4 ,  cv::Scalar(0,0,255,255), 1);
-
+			//cv::putText(image, "New Person", cv::Point(m_croppedFaces[i].y1+2, m_croppedFaces[i].x2-3),
+			//		cv::FONT_HERSHEY_DUPLEX, 0.1 + 2*fontScaler*4 ,  cv::Scalar(0,0,255,255), 1);
+			struct APP_meta tmp;
+			//tmp.name = "New Person";
+			tmp.x1 = m_croppedFaces[i].x1;
+			tmp.y1 = m_croppedFaces[i].y1;
+			tmp.x2 = m_croppedFaces[i].x2;
+			tmp.y2 = m_croppedFaces[i].y2;
+			meta.push_back(tmp);
 		}
 		}
 	}

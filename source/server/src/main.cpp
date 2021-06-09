@@ -13,8 +13,10 @@
 
 #include "NetworkTCP.h"
 #include "TcpSendRecvJpeg.h"
+#include "CommonStruct.h"
 #include <termios.h>
 
+#define MAXFACES	8
 int kbhit()
 {
 	struct timeval tv = { 0L, 0L };
@@ -40,11 +42,27 @@ int getch()
 using namespace nvinfer1;
 using namespace nvuffparser;
 
+static int UserAthenticate(std::string userid, std::string userpw)
+{
+	return 1;
+}
 
 int main(int argc, char *argv[])
 {
+	int maxFacesPerScene = MAXFACES;
+
 	TTcpListenPort    *TcpListenPort;
-	TTcpConnectedPort *TcpConnectedPort;
+	TTcpConnectedPort *TcpConnectedPort_control;
+	TTcpConnectedPort *TcpConnectedPort_sdata;
+	TTcpConnectedPort *TcpConnectedPort_nsdata;
+	TTcpConnectedPort *TcpConnectedPort_meta;
+	const char *testmodefile = "../friends640x480.mp4";
+
+	std::vector<struct APP_meta> meta;
+	meta.reserve(maxFacesPerScene);
+	int secure_mode = MODE_SECURE;
+	int run_mode = MODE_RUN;
+
 	struct sockaddr_in cli_addr;
 	socklen_t          clilen;
 	bool               UseCamera=false;
@@ -75,7 +93,6 @@ int main(int argc, char *argv[])
 	int videoFrameWidth = 640;
 	int videoFrameHeight = 480;
 
-	int maxFacesPerScene = 8;
 	float knownPersonThreshold = 1.;
 	bool isCSICam = true;
 
@@ -126,7 +143,9 @@ int main(int argc, char *argv[])
 
 	printf("Listening for connections\n");
 
-	if  ((TcpConnectedPort=AcceptTcpConnection(TcpListenPort,&cli_addr,&clilen,
+reset:
+	/* 1. Establish control channel */
+	if  ((TcpConnectedPort_control=AcceptTcpConnection(TcpListenPort,&cli_addr,&clilen,
 					"../../custom/keys/ca/ca.crt",
 					"../../custom/keys/server/server.crt",
 					"../../custom/keys/server/server.key"))==NULL)
@@ -134,8 +153,51 @@ int main(int argc, char *argv[])
 		printf("AcceptTcpConnection Failed\n");
 		return(-1);
 	}
+	printf("Accepted control channel connection Request\n");
 
-	printf("Accepted connection Request\n");
+	std::string userid;
+	std::string userpw;
+	if (TcpReceiveLoginData(TcpConnectedPort_control,userid,userpw)<0)  goto reset;
+	if (!UserAthenticate(userid, userpw)) {
+		TcpSendLoginRes(TcpConnectedPort_control, 0);
+		goto reset;
+	}
+	else {
+		if (TcpSendLoginRes(TcpConnectedPort_control, 1) < 0) goto reset;
+	}
+
+	/* 2. Establish secure channel */
+	if  ((TcpConnectedPort_sdata=AcceptTcpConnection(TcpListenPort,&cli_addr,&clilen,
+					"../../custom/keys/ca/ca.crt",
+					"../../custom/keys/server/server.crt",
+					"../../custom/keys/server/server.key"))==NULL)
+	{
+		printf("AcceptTcpConnection Failed\n");
+		return(-1);
+	}
+	printf("Accepted secure data channel connection Request\n");
+
+	/* 3. Establish non-secure channel */
+	if  ((TcpConnectedPort_nsdata=AcceptTcpConnection(TcpListenPort,&cli_addr,&clilen,
+					NULL,
+					NULL,
+					NULL))==NULL)
+	{
+		printf("AcceptTcpConnection Failed\n");
+		return(-1);
+	}
+	printf("Accepted non-secure data channel connection Request\n");
+
+	/* 4. Establish meta channel */
+	if  ((TcpConnectedPort_meta=AcceptTcpConnection(TcpListenPort,&cli_addr,&clilen,
+					"../../custom/keys/ca/ca.crt",
+					"../../custom/keys/server/server.crt",
+					"../../custom/keys/server/server.key"))==NULL)
+	{
+		printf("AcceptTcpConnection Failed\n");
+		return(-1);
+	}
+	printf("Accepted meta channel connection Request\n");
 
 	cv::cuda::GpuMat src_gpu, dst_gpu;
 	cv::Mat dst_img;
@@ -143,6 +205,9 @@ int main(int argc, char *argv[])
 	auto globalTimeStart = chrono::steady_clock::now();
 
 	while (true) {
+		TTcpConnectedPort *DataPort = secure_mode == MODE_SECURE ? TcpConnectedPort_sdata :
+									   TcpConnectedPort_nsdata;
+		meta.clear();
 		videoStreamer->getFrame(frame);
 		if (frame.empty()) {
 			std::cout << "Empty frame! Exiting...\n Try restarting nvargus-daemon by "
@@ -167,11 +232,12 @@ int main(int argc, char *argv[])
 		faceNet.forward(frame, outputBbox);
 		auto endForward = chrono::steady_clock::now();
 		auto startFeatM = chrono::steady_clock::now();
-		faceNet.featureMatching(frame);
+		faceNet.featureMatching(frame, meta);
 		auto endFeatM = chrono::steady_clock::now();
 		faceNet.resetVariables();
 
-		if (TcpSendImageAsJpeg(TcpConnectedPort,frame)<0)  break;
+		if (TcpSendImageAsJpeg(DataPort,frame)<0)  break;
+		if (TcpSendMeta(DataPort, meta)<0)  break;
 		//cv::imshow("VideoSource", frame);
 		nbFrames++;
 		outputBbox.clear();
@@ -196,7 +262,8 @@ int main(int argc, char *argv[])
 				dst_gpu.download(frame);
 
 				outputBbox = mtCNN.findFace(frame);
-				if (TcpSendImageAsJpeg(TcpConnectedPort,frame)<0)  break;
+				if (TcpSendImageAsJpeg(DataPort,frame)<0)  break;
+				if (TcpSendMeta(DataPort, meta)<0)  break;
 				//cv::imshow("VideoSource", frame);
 				faceNet.addNewFace(frame, outputBbox);
 				auto dTimeEnd = chrono::steady_clock::now();
