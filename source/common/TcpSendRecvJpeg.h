@@ -12,7 +12,7 @@
 #include "NetworkTCP.h"
 
 int TcpSendImageAsJpeg(TTcpConnectedPort * TcpConnectedPort, cv::Mat Image);
-bool TcpRecvImageAsJpeg(TTcpConnectedPort * TcpConnectedPort,cv::Mat *Image);
+int TcpRecvImageAsJpeg(TTcpConnectedPort * TcpConnectedPort,cv::Mat *Image);
 
 bool TcpReceiveLoginData(TTcpConnectedPort * TcpConnectedPort,std::string &userid,std::string &userpw);
 int TcpSendLoginRes(TTcpConnectedPort * TcpConnectedPort, int res);

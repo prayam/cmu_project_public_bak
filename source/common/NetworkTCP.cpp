@@ -423,6 +423,26 @@ TTcpConnectedPort *OpenTcpConnection(const char *remotehostname, const char * re
 		return(NULL);
 	}
 
+// recv timeout set
+#ifdef G_OS_WIN32
+	// WINDOWS
+	DWORD timeout = 5 * 1000;
+	if (setsockopt(TcpConnectedPort->ConnectedFd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&timeout, sizeof timeout) == -1) {
+		CloseTcpConnectedPort(&TcpConnectedPort);
+		perror("setsockopt SO_RCVTIMEO failed");
+		return(NULL);
+	}
+#else
+	struct timeval tv;
+	tv.tv_sec = 5;
+	tv.tv_usec = 0;
+	if (setsockopt(TcpConnectedPort->ConnectedFd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof(tv)) == -1) {
+		CloseTcpConnectedPort(&TcpConnectedPort);
+		perror("setsockopt SO_RCVTIMEO failed");
+		return(NULL);
+	}
+#endif
+
 	if(ca_pem != NULL && cert_pem != NULL && key_pem != NULL) {
 		isSsl = true;
 	}
@@ -445,6 +465,10 @@ TTcpConnectedPort *OpenTcpConnection(const char *remotehostname, const char * re
 
 		/* Get the SSL handle from the BIO */
 		BIO_get_ssl(sbio, &ssl);
+
+		/* set non blocking IO */
+		// BIO_set_nbio(sbio, 1);
+
 		gchar conn_str[128];
 		g_snprintf(conn_str, sizeof(conn_str), "%s:%s", remotehostname, remoteportno);
 		/* Connect to the server */
@@ -485,6 +509,7 @@ TTcpConnectedPort *OpenTcpConnection(const char *remotehostname, const char * re
 		printf("SSL handshake successful with %s\n", conn_str);
 		TcpConnectedPort->isSsl = true;
 		TcpConnectedPort->ssl = ssl;
+		TcpConnectedPort->ctx = ctx;
 	}
 	else {
 		if (connect(TcpConnectedPort->ConnectedFd,result->ai_addr,result->ai_addrlen) < 0)
@@ -520,7 +545,6 @@ void CloseTcpConnectedPort(TTcpConnectedPort **TcpConnectedPort)
 	if ((*TcpConnectedPort)==NULL) return;
 	if ((*TcpConnectedPort)->ConnectedFd!=BAD_SOCKET_FD)
 	{
-
 		if ((*TcpConnectedPort)->isSsl)
 		{
 			/* SSL Finalize */
@@ -543,6 +567,10 @@ void CloseTcpConnectedPort(TTcpConnectedPort **TcpConnectedPort)
 //-----------------------------------------------------------------
 //-----------------------------------------------------------------
 // ReadDataTcp - Reads the specified amount TCP data
+// return
+//		- positive = received bytes
+//		- 0 = peer is disconnected
+//		- negative = error
 //-----------------------------------------------------------------
 ssize_t ReadDataTcp(TTcpConnectedPort *TcpConnectedPort,unsigned char *data, size_t length)
 {
@@ -551,19 +579,19 @@ ssize_t ReadDataTcp(TTcpConnectedPort *TcpConnectedPort,unsigned char *data, siz
 	for (size_t i = 0; i < length; i += bytes)
 	{
 		if (TcpConnectedPort->isSsl) {
-			if ((bytes = SSL_read(TcpConnectedPort->ssl, (char *)(data+i), length - i)) == -1)
-			{
-				return (-1);
-			}
+			bytes = SSL_read(TcpConnectedPort->ssl, (char *)(data+i), length - i);
 		}
 		else {
-			if ((bytes = recv(TcpConnectedPort->ConnectedFd, (char *)(data+i), length  - i,0)) == -1)
-			{
-				return (-1);
-			}
+			bytes = recv(TcpConnectedPort->ConnectedFd, (char *)(data+i), length  - i,0);
+		}
+
+		if (bytes <= 0) {
+			g_print("some error: %ld. if it's 0, peer is disconnected\n", bytes);
+			return bytes;
 		}
 	}
-	return(length);
+
+	return (length);
 }
 //-----------------------------------------------------------------
 // END ReadDataTcp

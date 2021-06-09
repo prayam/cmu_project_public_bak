@@ -36,29 +36,42 @@ int TcpSendImageAsJpeg(TTcpConnectedPort * TcpConnectedPort,cv::Mat Image)
 // jpeg image in side a TCP Stream on the specified TCP local port
 // returns true on success and false on failure
 //-----------------------------------------------------------------
-bool TcpRecvImageAsJpeg(TTcpConnectedPort * TcpConnectedPort,cv::Mat *Image)
+int TcpRecvImageAsJpeg(TTcpConnectedPort * TcpConnectedPort,cv::Mat *Image)
 {
+	ssize_t ret;
 	unsigned int imagesize;
 	unsigned char *buff;	/* receive buffer */
 
-	if (ReadDataTcp(TcpConnectedPort,(unsigned char *)&imagesize,sizeof(imagesize))!=sizeof(imagesize)) return(false);
+	ret = ReadDataTcp(TcpConnectedPort, (unsigned char *)&imagesize, sizeof(imagesize));
+	if (ret != sizeof(imagesize)) {
+		goto exit;
+	}
 
-	imagesize=ntohl(imagesize); // convert image size to host format
-
-	if (imagesize<0) return false;
-
+	imagesize = ntohl(imagesize); // convert image size to host format
 	buff = new (std::nothrow) unsigned char [imagesize];
-	if (buff==NULL) return false;
+	if (buff == NULL) {
+		ret = -1;
+		g_print("buffer allocation fail\n");
+		goto exit;
+	}
 
-	if((ReadDataTcp(TcpConnectedPort,buff,imagesize))==imagesize)
-	{
-		cv::imdecode(cv::Mat(imagesize,1,CV_8UC1,buff), cv::IMREAD_COLOR, Image );
+	ret = ReadDataTcp(TcpConnectedPort, buff, imagesize);
+	if(ret == imagesize) {
+		cv::imdecode(cv::Mat(imagesize, 1, CV_8UC1, buff), cv::IMREAD_COLOR, Image);
 		delete [] buff;
-		if (!(*Image).empty()) return true;
-		else return false;
+
+		if (!(*Image).empty()) {
+			goto exit;
+		}
+		else {
+			ret = -1;
+			g_print("unknown image\n");
+			goto exit;
+		}
 	}
 	delete [] buff;
-	return false;
+exit:
+	return (int)ret;
 }
 
 bool TcpReceiveLoginData(TTcpConnectedPort * TcpConnectedPort,std::string &userid,std::string &userpw)

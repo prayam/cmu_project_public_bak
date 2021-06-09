@@ -2,12 +2,17 @@
 #define APP_H
 
 #include <gtkmm.h>
+#include "NetworkTCP.h"
 
 class App : public Gtk::Window
 {
 public:
     App();
     virtual ~App();
+
+	guint compute_func_id;
+	gboolean disconn_req;
+	TTcpConnectedPort *tcp_connected_port;
 
 protected:
     //Signal handlers:
