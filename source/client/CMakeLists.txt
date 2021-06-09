@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.7)
+cmake_minimum_required(VERSION 3.0.0)
 
 set (CLIENT_VERSION_MAJOR 1)
 set (CLIENT_VERSION_MINOR 0)
@@ -10,14 +10,18 @@ project (client)
 
 include(FindPkgConfig)
 
-# need 'sudo apt install cmake gcc g++ libssl-dev libglib2.0-dev libopencv-dev'
-pkg_check_modules(GLIB2 REQUIRED glib-2.0)
-pkg_check_modules(GIO2 REQUIRED gio-2.0)
-pkg_check_modules(GOBJECT2 REQUIRED gobject-2.0)
-pkg_check_modules(OPENSSL REQUIRED openssl)
-pkg_check_modules(OPENCV REQUIRED opencv4)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
+# need 'sudo apt install cmake gcc g++ libssl-dev libglib2.0-dev libopencv-dev'
+pkg_check_modules(GTKMM3 REQUIRED gtkmm-3.0)
+pkg_check_modules(OPENCV REQUIRED opencv4)
+pkg_check_modules(OPENSSL REQUIRED openssl)
+
+link_directories(
+        ${GTKMM3_LIBRARY_DIRS}
+        ${OPENCV_LIBRARY_DIRS}
+        ${OPENSSL_LIBRARY_DIRS}
+)
 
 file(GLOB CLIENT_SRC
         "src/*.h"
@@ -30,25 +34,20 @@ file(GLOB CLIENT_SRC
 include_directories(
         "src/"
         "../common/"
-        ${GLIB2_INCLUDE_DIRS}
-        ${GIO2_INCLUDE_DIRS}
-        ${GOBJECT2_INCLUDE_DIRS}
-        ${OPENSSL_INCLUDE_DIRS}
+        ${GTKMM3_INCLUDE_DIRS}
         ${OPENCV_INCLUDE_DIRS}
+        ${OPENSSL_INCLUDE_DIRS}
 )
+
 add_compile_options(
-        ${GLIB2_CFLAGS_OTHER}
-        ${GIO2_CFLAGS_OTHER}
-        ${GOBJECT2_CFLAGS_OTHER}
-        ${OPENSSL_CFLAGS_OTHER}
+        ${GTKMM3_CFLAGS_OTHER}
         ${OPENCV_CFLAGS_OTHER}
+        ${OPENSSL_CFLAGS_OTHER}
 )
 
 add_executable(client ${CLIENT_SRC})
 target_link_libraries(client
-        ${GLIB2_LIBRARIES}
-        ${GIO2_LIBRARIES}
-        ${GOBJECT2_LIBRARIES}
-        ${OPENSSL_LIBRARIES}
+        ${GTKMM3_LIBRARIES}
         ${OPENCV_LIBRARIES}
+        ${OPENSSL_LIBRARIES}
 )
