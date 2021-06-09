@@ -10,9 +10,12 @@ public:
     App();
     virtual ~App();
 
-	guint compute_func_id;
+	guint handle_port_secure_id;
 	gboolean disconn_req;
-	TTcpConnectedPort *tcp_connected_port;
+	TTcpConnectedPort *port_control;
+	TTcpConnectedPort *port_secure;
+	TTcpConnectedPort *port_nonsecure;
+	TTcpConnectedPort *port_meta;
 
 protected:
     //Signal handlers:

@@ -1,9 +1,9 @@
 #include "app.h"
 #include "TcpSendRecvJpeg.h"
+#include "CommonStruct.h"
 #include <iostream>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
-// #include <X11/Xlib.h>
 
 // Label: https://developer.gnome.org/gtkmm/3.24/classGtk_1_1Label.html
 // Box: https://developer.gnome.org/gtkmm/3.24/classGtk_1_1Box.html
@@ -34,8 +34,6 @@ App::App()
       m_Label_Login("Login: "),
       m_Label_Name("Name:  ")
 {
-	// XInitThreads();
-
     // set_size_request(800, 600);
     set_title("App");
 
@@ -97,23 +95,29 @@ App::App()
     show_all_children();
 	g_timeout_add_seconds(5, (GSourceFunc) change_thread_priority, NULL);
 
-	this->tcp_connected_port = NULL;
+	this->port_control = NULL;
+	this->port_secure = NULL;
+	this->port_nonsecure = NULL;
+	this->port_meta = NULL;
 }
 
 App::~App()
 {
 }
 
-static gboolean compute_func(gpointer data) {
+static gboolean handle_port_secure(gpointer data) {
 	bool retvalue;
 	App *app = static_cast<App *>(data);
+	guint8 *recv_meta;
+	gsize recv_meta_len;
+	Mat Image;
+
+	recv_meta_len = sizeof(struct APP_meta);
+	recv_meta = (guint8 *)g_malloc(recv_meta_len);
 	namedWindow( "Server", WINDOW_AUTOSIZE );// Create a window for displa.
 
-	Mat Image; 
-	
 	while (!app->disconn_req) {
-		retvalue = TcpRecvImageAsJpeg(app->tcp_connected_port, &Image);
-
+		retvalue = TcpRecvImageAsJpeg(app->port_secure, &Image);
 		if (retvalue) {
 			imshow( "Server", Image ); // If a valid image is received then display it
 		}
@@ -121,33 +125,87 @@ static gboolean compute_func(gpointer data) {
 			break;
 		}
 
+		// g_print("recv meta 1st\n");
+		// retvalue = ReadDataTcp(app->port_meta, recv_meta, recv_meta_len);
+		// if (retvalue) {
+		// 	g_print("recv meta 1st: %d\n", retvalue);
+		// }
+		// else {
+		// 	break;
+		// }
+
+		// g_print("recv meta 2nd\n");
+		// retvalue = ReadDataTcp(app->port_meta, recv_meta, recv_meta_len);
+		// if (retvalue) {
+		// 	g_print("recv meta 2nd: %d\n", retvalue);
+		// }
+		// else {
+		// 	break;
+		// }
+
 		waitKey(10);
 	}
-	destroyWindow("Server");
 
-	app->compute_func_id = 0;
+	destroyWindow("Server");
+	g_free(recv_meta);
+
+	app->handle_port_secure_id = 0;
 	g_print("end func");
+
 	return G_SOURCE_REMOVE;
 }
 
 gboolean App::connect_server ()
 {
-	if (this->tcp_connected_port != NULL) {
-		printf("this.tcp_connected_port is not NULL\n");
+	const gchar *ca = "../../custom/keys/ca/ca.crt";
+	const gchar *crt = "../../custom/keys/client/client.crt";
+	const gchar *key = "../../custom/keys/client/client.key";
+
+	if (this->port_control != NULL) {
+		printf("this.port_control is not NULL\n");
 		return FALSE;
 	}
 
-	if ((this->tcp_connected_port = OpenTcpConnection("192.168.0.228", "5000",
-			"../../custom/keys/ca/ca.crt",
-			"../../custom/keys/client/client.crt",
-			"../../custom/keys/client/client.key"))==NULL)	// Open TCP TLS port for control data flow
+	if (this->port_secure != NULL) {
+		printf("this.port_secure is not NULL\n");
+		return FALSE;
+	}
+
+	if (this->port_nonsecure != NULL) {
+		printf("this.port_nonsecure is not NULL\n");
+		return FALSE;
+	}
+
+	if (this->port_meta != NULL) {
+		printf("this.port_meta is not NULL\n");
+		return FALSE;
+	}
+
+	if ((this->port_control = OpenTcpConnection("192.168.0.228", "5000", ca, crt, key)) == NULL) // Open TCP TLS port for control data
 	{
-		printf("OpenTcpConnection\n");
+		printf("error open port_control\n");
 		return FALSE;
 	}
 
-	this->compute_func_id = g_idle_add(compute_func, this);
+	if ((this->port_secure = OpenTcpConnection("192.168.0.228", "5000", ca, crt, key)) == NULL)	// Open TCP TLS port for secure mode
+	{
+		printf("error open port_secure\n");
+		return FALSE;
+	}
 
+	if ((this->port_nonsecure = OpenTcpConnection("192.168.0.228", "5000", NULL, NULL, NULL)) == NULL) // Open TCP TLS port for non_secure mode
+	{
+		printf("error open port_nonsecure\n");
+		return FALSE;
+	}
+
+	if ((this->port_meta = OpenTcpConnection("192.168.0.228", "5000", ca, crt, key)) == NULL) // Open TCP TLS port for meta data
+	{
+		printf("error open port_meta\n");
+		return FALSE;
+	}
+
+	this->handle_port_secure_id = g_idle_add(handle_port_secure, this);
 	return TRUE;
 }
 
@@ -162,7 +220,7 @@ void App::on_button_login()
     g_print("pass: %s\n", m_Entry_Password.get_text().c_str());
     g_print("on_button_login\n");
 
-    if (true) { //:TODO: check validation
+    if (this->connect_server()) {
         m_Entry_Id.set_sensitive(false);
         m_Entry_Password.set_sensitive(false);
         m_Button_Login.set_sensitive(false);
@@ -173,10 +231,12 @@ void App::on_button_login()
         m_Button_LearnSave.set_sensitive(true);
         m_CheckButton_Secure.set_sensitive(true);
         m_Entry_Name.set_sensitive(true);
+		this->disconn_req = FALSE;
     }
-
-	this->disconn_req = FALSE;
-    this->connect_server();
+	else {
+        m_Entry_Id.set_text("");
+        m_Entry_Password.set_text("");
+	}
 }
 
 void App::on_button_logout()
@@ -199,13 +259,29 @@ void App::on_button_logout()
     }
 
 	this->disconn_req = TRUE;
-	if (this->tcp_connected_port != NULL) {
-		CloseTcpConnectedPort(&this->tcp_connected_port); // Close network port;
-		this->tcp_connected_port = NULL;
+	if (this->port_control != NULL) {
+		CloseTcpConnectedPort(&this->port_control); // Close network port;
+		this->port_control = NULL;
 	}
-	if(this->compute_func_id) {
-		g_source_remove(this->compute_func_id);
-		this->compute_func_id = 0;
+
+	if (this->port_secure != NULL) {
+		CloseTcpConnectedPort(&this->port_secure); // Close network port;
+		this->port_secure = NULL;
+	}
+
+	if (this->port_nonsecure != NULL) {
+		CloseTcpConnectedPort(&this->port_nonsecure); // Close network port;
+		this->port_nonsecure = NULL;
+	}
+
+	if (this->port_meta != NULL) {
+		CloseTcpConnectedPort(&this->port_meta); // Close network port;
+		this->port_meta = NULL;
+	}
+
+	if(this->handle_port_secure_id) {
+		g_source_remove(this->handle_port_secure_id);
+		this->handle_port_secure_id = 0;
 	}
 }
 

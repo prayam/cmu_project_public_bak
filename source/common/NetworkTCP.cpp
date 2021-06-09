@@ -7,6 +7,7 @@
 //------------------------------------------------------------------------------------------------
 #include <iostream>
 #include <new>
+#include <glib.h>
 #include <stdio.h>
 #include <string.h>
 #include "NetworkTCP.h"
@@ -23,7 +24,7 @@ TTcpListenPort *OpenTcpListenPort(short localport)
 	TTcpListenPort *TcpListenPort;
 	struct sockaddr_in myaddr;
 
-	TcpListenPort= new (std::nothrow) TTcpListenPort;
+	TcpListenPort= g_new0(TTcpListenPort, 1);
 
 	if (TcpListenPort==NULL)
 	{
@@ -37,7 +38,7 @@ TTcpListenPort *OpenTcpListenPort(short localport)
 	iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
 	if (iResult != 0)
 	{
-		delete TcpListenPort;
+		 TcpListenPort;
 		printf("WSAStartup failed: %d\n", iResult);
 		return(NULL);
 	}
@@ -95,7 +96,7 @@ void CloseTcpListenPort(TTcpListenPort **TcpListenPort)
 		CLOSE_SOCKET((*TcpListenPort)->ListenFd);
 		(*TcpListenPort)->ListenFd=BAD_SOCKET_FD;
 	}
-	delete (*TcpListenPort);
+	g_free (*TcpListenPort);
 	(*TcpListenPort)=NULL;
 #if  defined(_WIN32) || defined(_WIN64)
 	WSACleanup();
@@ -136,7 +137,6 @@ static SSL_CTX *get_server_context(const char *ca_pem,
 	SSL_CTX *ctx;
 
 	/* Get a default context */
-	// if (!(ctx = SSL_CTX_new(SSLv23_server_method()))) {
 	if (!(ctx = SSL_CTX_new(TLS_server_method()))) {
 		fprintf(stderr, "SSL_CTX_new failed\n");
 		return NULL;
@@ -201,7 +201,7 @@ TTcpConnectedPort *AcceptTcpConnection(TTcpListenPort *TcpListenPort,
 	gboolean isSsl = false;
 	int rc = -1;
 
-	TcpConnectedPort= new (std::nothrow) TTcpConnectedPort;
+	TcpConnectedPort = g_new0(TTcpConnectedPort, 1);
 
 	if (TcpConnectedPort==NULL)
 	{
@@ -231,7 +231,7 @@ TTcpConnectedPort *AcceptTcpConnection(TTcpListenPort *TcpListenPort,
 	if (TcpConnectedPort->ConnectedFd== BAD_SOCKET_FD)
 	{
 		perror("ERROR on accept");
-		delete TcpConnectedPort;
+		g_free (TcpConnectedPort);
 		return NULL;
 	}
 
@@ -362,7 +362,7 @@ TTcpConnectedPort *OpenTcpConnection(const char *remotehostname, const char * re
 	SSL_CTX *ctx;
 	X509 *server_cert;
 
-	TcpConnectedPort= new (std::nothrow) TTcpConnectedPort;
+	TcpConnectedPort= g_new0(TTcpConnectedPort, 1);
 
 	if (TcpConnectedPort==NULL)
 	{
@@ -375,7 +375,7 @@ TTcpConnectedPort *OpenTcpConnection(const char *remotehostname, const char * re
 		iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
 	if (iResult != 0)
 	{
-		delete TcpConnectedPort;
+		g_free(TcpConnectedPort);
 		printf("WSAStartup failed: %d\n", iResult);
 		return(NULL);
 	}
@@ -389,13 +389,13 @@ TTcpConnectedPort *OpenTcpConnection(const char *remotehostname, const char * re
 	s = getaddrinfo(remotehostname, remoteportno, &hints, &result);
 	if (s != 0)
 	{
-		delete TcpConnectedPort;
+		g_free(TcpConnectedPort);
 		fprintf(stderr, "getaddrinfo: Failed\n");
 		return(NULL);
 	}
 	if ( result==NULL)
 	{
-		delete TcpConnectedPort;
+		g_free(TcpConnectedPort);
 		fprintf(stderr, "getaddrinfo: Failed\n");
 		return(NULL);
 	}
@@ -542,22 +542,24 @@ fail1:
 //-----------------------------------------------------------------
 void CloseTcpConnectedPort(TTcpConnectedPort **TcpConnectedPort)
 {
-	if ((*TcpConnectedPort)==NULL) return;
-	if ((*TcpConnectedPort)->ConnectedFd!=BAD_SOCKET_FD)
-	{
-		if ((*TcpConnectedPort)->isSsl)
-		{
+	if ((*TcpConnectedPort) == NULL) {
+		return;
+	}
+
+	if ((*TcpConnectedPort)->ConnectedFd != BAD_SOCKET_FD) {
+		if ((*TcpConnectedPort)->isSsl) {
 			/* SSL Finalize */
 			SSL_shutdown((*TcpConnectedPort)->ssl);
 			SSL_free((*TcpConnectedPort)->ssl);
 			SSL_CTX_free((*TcpConnectedPort)->ctx);
-
-			CLOSE_SOCKET((*TcpConnectedPort)->ConnectedFd);
-			(*TcpConnectedPort)->ConnectedFd=BAD_SOCKET_FD;
 		}
+
+		CLOSE_SOCKET((*TcpConnectedPort)->ConnectedFd);
+		(*TcpConnectedPort)->ConnectedFd = BAD_SOCKET_FD;
 	}
-	delete (*TcpConnectedPort);
-	(*TcpConnectedPort)=NULL;
+
+	g_free (*TcpConnectedPort);
+	(*TcpConnectedPort) = NULL;
 #if  defined(_WIN32) || defined(_WIN64)
 	WSACleanup();
 #endif
@@ -572,17 +574,17 @@ void CloseTcpConnectedPort(TTcpConnectedPort **TcpConnectedPort)
 //		- 0 = peer is disconnected
 //		- negative = error
 //-----------------------------------------------------------------
-ssize_t ReadDataTcp(TTcpConnectedPort *TcpConnectedPort,unsigned char *data, size_t length)
+ssize_t ReadDataTcp(TTcpConnectedPort *TcpConnectedPort, unsigned char *data, size_t length)
 {
 	ssize_t bytes;
 
 	for (size_t i = 0; i < length; i += bytes)
 	{
 		if (TcpConnectedPort->isSsl) {
-			bytes = SSL_read(TcpConnectedPort->ssl, (char *)(data+i), length - i);
+			bytes = SSL_read(TcpConnectedPort->ssl, (char *)(data + i), length - i);
 		}
 		else {
-			bytes = recv(TcpConnectedPort->ConnectedFd, (char *)(data+i), length  - i,0);
+			bytes = recv(TcpConnectedPort->ConnectedFd, (char *)(data + i), length - i, 0);
 		}
 
 		if (bytes <= 0) {

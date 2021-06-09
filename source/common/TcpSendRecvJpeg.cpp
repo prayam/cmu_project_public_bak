@@ -5,6 +5,7 @@
 // 1.0 April 2017 - initial version
 // Send and receives OpenCV Mat Images in a Tcp Stream commpressed as Jpeg images
 //------------------------------------------------------------------------------------------------
+#include <glib.h>
 #include <opencv2/highgui/highgui.hpp>
 #include "TcpSendRecvJpeg.h"
 #include "CommonStruct.h"
@@ -48,7 +49,7 @@ int TcpRecvImageAsJpeg(TTcpConnectedPort * TcpConnectedPort,cv::Mat *Image)
 	}
 
 	imagesize = ntohl(imagesize); // convert image size to host format
-	buff = new (std::nothrow) unsigned char [imagesize];
+	buff = (unsigned char*)g_malloc(imagesize);
 	if (buff == NULL) {
 		ret = -1;
 		g_print("buffer allocation fail\n");
@@ -58,7 +59,7 @@ int TcpRecvImageAsJpeg(TTcpConnectedPort * TcpConnectedPort,cv::Mat *Image)
 	ret = ReadDataTcp(TcpConnectedPort, buff, imagesize);
 	if(ret == imagesize) {
 		cv::imdecode(cv::Mat(imagesize, 1, CV_8UC1, buff), cv::IMREAD_COLOR, Image);
-		delete [] buff;
+		g_free(buff);
 
 		if (!(*Image).empty()) {
 			goto exit;
@@ -69,10 +70,13 @@ int TcpRecvImageAsJpeg(TTcpConnectedPort * TcpConnectedPort,cv::Mat *Image)
 			goto exit;
 		}
 	}
-	delete [] buff;
+	g_free(buff);
 exit:
 	return (int)ret;
 }
+//-----------------------------------------------------------------
+// END TcpRecvImageAsJpeg
+//-----------------------------------------------------------------
 
 bool TcpReceiveLoginData(TTcpConnectedPort * TcpConnectedPort,std::string &userid,std::string &userpw)
 {
@@ -90,9 +94,6 @@ int TcpSendMeta(TTcpConnectedPort * TcpConnectedPort, std::vector<struct APP_met
 }
 
 
-//-----------------------------------------------------------------
-// END TcpRecvImageAsJpeg
-//-----------------------------------------------------------------
 //-----------------------------------------------------------------
 // END of File
 //-----------------------------------------------------------------
