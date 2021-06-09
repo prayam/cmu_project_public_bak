@@ -1,0 +1,4 @@
+Security Requirements
+1) manage user info like learned user face photo and user name securely
+2) manage user id / pass securely
+3) manage communication channel securely
