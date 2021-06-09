@@ -40,6 +40,10 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -s")
 set(CMAKE_SKIP_RPATH TRUE)
 set(CMAKE_INSTALL_RPATH "")
 
+# For obfuscator
+set(OBFUSCATOR_DIR /home/lg/libs/ADVobfuscator/Lib)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_RELEASE} -DAPPLY_OBFUSCATED=1")
+
 # tensorRT
 message("CUDA_TOOLKIT_ROOT_DIR = ${CUDA_TOOLKIT_ROOT_DIR}")
 
@@ -75,6 +79,7 @@ include_directories(
   trt_l2norm_helper
   ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES}
   ${TENSORRT_INCLUDE_DIR}
+  ${OBFUSCATOR_DIR}
 )
 
 include_directories(
@@ -99,7 +104,14 @@ file(GLOB DIR_SRCS
 message("DIR_SRCS = ${DIR_SRCS}")
 cuda_add_executable(${PROJECT_NAME} ${DIR_SRCS})
 
+add_library(libsslcrypto STATIC IMPORTED)
+set_target_properties(libsslcrypto PROPERTIES
+        IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/libs/libsslcrypto/libsslcrypto.a"
+        INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}/libs/libsslcrypto/"
+)
+
 target_link_libraries(${PROJECT_NAME}
+  libsslcrypto
   trt_l2norm_helper
   ${TENSORRT_LIBRARY}
   ${GLIB2_LIBRARIES}
