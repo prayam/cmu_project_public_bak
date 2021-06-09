@@ -2,6 +2,17 @@
 #define _COMMONSTRUCT_H_
 
 enum {
+	MODE_SECURE,
+	MODE_NONSECURE,	/* Just switch between secure port and non-secure port. */
+
+	/* Each secure and nonsecure mode can have the following mode independently. */
+	MODE_TESTRUN,	/* Data: Video file stream */
+	MODE_RUN,	/* Data: Camera stream */
+	MODE_CAPTURE,	/* Corresponding to learning mode */
+	MODE_SAVE,	/* Corresponding to learning mode */
+};
+
+enum {
 	REQ_LOGIN,	/* Start to connect socket.
 			   Login process:
 			      1. Enter ID/PW
