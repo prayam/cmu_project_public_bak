@@ -69,7 +69,7 @@ int dec_ssl (unsigned char* in, size_t is, unsigned char** out, size_t* os);
 /**
  * @brief : calculate hash using sha256
  * @in  param : input file name
- * @out param : output hash value
+ * @out param : output hash value, length of hash is always 32 (SHA256_DIGEST_LENGTH)
  * @return : 0 for success
  * @caution : caller must be free(*hash) after using
  *            because memory assigned internally using malloc.
@@ -80,7 +80,7 @@ make_sha256_f(const char* fname, unsigned char** hash);
 /**
  * @brief : calculate hash using sha256
  * @in  param : input data & it's size
- * @out param : output hash value
+ * @out param : output hash value, length of hash is always 32 (SHA256_DIGEST_LENGTH)
  * @return : 0 for success
  * @caution : caller must be free(*hash) after using
  *            because memory assigned internally using malloc.
