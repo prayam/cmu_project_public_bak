@@ -281,10 +281,10 @@ bool TcpRecvMeta(TTcpConnectedPort * TcpConnectedPort, std::vector<struct APP_me
 			goto exit;
 		}
 
-		tmp.x1 = ntohl(meta[i].x1);
-		tmp.y1 = ntohl(meta[i].y1);
-		tmp.x2 = ntohl(meta[i].x2);
-		tmp.y2 = ntohl(meta[i].y2);
+		tmp.x1 = ntohl(tmp.x1);
+		tmp.y1 = ntohl(tmp.y1);
+		tmp.x2 = ntohl(tmp.x2);
+		tmp.y2 = ntohl(tmp.y2);
 
 		meta.push_back(tmp);
 
