@@ -141,6 +141,7 @@ exit:
 	return ret;
 }
 
+/* CAUTION: Caller should free userid and userpw after using them. */
 bool TcpRecvLoginData(TTcpConnectedPort * TcpConnectedPort, char** userid, char** userpw)
 {
 	ssize_t read_len, req_len;
@@ -206,9 +207,14 @@ exit:
 	return ret;
 }
 
-int TcpSendLoginRes(TTcpConnectedPort * TcpConnectedPort, int res)
+int TcpSendLoginRes(TTcpConnectedPort * TcpConnectedPort, unsigned char res)
 {
-	return 0;
+	return WriteDataTcp(TcpConnectedPort, &res, sizeof(char));
+}
+
+int TcpRecvLoginRes(TTcpConnectedPort * TcpConnectedPort, unsigned char *res)
+{
+	return ReadDataTcp(TcpConnectedPort, res, sizeof(char));
 }
 
 int TcpSendMeta(TTcpConnectedPort * TcpConnectedPort, std::vector<struct APP_meta> meta)

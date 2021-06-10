@@ -1,7 +1,7 @@
 #include <unistd.h> /* for getpid() */
 #include <glib/gprintf.h> /* for g_sprintf() */
 
-#include "logger.h"
+#include "Logger.h"
 
 /* ASCII background color code. see https://gist.github.com/radxene/f1e286301763b921baf06074ea46c800 */
 #define ANSI_RESET_ALL          "\x1b[0m"

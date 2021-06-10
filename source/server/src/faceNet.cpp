@@ -1,5 +1,6 @@
 #include "faceNet.h"
 #include "CommonStruct.h"
+#include <glib.h>
 
 int FaceNetClassifier::m_classCount = 0;
 
@@ -225,15 +226,15 @@ std:vector<float> currEmbedding(128);
     currEmbedding.clear();
 		}
 		float fontScaler = static_cast<float>(m_croppedFaces[i].x2 - m_croppedFaces[i].x1)/static_cast<float>(m_frameWidth);
-		cv::rectangle(image, cv::Point(m_croppedFaces[i].y1, m_croppedFaces[i].x1), cv::Point(m_croppedFaces[i].y2, m_croppedFaces[i].x2),
-				cv::Scalar(0,0,255), 2,8,0);
+		//cv::rectangle(image, cv::Point(m_croppedFaces[i].y1, m_croppedFaces[i].x1), cv::Point(m_croppedFaces[i].y2, m_croppedFaces[i].x2),
+		//		cv::Scalar(0,0,255), 2,8,0);
 		if (minDistance <= m_knownPersonThresh) {
 			// cv::putText(image, m_knownFaces[winner].className, cv::Point(m_croppedFaces[i].y1+2, m_croppedFaces[i].x2-3),
 			//         cv::FONT_HERSHEY_DUPLEX, 0.1 + 2*fontScaler*4,  cv::Scalar(0,0,255,255), 1);
 			//cv::putText(image, m_knownFaces[winner].className, cv::Point(m_croppedFaces[i].y1+2, m_croppedFaces[i].x2-3),
 			//		cv::FONT_HERSHEY_DUPLEX, 0.1 + 2*fontScaler*4,  cv::Scalar(0,0,255,255), 1);
 			struct APP_meta tmp;
-			//tmp.name = m_knownFaces[winner].className;
+			m_knownFaces[winner].className.copy(tmp.name, MAX_NAME - 1, 0);
 			tmp.x1 = m_croppedFaces[i].x1;
 			tmp.y1 = m_croppedFaces[i].y1;
 			tmp.x2 = m_croppedFaces[i].x2;
@@ -246,7 +247,7 @@ std:vector<float> currEmbedding(128);
 			//cv::putText(image, "New Person", cv::Point(m_croppedFaces[i].y1+2, m_croppedFaces[i].x2-3),
 			//		cv::FONT_HERSHEY_DUPLEX, 0.1 + 2*fontScaler*4 ,  cv::Scalar(0,0,255,255), 1);
 			struct APP_meta tmp;
-			//tmp.name = "New Person";
+			g_strlcpy(tmp.name, "New Person", MAX_NAME - 1);
 			tmp.x1 = m_croppedFaces[i].x1;
 			tmp.y1 = m_croppedFaces[i].y1;
 			tmp.x2 = m_croppedFaces[i].x2;

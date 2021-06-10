@@ -95,6 +95,7 @@ message("TENSORRT_LIBRARY = ${TENSORRT_LIBRARY}")
 
 file(GLOB DIR_SRCS
         "src/*.cpp"
+	"../common/Logger.cpp"
         "../common/NetworkTCP.cpp"
         "../common/TcpSendRecvJpeg.cpp"
         "../common/TcpSendRecvJpeg.cpp"
