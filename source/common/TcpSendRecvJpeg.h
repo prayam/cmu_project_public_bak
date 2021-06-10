@@ -14,7 +14,9 @@
 int TcpSendImageAsJpeg(TTcpConnectedPort * TcpConnectedPort, cv::Mat Image);
 int TcpRecvImageAsJpeg(TTcpConnectedPort * TcpConnectedPort,cv::Mat *Image);
 
-bool TcpReceiveLoginData(TTcpConnectedPort * TcpConnectedPort,std::string &userid,std::string &userpw);
+bool TcpSendLoginData(TTcpConnectedPort * TcpConnectedPort, const char* userid, const char* userpw);
+bool TcpRecvLoginData(TTcpConnectedPort * TcpConnectedPort, char** userid, char** userpw);
+
 int TcpSendLoginRes(TTcpConnectedPort * TcpConnectedPort, int res);
 int TcpSendMeta(TTcpConnectedPort * TcpConnectedPort, std::vector<struct APP_meta> meta);
 

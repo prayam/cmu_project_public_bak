@@ -232,6 +232,7 @@ void App::on_button_login()
         m_CheckButton_Secure.set_sensitive(true);
         m_Entry_Name.set_sensitive(true);
 		this->disconn_req = FALSE;
+		TcpSendLoginData(this->port_control, m_Entry_Id.get_text().c_str(), m_Entry_Password.get_text().c_str());
     }
 	else {
         m_Entry_Id.set_text("");

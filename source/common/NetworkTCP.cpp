@@ -10,6 +10,8 @@
 #include <glib.h>
 #include <stdio.h>
 #include <string.h>
+#include <netinet/tcp.h> //for TCP_NODELAY and TCP_QUICKACK
+#include <netinet/in.h> //for IPPROTO_TCP
 #include "NetworkTCP.h"
 #include "openssl_hostname_validation.h"
 
@@ -236,18 +238,33 @@ TTcpConnectedPort *AcceptTcpConnection(TTcpListenPort *TcpListenPort,
 	}
 
 	int bufsize = 200 * 1024;
-	if (setsockopt(TcpConnectedPort->ConnectedFd, SOL_SOCKET,
-				SO_RCVBUF, (char *)&bufsize, sizeof(bufsize)) == -1)
+	if (setsockopt(TcpConnectedPort->ConnectedFd, SOL_SOCKET, SO_RCVBUF, (char *)&bufsize, sizeof(bufsize)) == -1)
 	{
 		CloseTcpConnectedPort(&TcpConnectedPort);
 		perror("setsockopt SO_SNDBUF failed");
 		return(NULL);
 	}
-	if (setsockopt(TcpConnectedPort->ConnectedFd, SOL_SOCKET,
-				SO_SNDBUF, (char *)&bufsize, sizeof(bufsize)) == -1)
+
+	if (setsockopt(TcpConnectedPort->ConnectedFd, SOL_SOCKET, SO_SNDBUF, (char *)&bufsize, sizeof(bufsize)) == -1)
 	{
 		CloseTcpConnectedPort(&TcpConnectedPort);
 		perror("setsockopt SO_SNDBUF failed");
+		return(NULL);
+	}
+
+	int option = 1;
+	if(setsockopt(TcpConnectedPort->ConnectedFd, IPPROTO_TCP, TCP_NODELAY, (char*)&option, sizeof(option)) < 0)
+	{
+		CloseTcpConnectedPort(&TcpConnectedPort);
+		perror("setsockopt failed");
+		return(NULL);
+	}
+
+	option = 1;
+	if(setsockopt(TcpConnectedPort->ConnectedFd, IPPROTO_TCP, TCP_QUICKACK, (char*)&option, sizeof(option)) < 0)
+	{
+		CloseTcpConnectedPort(&TcpConnectedPort);
+		perror("setsockopt failed");
 		return(NULL);
 	}
 
@@ -408,18 +425,32 @@ TTcpConnectedPort *OpenTcpConnection(const char *remotehostname, const char * re
 	}
 
 	int bufsize = 200 * 1024;
-	if (setsockopt(TcpConnectedPort->ConnectedFd, SOL_SOCKET,
-				SO_SNDBUF, (char *)&bufsize, sizeof(bufsize)) == -1)
+	if (setsockopt(TcpConnectedPort->ConnectedFd, SOL_SOCKET, SO_SNDBUF, (char *)&bufsize, sizeof(bufsize)) == -1)
 	{
 		CloseTcpConnectedPort(&TcpConnectedPort);
 		perror("setsockopt SO_SNDBUF failed");
 		return(NULL);
 	}
-	if (setsockopt(TcpConnectedPort->ConnectedFd, SOL_SOCKET,
-				SO_RCVBUF, (char *)&bufsize, sizeof(bufsize)) == -1)
+	if (setsockopt(TcpConnectedPort->ConnectedFd, SOL_SOCKET, SO_RCVBUF, (char *)&bufsize, sizeof(bufsize)) == -1)
 	{
 		CloseTcpConnectedPort(&TcpConnectedPort);
 		perror("setsockopt SO_SNDBUF failed");
+		return(NULL);
+	}
+
+	int option = 1;
+	if(setsockopt(TcpConnectedPort->ConnectedFd, IPPROTO_TCP, TCP_NODELAY, (char*)&option, sizeof(option)) < 0)
+	{
+		CloseTcpConnectedPort(&TcpConnectedPort);
+		perror("setsockopt failed");
+		return(NULL);
+	}
+
+	option = 1;
+	if(setsockopt(TcpConnectedPort->ConnectedFd, IPPROTO_TCP, TCP_QUICKACK, (char*)&option, sizeof(option)) < 0)
+	{
+		CloseTcpConnectedPort(&TcpConnectedPort);
+		perror("setsockopt failed");
 		return(NULL);
 	}
 
