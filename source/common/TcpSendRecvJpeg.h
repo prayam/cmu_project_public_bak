@@ -19,8 +19,8 @@ bool TcpRecvLoginData(TTcpConnectedPort * TcpConnectedPort, char** userid, char*
 
 int TcpSendLoginRes(TTcpConnectedPort * TcpConnectedPort, unsigned char res);
 int TcpRecvLoginRes(TTcpConnectedPort * TcpConnectedPort, unsigned char *res);
-int TcpSendMeta(TTcpConnectedPort * TcpConnectedPort, std::vector<struct APP_meta> meta);
-int TcpRecvMeta(TTcpConnectedPort * TcpConnectedPort, std::vector<struct APP_meta> &meta);
+bool TcpSendMeta(TTcpConnectedPort * TcpConnectedPort, std::vector<struct APP_meta> meta);
+bool TcpRecvMeta(TTcpConnectedPort * TcpConnectedPort, std::vector<struct APP_meta> &meta);
 
 #endif
 //------------------------------------------------------------------------------------------------

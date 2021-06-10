@@ -106,6 +106,7 @@ bool TcpSendLoginData(TTcpConnectedPort * TcpConnectedPort, const char* userid, 
 
 	if (MAX_DATA_LEN < (1 + userid_len + 1 + userpw_len)) {
 		LOG_WARNING("expected data max len(%d), but it's (%ld)", MAX_DATA_LEN, (1 + userid_len + 1 + userpw_len));
+		goto exit;
 	}
 
 	req_len = sizeof(struct APP_command_req);
@@ -178,12 +179,14 @@ bool TcpRecvLoginData(TTcpConnectedPort * TcpConnectedPort, char** userid, char*
 	tmp++;
 	if (userid_len > MAX_ACCOUNT_ID) {
 		LOG_WARNING("exceeds id len %d. read len %d", MAX_ACCOUNT_ID, userid_len);
+		goto exit;
 	}
 	tmp += userid_len;
 
 	userpw_len = *tmp;
 	if (userpw_len > MAX_ACCOUNT_PW) {
 		LOG_WARNING("exceeds pw len %d. read len %d", MAX_ACCOUNT_PW, userpw_len);
+		goto exit;
 	}
 
 	*userid = g_strndup (req->data + 1, userid_len);
@@ -217,9 +220,78 @@ int TcpRecvLoginRes(TTcpConnectedPort * TcpConnectedPort, unsigned char *res)
 	return ReadDataTcp(TcpConnectedPort, res, sizeof(char));
 }
 
-int TcpSendMeta(TTcpConnectedPort * TcpConnectedPort, std::vector<struct APP_meta> meta)
+bool TcpSendMeta(TTcpConnectedPort * TcpConnectedPort, std::vector<struct APP_meta> meta)
 {
-	return 0;
+	size_t write_ret;
+	guint8 nr = meta.size();
+
+	if (TcpConnectedPort == NULL) {
+		LOG_WARNING("TcpConnectedPort is NULL");
+		goto exit;
+	}
+
+	write_ret = WriteDataTcp(TcpConnectedPort, (unsigned char *)&nr, sizeof(guint8));
+	if (write_ret != sizeof(guint8)) {
+		LOG_WARNING("Meta/nr: unexpected write len %ld. it should be %ld", write_ret, sizeof(guint8));
+		goto exit;
+	}
+
+	for (int i = 0; i < nr; i++) {
+		struct APP_meta tmp;
+
+		g_strlcpy(tmp.name, meta[i].name, MAX_NAME - 1);
+		tmp.x1 = htonl(meta[i].x1);
+		tmp.y1 = htonl(meta[i].y1);
+		tmp.x2 = htonl(meta[i].x2);
+		tmp.y2 = htonl(meta[i].y2);
+
+		write_ret = WriteDataTcp(TcpConnectedPort, (unsigned char *)&tmp, sizeof(struct APP_meta));
+		if (write_ret != sizeof(struct APP_meta)) {
+			LOG_WARNING("Meta/item: unexpected write len %ld. it should be %ld", write_ret, sizeof(struct APP_meta));
+			goto exit;
+		}
+	}
+	return TRUE;
+exit:
+	return FALSE;
+}
+
+bool TcpRecvMeta(TTcpConnectedPort * TcpConnectedPort, std::vector<struct APP_meta> &meta)
+{
+	size_t read_ret;
+	guint8 nr;
+
+	if (TcpConnectedPort == NULL) {
+		LOG_WARNING("TcpConnectedPort is NULL");
+		goto exit;
+	}
+
+	read_ret = ReadDataTcp(TcpConnectedPort, (unsigned char *)&nr, sizeof(guint8));
+	if (read_ret != sizeof(guint8)) {
+		LOG_WARNING("Meta/nr: unexpected read len %ld. it should be %ld", read_ret, sizeof(guint8));
+		goto exit;
+	}
+
+	for (int i = 0; i < nr; i++) {
+		struct APP_meta tmp;
+
+		read_ret = ReadDataTcp(TcpConnectedPort, (unsigned char *)&tmp, sizeof(struct APP_meta));
+		if (read_ret != sizeof(struct APP_meta)) {
+			LOG_WARNING("Meta/item: unexpected read len %ld. it should be %ld", read_ret, sizeof(struct APP_meta));
+			goto exit;
+		}
+
+		tmp.x1 = ntohl(meta[i].x1);
+		tmp.y1 = ntohl(meta[i].y1);
+		tmp.x2 = ntohl(meta[i].x2);
+		tmp.y2 = ntohl(meta[i].y2);
+
+		meta.push_back(tmp);
+
+	}
+	return TRUE;
+exit:
+	return FALSE;
 }
 
 
