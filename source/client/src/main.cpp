@@ -3,14 +3,6 @@
 #include "app.h"
 #include "Logger.h"
 #include <gtkmm/application.h>
-/*
-    auto app = Gtk::Application::create(argc, argv);
-
-    Gtk::Window window;
-    window.set_default_size(600,400);
-
-    return app->run(window);
-*/
 
 int main (int argc, char *argv[])
 {
