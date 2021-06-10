@@ -128,7 +128,7 @@ bool TcpSendLoginData(TTcpConnectedPort * TcpConnectedPort, const char* userid, 
 	memcpy(tmp, userpw, userpw_len);
 	tmp += userpw_len;
 
-	write_ret = WriteDataTcp(TcpConnectedPort, (unsigned char *)&req, req_len);
+	write_ret = WriteDataTcp(TcpConnectedPort, (unsigned char *)req, req_len);
 	if (write_ret != req_len) {
 		LOG_WARNING("unexpected write len %ld. it should be %ld", write_ret, req_len);
 	}
@@ -162,7 +162,7 @@ bool TcpRecvLoginData(TTcpConnectedPort * TcpConnectedPort, char** userid, char*
 		goto exit;
 	}
 
-	read_len = ReadDataTcp(TcpConnectedPort, (unsigned char *)&req, req_len);
+	read_len = ReadDataTcp(TcpConnectedPort, (unsigned char *)req, req_len);
 	if (read_len != req_len) {
 		LOG_WARNING("unexpected read len %ld. it should be %ld", read_len, req_len);
 		goto exit;
