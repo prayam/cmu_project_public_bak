@@ -117,6 +117,7 @@ static gboolean handle_port_secure(gpointer data) {
     float fontScaler;
 	std::vector<struct APP_meta> meta_vector;
 
+	LOG_INFO("start");
 	namedWindow( "Server", WINDOW_AUTOSIZE );// Create a window for displa.
 
 	while (!app->disconn_req) {
@@ -146,6 +147,8 @@ static gboolean handle_port_secure(gpointer data) {
 	LOG_INFO("end func");
 
 	app->handle_port_secure_id = 0;
+	app->on_button_logout();
+	app->show_dialog("End Connection");
 	return G_SOURCE_REMOVE;
 }
 
@@ -158,39 +161,41 @@ void App::show_dialog(const char* contents)
 
 gboolean App::connect_server ()
 {
+	LOG_INFO("start");
+	gboolean ret = FALSE;
+	guint8 res = 255;
 	const gchar *ca = "../../custom/keys/ca/ca.crt";
 	const gchar *crt = "../../custom/keys/client/client.crt";
 	const gchar *key = "../../custom/keys/client/client.key";
 
 	if (this->port_control != NULL) {
 		LOG_WARNING("this.port_control is not NULL");
-		return FALSE;
+		goto exit;
 	}
 
 	if (this->port_secure != NULL) {
 		LOG_WARNING("this.port_secure is not NULL");
-		return FALSE;
+		goto exit;
 	}
 
 	if (this->port_nonsecure != NULL) {
 		LOG_WARNING("this.port_nonsecure is not NULL");
-		return FALSE;
+		goto exit;
 	}
 
 	if (this->port_meta != NULL) {
 		LOG_WARNING("this.port_meta is not NULL");
-		return FALSE;
+		goto exit;
 	}
 
 	if ((this->port_control = OpenTcpConnection("192.168.0.228", "5000", ca, crt, key)) == NULL) // Open TCP TLS port for control data
 	{
 		LOG_WARNING("error open port_control");
 		show_dialog("Connection Fail");
-		return FALSE;
+		goto exit;
 	}
 
 	// send login info and check
-	guint8 res = 255;
 	TcpSendLoginData(this->port_control, m_Entry_Id.get_text().c_str(), m_Entry_Password.get_text().c_str());
 	TcpRecvLoginRes(this->port_control, &res);
 
@@ -198,7 +203,7 @@ gboolean App::connect_server ()
 		LOG_WARNING("login fail");
 		disconnect_server();
 		show_dialog("Login Fail");
-		return FALSE;
+		goto exit;
 	}
 
 	if ((this->port_secure = OpenTcpConnection("192.168.0.228", "5000", ca, crt, key)) == NULL)	// Open TCP TLS port for secure mode
@@ -206,7 +211,7 @@ gboolean App::connect_server ()
 		LOG_WARNING("error open port_secure");
 		disconnect_server();
 		show_dialog("Connection Fail");
-		return FALSE;
+		goto exit;
 	}
 
 	if ((this->port_nonsecure = OpenTcpConnection("192.168.0.228", "5000", NULL, NULL, NULL)) == NULL) // Open TCP TLS port for non_secure mode
@@ -214,7 +219,7 @@ gboolean App::connect_server ()
 		LOG_WARNING("error open port_nonsecure");
 		disconnect_server();
 		show_dialog("Connection Fail");
-		return FALSE;
+		goto exit;
 	}
 
 	if ((this->port_meta = OpenTcpConnection("192.168.0.228", "5000", ca, crt, key)) == NULL) // Open TCP TLS port for meta data
@@ -222,16 +227,21 @@ gboolean App::connect_server ()
 		LOG_WARNING("error open port_meta");
 		disconnect_server();
 		show_dialog("Connection Fail");
-		return FALSE;
+		goto exit;
 	}
 
 	this->disconn_req = FALSE;
 	this->handle_port_secure_id = g_idle_add(handle_port_secure, this);
-	return TRUE;
+	ret = TRUE;
+
+exit:
+	LOG_INFO("end");
+	return ret;
 }
 
 gboolean App::disconnect_server ()
 {
+	LOG_INFO("start");
 	this->disconn_req = TRUE;
 
 	if (this->port_control != NULL) {
@@ -259,11 +269,13 @@ gboolean App::disconnect_server ()
 		this->handle_port_secure_id = 0;
 	}
 
+	LOG_INFO("end");
 	return TRUE;
 }
 
 void App::on_button_login()
 {
+	LOG_INFO("start");
 	if (this->connect_server()) {
 		/* disables */
 		m_Entry_Id.set_sensitive(false);
@@ -285,10 +297,12 @@ void App::on_button_login()
 		m_Entry_Id.set_text("");
 		m_Entry_Password.set_text("");
 	}
+	LOG_INFO("end");
 }
 
 void App::on_button_logout()
 {
+	LOG_INFO("start");
 	this->disconnect_server();
 	TcpSendLogoutReq(this->port_control);
 
@@ -309,6 +323,7 @@ void App::on_button_logout()
 	m_Button_Login.set_sensitive(true);
 	m_Label_Login.set_sensitive(true);
 	m_Label_Password.set_sensitive(true);
+	LOG_INFO("end");
 }
 
 void App::on_checkbox_secure_toggled()

@@ -17,12 +17,14 @@ public:
 	TTcpConnectedPort *port_nonsecure;
 	TTcpConnectedPort *port_meta;
 
+	void on_button_logout();
+	void show_dialog(const char* contents);
+
 protected:
 	//Signal handlers:
 	void on_checkbox_secure_toggled();
 	void on_checkbox_test_toggled();
 	void on_button_login();
-	void on_button_logout();
 	void on_button_learn_capture();
 	void on_button_learn_save();
 	void on_entry_changed();
@@ -37,7 +39,6 @@ protected:
 	std::unique_ptr<Gtk::MessageDialog> m_pDialog;
 
 private:
-	void show_dialog(const char* contents);
 	gboolean connect_server ();
 	gboolean disconnect_server ();
 };
