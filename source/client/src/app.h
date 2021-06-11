@@ -40,6 +40,7 @@ protected:
 	std::unique_ptr<Gtk::MessageDialog> m_pDialog;
 
 private:
+	gboolean button_learn_paused;
 	gboolean connect_server ();
 	gboolean disconnect_server ();
 };

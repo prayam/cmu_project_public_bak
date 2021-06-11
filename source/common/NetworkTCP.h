@@ -54,6 +54,12 @@ typedef struct
 	SSL_CTX *ctx;
 } TTcpConnectedPort;
 
+enum {
+	TCP_RECV_TIMEOUT = -2,
+	TCP_RECV_ERROR = -1,
+	TCP_RECV_PEER_DISCONNECTED = 0
+};
+
 //------------------------------------------------------------------------------------------------
 //  Function Prototypes
 //------------------------------------------------------------------------------------------------

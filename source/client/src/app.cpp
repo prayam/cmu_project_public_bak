@@ -42,6 +42,7 @@ App::App()
 	this->port_meta = NULL;
 	this->handle_port_secure_id = 0;
 	this->connected_server = false;
+	this->button_learn_paused = false;
 
 	// set_size_request(800, 600);
 	set_title("App");
@@ -118,6 +119,7 @@ static gboolean handle_port_secure(gpointer data) {
 	Mat image;
     float fontScaler;
 	std::vector<struct APP_meta> meta_vector;
+	ssize_t ret;
 
 	LOG_INFO("start");
 	namedWindow( "Server", WINDOW_AUTOSIZE );// Create a window for displa.
@@ -128,15 +130,25 @@ static gboolean handle_port_secure(gpointer data) {
 			continue;
 		}
 
-		if (TcpRecvImageAsJpeg(app->port_recv_photo, &image) <= 0) {
+		ret = TcpRecvImageAsJpeg(app->port_recv_photo, &image);
+		if (ret == TCP_RECV_PEER_DISCONNECTED || ret == TCP_RECV_ERROR) {
 			LOG_WARNING("TcpRecvImageAsJpeg fail");
 			break;
 		}
+		else if (ret == TCP_RECV_TIMEOUT) {
+			waitKey(10);
+			continue;
+		}
 
 		meta_vector.clear();
-		if (!TcpRecvMeta(app->port_meta, meta_vector)) {
+		ret = TcpRecvMeta(app->port_meta, meta_vector);
+		if (ret == TCP_RECV_PEER_DISCONNECTED || ret == TCP_RECV_ERROR) {
 			LOG_WARNING("TcpRecvMeta fail");
 			break;
+		}
+		else if (ret == TCP_RECV_TIMEOUT) {
+			waitKey(10);
+			continue;
 		}
 
 		for (struct APP_meta const & meta : meta_vector) {
@@ -172,6 +184,7 @@ gboolean App::connect_server ()
 
 	gboolean ret = FALSE;
 	guint8 res = 255;
+	ssize_t recv_ret = 0;
 	const gchar *ca = "../../custom/keys/ca/ca.crt";
 	const gchar *crt = "../../custom/keys/client/client.crt";
 	const gchar *key = "../../custom/keys/client/client.key";
@@ -205,9 +218,10 @@ gboolean App::connect_server ()
 
 	// send login info and check
 	TcpSendLoginData(this->port_control, m_Entry_Id.get_text().c_str(), m_Entry_Password.get_text().c_str());
-	TcpRecvLoginRes(this->port_control, &res);
+	recv_ret = TcpRecvLoginRes(this->port_control, &res);
 
-	if (res == 0) {
+	if ((recv_ret == TCP_RECV_PEER_DISCONNECTED || recv_ret == TCP_RECV_ERROR || recv_ret == TCP_RECV_TIMEOUT) ||
+			res == 0) {
 		LOG_WARNING("login fail");
 		disconnect_server();
 		show_dialog("Login Fail");
@@ -386,7 +400,25 @@ void App::on_button_learn_capture()
 	//:TODO: Need to consider sequence.
 	LOG_INFO("on_button_learn_capture");
 	if (this->connected_server) {
-		TcpSendCaptureReq(this->port_control);
+		if (!this->button_learn_paused) { //:TODO: change the button label
+			// paused
+			this->port_recv_photo = NULL;
+			TcpSendCaptureReq(this->port_control);
+		}
+		else {
+			if (m_CheckButton_Secure.get_active()) {
+				// send secure mode
+				this->port_recv_photo = this->port_secure;
+				TcpSendSecureModeReq(this->port_control);
+			}
+			else {
+				// send non secure mode
+				this->port_recv_photo = this->port_nonsecure;
+				TcpSendNonSecureModeReq(this->port_control);
+			}
+		}
+
+		this->button_learn_paused = !this->button_learn_paused;
 	}
 }
 

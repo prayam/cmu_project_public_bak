@@ -38,7 +38,7 @@ int TcpSendImageAsJpeg(TTcpConnectedPort * TcpConnectedPort,cv::Mat Image)
 // jpeg image in side a TCP Stream on the specified TCP local port
 // returns true on success and false on failure
 //-----------------------------------------------------------------
-int TcpRecvImageAsJpeg(TTcpConnectedPort * TcpConnectedPort,cv::Mat *Image)
+ssize_t TcpRecvImageAsJpeg(TTcpConnectedPort * TcpConnectedPort,cv::Mat *Image)
 {
 	ssize_t ret;
 	unsigned int imagesize;
@@ -71,7 +71,7 @@ int TcpRecvImageAsJpeg(TTcpConnectedPort * TcpConnectedPort,cv::Mat *Image)
 
 exit:
 	g_free(buff);
-	return (int)ret;
+	return ret;
 }
 //-----------------------------------------------------------------
 // END TcpRecvImageAsJpeg
@@ -143,13 +143,13 @@ exit:
 }
 
 /* CAUTION: Caller should free userid and userpw after using them. */
-bool TcpRecvLoginData(TTcpConnectedPort * TcpConnectedPort, char** userid, char** userpw)
+ssize_t TcpRecvLoginData(TTcpConnectedPort * TcpConnectedPort, char** userid, char** userpw)
 {
-	ssize_t read_len, req_len;
+	ssize_t read_len = TCP_RECV_ERROR;
+	ssize_t req_len;
 	struct APP_command_req *req;
 	guint8 *tmp;
 	guint8 userid_len, userpw_len;
-	bool ret = FALSE;
 
 	if (TcpConnectedPort == NULL) {
 		LOG_WARNING("TcpConnectedPort is NULL");
@@ -203,11 +203,10 @@ bool TcpRecvLoginData(TTcpConnectedPort * TcpConnectedPort, char** userid, char*
 	}
 
 	LOG_HEX_DUMP_DEBUG(req, req_len, "read req");
-	ret = TRUE;
 
 exit:
 	g_free(req);
-	return ret;
+	return read_len;
 }
 
 bool TcpSendLogoutReq(TTcpConnectedPort * TcpConnectedPort)
@@ -471,13 +470,13 @@ exit:
 }
 
 /* CAUTION: Caller should free data after using it. */
-bool TcpRecvCtrlReq(TTcpConnectedPort * TcpConnectedPort, char *req_id, void **data)
+ssize_t TcpRecvCtrlReq(TTcpConnectedPort * TcpConnectedPort, char *req_id, void **data)
 {
-	ssize_t read_len, req_len;
+	ssize_t read_len = TCP_RECV_ERROR;
+	ssize_t req_len;
 	struct APP_command_req *req;
 	guint8 *tmp;
 	guint8 name_len;
-	bool ret = FALSE;
 
 	if (TcpConnectedPort == NULL) {
 		LOG_WARNING("TcpConnectedPort is NULL");
@@ -515,11 +514,10 @@ bool TcpRecvCtrlReq(TTcpConnectedPort * TcpConnectedPort, char *req_id, void **d
 	}
 
 	LOG_HEX_DUMP_DEBUG(req, req_len, "read req");
-	ret = TRUE;
 
 exit:
 	g_free(req);
-	return ret;
+	return read_len;
 }
 
 int TcpSendLoginRes(TTcpConnectedPort * TcpConnectedPort, unsigned char res)
@@ -527,7 +525,7 @@ int TcpSendLoginRes(TTcpConnectedPort * TcpConnectedPort, unsigned char res)
 	return WriteDataTcp(TcpConnectedPort, &res, sizeof(char));
 }
 
-int TcpRecvLoginRes(TTcpConnectedPort * TcpConnectedPort, unsigned char *res)
+ssize_t TcpRecvLoginRes(TTcpConnectedPort * TcpConnectedPort, unsigned char *res)
 {
 	return ReadDataTcp(TcpConnectedPort, res, sizeof(char));
 }
@@ -568,9 +566,9 @@ exit:
 	return FALSE;
 }
 
-bool TcpRecvMeta(TTcpConnectedPort * TcpConnectedPort, std::vector<struct APP_meta> &meta)
+ssize_t TcpRecvMeta(TTcpConnectedPort * TcpConnectedPort, std::vector<struct APP_meta> &meta)
 {
-	size_t read_ret;
+	size_t read_ret = TCP_RECV_ERROR;
 	guint8 nr;
 
 	if (TcpConnectedPort == NULL) {
@@ -599,11 +597,10 @@ bool TcpRecvMeta(TTcpConnectedPort * TcpConnectedPort, std::vector<struct APP_me
 		tmp.y2 = ntohl(tmp.y2);
 
 		meta.push_back(tmp);
-
 	}
-	return TRUE;
+
 exit:
-	return FALSE;
+	return read_ret;
 }
 
 

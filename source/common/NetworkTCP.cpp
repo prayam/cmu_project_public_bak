@@ -681,29 +681,83 @@ void CloseTcpConnectedPort(TTcpConnectedPort **TcpConnectedPort)
 // ReadDataTcp - Reads the specified amount TCP data
 // return
 //		- positive = received bytes
-//		- 0 = peer is disconnected
-//		- negative = error
+//		- 0 = TCP_RECV_PEER_DISCONNECTED
+//		- -1 = TCP_RECV_ERROR
+//		- -2 = TCP_RECV_TIMEOUT
 //-----------------------------------------------------------------
 ssize_t ReadDataTcp(TTcpConnectedPort *TcpConnectedPort, unsigned char *data, size_t length)
 {
-	ssize_t bytes;
+	int ret;
+	int sslfd;
+	fd_set fdset;
+	struct timeval tv;
+	ssize_t bytes = 0;
 
-	for (size_t i = 0; i < length; i += bytes)
-	{
-		if (TcpConnectedPort->isSsl) {
-			bytes = SSL_read(TcpConnectedPort->ssl, (char *)(data + i), length - i);
-		}
-		else {
-			bytes = recv(TcpConnectedPort->ConnectedFd, (char *)(data + i), length - i, 0);
-		}
-
-		if (bytes <= 0) {
-			g_print("some error: %ld. if it's 0, peer is disconnected\n", bytes);
-			return bytes;
+	if (TcpConnectedPort->isSsl) {
+		sslfd = SSL_get_fd(TcpConnectedPort->ssl);
+		if (sslfd < 0) {
+			LOG_WARNING("SSL_get_fd failed");
 		}
 	}
 
-	return (length);
+	for (size_t i = 0; i < length; i += bytes)
+	{
+		FD_ZERO(&fdset);
+		tv.tv_sec = 1;
+		tv.tv_usec = 0;
+
+		if (TcpConnectedPort->isSsl) {
+			FD_SET(sslfd, &fdset);
+
+			ret = select(sslfd + 1, &fdset, NULL, NULL, &tv);
+			if (ret < 0) { // select error
+				LOG_DEBUG("select error");
+				return TCP_RECV_ERROR;
+			}
+			else if (ret == 0) { // timeout
+				LOG_DEBUG("select timeout");
+				return TCP_RECV_TIMEOUT;
+			}
+			else if (FD_ISSET(sslfd, &fdset)) {
+				bytes = SSL_read(TcpConnectedPort->ssl, (char *)(data + i), length - i);
+			}
+			else { // unknown error
+				LOG_DEBUG("select unknown error");
+				return TCP_RECV_ERROR;
+			}
+		}
+		else {
+			FD_SET(TcpConnectedPort->ConnectedFd, &fdset);
+
+			ret = select(TcpConnectedPort->ConnectedFd + 1, &fdset, NULL, NULL, &tv);
+			if (ret < 0) { // select error
+				LOG_DEBUG("select error");
+				return TCP_RECV_ERROR;
+			}
+			else if (ret == 0) { // timeout
+				LOG_DEBUG("select timeout");
+				return TCP_RECV_TIMEOUT;
+			}
+			else if (FD_ISSET(TcpConnectedPort->ConnectedFd, &fdset)) {
+				bytes = recv(TcpConnectedPort->ConnectedFd, (char *)(data + i), length - i, 0);
+			}
+			else { // unknown error
+				LOG_DEBUG("select unknown error");
+				return TCP_RECV_ERROR;
+			}
+		}
+
+		if (bytes == 0) { // recv error
+			LOG_WARNING("peer is disconnected");
+			return TCP_RECV_PEER_DISCONNECTED;
+		}
+		else if (bytes < 0) {
+			LOG_DEBUG("recv or SSL_read error");
+			return TCP_RECV_ERROR;
+		}
+	}
+
+	return length;
 }
 //-----------------------------------------------------------------
 // END ReadDataTcp
