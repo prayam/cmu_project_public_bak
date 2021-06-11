@@ -11,7 +11,8 @@ public:
 	virtual ~App();
 
 	guint handle_port_secure_id;
-	gboolean disconn_req;
+	gboolean connected_server;
+	TTcpConnectedPort *port_recv_photo;
 	TTcpConnectedPort *port_control;
 	TTcpConnectedPort *port_secure;
 	TTcpConnectedPort *port_nonsecure;

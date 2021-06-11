@@ -35,11 +35,13 @@ App::App()
 	  m_CheckButton_Secure("Secure Mode"),
 	  m_CheckButton_Test("Test Mode")
 {
+	this->port_recv_photo = NULL;
 	this->port_control = NULL;
 	this->port_secure = NULL;
 	this->port_nonsecure = NULL;
 	this->port_meta = NULL;
 	this->handle_port_secure_id = 0;
+	this->connected_server = false;
 
 	// set_size_request(800, 600);
 	set_title("App");
@@ -120,8 +122,13 @@ static gboolean handle_port_secure(gpointer data) {
 	LOG_INFO("start");
 	namedWindow( "Server", WINDOW_AUTOSIZE );// Create a window for displa.
 
-	while (!app->disconn_req) {
-		if (TcpRecvImageAsJpeg(app->port_secure, &image) <= 0) {
+	while (app->connected_server) {
+		if (app->port_recv_photo == NULL) {
+			waitKey(10);
+			continue;
+		}
+
+		if (TcpRecvImageAsJpeg(app->port_recv_photo, &image) <= 0) {
 			LOG_WARNING("TcpRecvImageAsJpeg fail");
 			break;
 		}
@@ -162,6 +169,7 @@ void App::show_dialog(const char* contents)
 gboolean App::connect_server ()
 {
 	LOG_INFO("start");
+
 	gboolean ret = FALSE;
 	guint8 res = 255;
 	const gchar *ca = "../../custom/keys/ca/ca.crt";
@@ -230,7 +238,8 @@ gboolean App::connect_server ()
 		goto exit;
 	}
 
-	this->disconn_req = FALSE;
+	this->connected_server = true;
+	this->port_recv_photo = this->port_secure;
 	this->handle_port_secure_id = g_idle_add(handle_port_secure, this);
 	ret = TRUE;
 
@@ -242,7 +251,8 @@ exit:
 gboolean App::disconnect_server ()
 {
 	LOG_INFO("start");
-	this->disconn_req = TRUE;
+
+	this->connected_server = false;
 
 	if (this->port_control != NULL) {
 		CloseTcpConnectedPort(&this->port_control); // Close network port;
@@ -269,6 +279,8 @@ gboolean App::disconnect_server ()
 		this->handle_port_secure_id = 0;
 	}
 
+	this->port_recv_photo = NULL;
+
 	LOG_INFO("end");
 	return TRUE;
 }
@@ -276,6 +288,7 @@ gboolean App::disconnect_server ()
 void App::on_button_login()
 {
 	LOG_INFO("start");
+
 	if (this->connect_server()) {
 		/* disables */
 		m_Entry_Id.set_sensitive(false);
@@ -296,6 +309,7 @@ void App::on_button_login()
 	else {
 		m_Entry_Id.set_text("");
 		m_Entry_Password.set_text("");
+		m_Entry_Name.set_text("");
 	}
 	LOG_INFO("end");
 }
@@ -303,6 +317,7 @@ void App::on_button_login()
 void App::on_button_logout()
 {
 	LOG_INFO("start");
+
 	this->disconnect_server();
 	TcpSendLogoutReq(this->port_control);
 
@@ -316,13 +331,19 @@ void App::on_button_logout()
 	m_Label_Name.set_sensitive(false);
 
 	/* enables */
-	m_Entry_Id.set_text("");
-	m_Entry_Password.set_text("");
 	m_Entry_Id.set_sensitive(true);
 	m_Entry_Password.set_sensitive(true);
 	m_Button_Login.set_sensitive(true);
 	m_Label_Login.set_sensitive(true);
 	m_Label_Password.set_sensitive(true);
+
+	/* setting values */
+	m_Entry_Id.set_text("");
+	m_Entry_Password.set_text("");
+	m_Entry_Name.set_text("");
+	m_CheckButton_Secure.set_active(true);
+	m_CheckButton_Test.set_active(false);
+
 	LOG_INFO("end");
 }
 
@@ -330,13 +351,17 @@ void App::on_checkbox_secure_toggled()
 {
 	LOG_INFO("on_checkbox_secure_toggled, %d", m_CheckButton_Secure.get_active());
 
-	if (m_CheckButton_Secure.get_active()) {
-		// send secure mode
-		TcpSendSecureModeReq(this->port_control);
-	}
-	else {
-		// send non secure mode
-		TcpSendNonSecureModeReq(this->port_control);
+	if (this->connected_server) {
+		if (m_CheckButton_Secure.get_active()) {
+			// send secure mode
+			this->port_recv_photo = this->port_secure;
+			TcpSendSecureModeReq(this->port_control);
+		}
+		else {
+			// send non secure mode
+			this->port_recv_photo = this->port_nonsecure;
+			TcpSendNonSecureModeReq(this->port_control);
+		}
 	}
 }
 
@@ -344,13 +369,15 @@ void App::on_checkbox_test_toggled()
 {
 	LOG_INFO("on_checkbox_test_toggled, %d", m_CheckButton_Test.get_active());
 
-	if (m_CheckButton_Test.get_active()) {
-		// send test mode
-		TcpSendTestRunModeReq(this->port_control);
-	}
-	else {
-		// send run mode
-		TcpSendRunModeReq(this->port_control);
+	if (this->connected_server) {
+		if (m_CheckButton_Test.get_active()) {
+			// send test mode
+			TcpSendTestRunModeReq(this->port_control);
+		}
+		else {
+			// send run mode
+			TcpSendRunModeReq(this->port_control);
+		}
 	}
 }
 
@@ -358,14 +385,18 @@ void App::on_button_learn_capture()
 {
 	//:TODO: Need to consider sequence.
 	LOG_INFO("on_button_learn_capture");
-	TcpSendCaptureReq(this->port_control);
+	if (this->connected_server) {
+		TcpSendCaptureReq(this->port_control);
+	}
 }
 
 void App::on_button_learn_save()
 {
 	LOG_INFO("Name: %s", m_Entry_Name.get_text().c_str());
 	LOG_INFO("on_button_learn_save");
-	TcpSendSaveReq(this->port_control, m_Entry_Name.get_text().c_str());
+	if (this->connected_server) {
+		TcpSendSaveReq(this->port_control, m_Entry_Name.get_text().c_str());
+	}
 }
 
 void App::on_entry_changed()
