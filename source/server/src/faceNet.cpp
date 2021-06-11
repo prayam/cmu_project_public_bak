@@ -234,7 +234,7 @@ std:vector<float> currEmbedding(128);
 			//cv::putText(image, m_knownFaces[winner].className, cv::Point(m_croppedFaces[i].y1+2, m_croppedFaces[i].x2-3),
 			//		cv::FONT_HERSHEY_DUPLEX, 0.1 + 2*fontScaler*4,  cv::Scalar(0,0,255,255), 1);
 			struct APP_meta tmp;
-			m_knownFaces[winner].className.copy(tmp.name, MAX_NAME - 1, 0);
+			g_strlcpy(tmp.name, m_knownFaces[winner].className.c_str(), MAX_NAME - 1);
 			tmp.x1 = m_croppedFaces[i].x1;
 			tmp.y1 = m_croppedFaces[i].y1;
 			tmp.x2 = m_croppedFaces[i].x2;
@@ -263,6 +263,14 @@ std:vector<float> currEmbedding(128);
 		string newName;
 		std::cin >> newName;
 		std::cout << "Hi " << newName << ", you will be added to the database.\n";
+		forwardAddFace(image, outputBbox, newName);
+		string filePath = "../imgs/";
+		filePath.append(newName);
+		filePath.append(".jpg");
+		cv::imwrite(filePath, image);
+	}
+
+	void FaceNetClassifier::addNewFace_name(cv::Mat &image, std::vector<struct Bbox> outputBbox, string newName) {
 		forwardAddFace(image, outputBbox, newName);
 		string filePath = "../imgs/";
 		filePath.append(newName);

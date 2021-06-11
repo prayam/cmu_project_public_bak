@@ -43,6 +43,7 @@ class FaceNetClassifier
 		void forward(cv::Mat image, std::vector<struct Bbox> outputBbox);
 		void featureMatching(cv::Mat &image, std::vector<struct APP_meta> &meta);
 		void addNewFace(cv::Mat &image, std::vector<struct Bbox> outputBbox);
+		void addNewFace_name(cv::Mat &image, std::vector<struct Bbox> outputBbox, string name);
 		void resetVariables();
 
 	private:

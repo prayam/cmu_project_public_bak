@@ -244,43 +244,6 @@ exit:
 	return ret;
 }
 
-bool TcpRecvLogoutReq(TTcpConnectedPort * TcpConnectedPort)
-{
-	ssize_t read_len, req_len;
-	struct APP_command_req *req;
-	bool ret = FALSE;
-
-	if (TcpConnectedPort == NULL) {
-		LOG_WARNING("TcpConnectedPort is NULL");
-		goto exit;
-	}
-
-	req = g_new0(struct APP_command_req, 1);
-	if (req == NULL) {
-		LOG_WARNING("memory allocation fail");
-		goto exit;
-	}
-
-	req_len = sizeof(struct APP_command_req);
-	read_len = ReadDataTcp(TcpConnectedPort, (unsigned char *)req, req_len);
-	if (read_len != req_len) {
-		LOG_WARNING("unexpected read len %ld. it should be %ld", read_len, req_len);
-		goto exit;
-	}
-
-	if (req->req_id != REQ_LOGOUT) {
-		LOG_WARNING("unexpected message id %d. it should be %d", req->req_id, REQ_LOGOUT);
-		goto exit;
-	}
-
-	LOG_HEX_DUMP_DEBUG(req, req_len, "read req");
-	ret = TRUE;
-
-exit:
-	g_free(req);
-	return ret;
-}
-
 bool TcpSendSecureModeReq(TTcpConnectedPort * TcpConnectedPort)
 {
 	bool ret = FALSE;
@@ -309,43 +272,6 @@ bool TcpSendSecureModeReq(TTcpConnectedPort * TcpConnectedPort)
 
 	ret = TRUE;
 	LOG_HEX_DUMP_DEBUG(req, req_len, "read req. len: %ld", write_ret);
-
-exit:
-	g_free(req);
-	return ret;
-}
-
-bool TcpRecvSecureModeReq(TTcpConnectedPort * TcpConnectedPort)
-{
-	ssize_t read_len, req_len;
-	struct APP_command_req *req;
-	bool ret = FALSE;
-
-	if (TcpConnectedPort == NULL) {
-		LOG_WARNING("TcpConnectedPort is NULL");
-		goto exit;
-	}
-
-	req = g_new0(struct APP_command_req, 1);
-	if (req == NULL) {
-		LOG_WARNING("memory allocation fail");
-		goto exit;
-	}
-
-	req_len = sizeof(struct APP_command_req);
-	read_len = ReadDataTcp(TcpConnectedPort, (unsigned char *)req, req_len);
-	if (read_len != req_len) {
-		LOG_WARNING("unexpected read len %ld. it should be %ld", read_len, req_len);
-		goto exit;
-	}
-
-	if (req->req_id != REQ_SECURE) {
-		LOG_WARNING("unexpected message id %d. it should be %d", req->req_id, REQ_SECURE);
-		goto exit;
-	}
-
-	LOG_HEX_DUMP_DEBUG(req, req_len, "read req");
-	ret = TRUE;
 
 exit:
 	g_free(req);
@@ -386,43 +312,6 @@ exit:
 	return ret;
 }
 
-bool TcpRecvNonSecureModeReq(TTcpConnectedPort * TcpConnectedPort)
-{
-	ssize_t read_len, req_len;
-	struct APP_command_req *req;
-	bool ret = FALSE;
-
-	if (TcpConnectedPort == NULL) {
-		LOG_WARNING("TcpConnectedPort is NULL");
-		goto exit;
-	}
-
-	req = g_new0(struct APP_command_req, 1);
-	if (req == NULL) {
-		LOG_WARNING("memory allocation fail");
-		goto exit;
-	}
-
-	req_len = sizeof(struct APP_command_req);
-	read_len = ReadDataTcp(TcpConnectedPort, (unsigned char *)req, req_len);
-	if (read_len != req_len) {
-		LOG_WARNING("unexpected read len %ld. it should be %ld", read_len, req_len);
-		goto exit;
-	}
-
-	if (req->req_id != REQ_NONSECURE) {
-		LOG_WARNING("unexpected message id %d. it should be %d", req->req_id, REQ_NONSECURE);
-		goto exit;
-	}
-
-	LOG_HEX_DUMP_DEBUG(req, req_len, "read req");
-	ret = TRUE;
-
-exit:
-	g_free(req);
-	return ret;
-}
-
 bool TcpSendTestRunModeReq(TTcpConnectedPort * TcpConnectedPort)
 {
 	bool ret = FALSE;
@@ -451,43 +340,6 @@ bool TcpSendTestRunModeReq(TTcpConnectedPort * TcpConnectedPort)
 
 	ret = TRUE;
 	LOG_HEX_DUMP_DEBUG(req, req_len, "read req. len: %ld", write_ret);
-
-exit:
-	g_free(req);
-	return ret;
-}
-
-bool TcpRecvTestRunModeReq(TTcpConnectedPort * TcpConnectedPort)
-{
-	ssize_t read_len, req_len;
-	struct APP_command_req *req;
-	bool ret = FALSE;
-
-	if (TcpConnectedPort == NULL) {
-		LOG_WARNING("TcpConnectedPort is NULL");
-		goto exit;
-	}
-
-	req = g_new0(struct APP_command_req, 1);
-	if (req == NULL) {
-		LOG_WARNING("memory allocation fail");
-		goto exit;
-	}
-
-	req_len = sizeof(struct APP_command_req);
-	read_len = ReadDataTcp(TcpConnectedPort, (unsigned char *)req, req_len);
-	if (read_len != req_len) {
-		LOG_WARNING("unexpected read len %ld. it should be %ld", read_len, req_len);
-		goto exit;
-	}
-
-	if (req->req_id != REQ_TESTRUN) {
-		LOG_WARNING("unexpected message id %d. it should be %d", req->req_id, REQ_TESTRUN);
-		goto exit;
-	}
-
-	LOG_HEX_DUMP_DEBUG(req, req_len, "read req");
-	ret = TRUE;
 
 exit:
 	g_free(req);
@@ -528,43 +380,6 @@ exit:
 	return ret;
 }
 
-bool TcpRecvRunModeReq(TTcpConnectedPort * TcpConnectedPort)
-{
-	ssize_t read_len, req_len;
-	struct APP_command_req *req;
-	bool ret = FALSE;
-
-	if (TcpConnectedPort == NULL) {
-		LOG_WARNING("TcpConnectedPort is NULL");
-		goto exit;
-	}
-
-	req = g_new0(struct APP_command_req, 1);
-	if (req == NULL) {
-		LOG_WARNING("memory allocation fail");
-		goto exit;
-	}
-
-	req_len = sizeof(struct APP_command_req);
-	read_len = ReadDataTcp(TcpConnectedPort, (unsigned char *)req, req_len);
-	if (read_len != req_len) {
-		LOG_WARNING("unexpected read len %ld. it should be %ld", read_len, req_len);
-		goto exit;
-	}
-
-	if (req->req_id != REQ_RUN) {
-		LOG_WARNING("unexpected message id %d. it should be %d", req->req_id, REQ_RUN);
-		goto exit;
-	}
-
-	LOG_HEX_DUMP_DEBUG(req, req_len, "read req");
-	ret = TRUE;
-
-exit:
-	g_free(req);
-	return ret;
-}
-
 bool TcpSendCaptureReq(TTcpConnectedPort * TcpConnectedPort)
 {
 	bool ret = FALSE;
@@ -593,43 +408,6 @@ bool TcpSendCaptureReq(TTcpConnectedPort * TcpConnectedPort)
 
 	ret = TRUE;
 	LOG_HEX_DUMP_DEBUG(req, req_len, "read req. len: %ld", write_ret);
-
-exit:
-	g_free(req);
-	return ret;
-}
-
-bool TcpRecvCaptureReq(TTcpConnectedPort * TcpConnectedPort)
-{
-	ssize_t read_len, req_len;
-	struct APP_command_req *req;
-	bool ret = FALSE;
-
-	if (TcpConnectedPort == NULL) {
-		LOG_WARNING("TcpConnectedPort is NULL");
-		goto exit;
-	}
-
-	req = g_new0(struct APP_command_req, 1);
-	if (req == NULL) {
-		LOG_WARNING("memory allocation fail");
-		goto exit;
-	}
-
-	req_len = sizeof(struct APP_command_req);
-	read_len = ReadDataTcp(TcpConnectedPort, (unsigned char *)req, req_len);
-	if (read_len != req_len) {
-		LOG_WARNING("unexpected read len %ld. it should be %ld", read_len, req_len);
-		goto exit;
-	}
-
-	if (req->req_id != REQ_CAPTURE) {
-		LOG_WARNING("unexpected message id %d. it should be %d", req->req_id, REQ_CAPTURE);
-		goto exit;
-	}
-
-	LOG_HEX_DUMP_DEBUG(req, req_len, "read req");
-	ret = TRUE;
 
 exit:
 	g_free(req);
@@ -692,8 +470,8 @@ exit:
 	return ret;
 }
 
-/* CAUTION: Caller should free name after using it. */
-bool TcpRecvSaveReq(TTcpConnectedPort * TcpConnectedPort, char **name)
+/* CAUTION: Caller should free data after using it. */
+bool TcpRecvCtrlReq(TTcpConnectedPort * TcpConnectedPort, char *req_id, void **data)
 {
 	ssize_t read_len, req_len;
 	struct APP_command_req *req;
@@ -719,23 +497,21 @@ bool TcpRecvSaveReq(TTcpConnectedPort * TcpConnectedPort, char **name)
 		goto exit;
 	}
 
-	if (req->req_id != REQ_SAVE) {
-		LOG_WARNING("unexpected message id %d. it should be %d", req->req_id, REQ_SAVE);
-		goto exit;
-	}
+	*req_id = req->req_id;
+	if (req->req_id == REQ_SAVE) {
+		tmp = (guint8*)req->data;
+		name_len = *tmp;
+		tmp++;
+		if (name_len > MAX_NAME) {
+			LOG_WARNING("exceeds id len %d. read len %d", MAX_NAME, name_len);
+			goto exit;
+		}
 
-	tmp = (guint8*)req->data;
-	name_len = *tmp;
-	tmp++;
-	if (name_len > MAX_NAME) {
-		LOG_WARNING("exceeds id len %d. read len %d", MAX_NAME, name_len);
-		goto exit;
-	}
-
-	*name = g_strndup (req->data + 1, name_len);
-	if (*name == NULL) {
-		LOG_WARNING("memory allocation fail");
-		goto exit;
+		*data = g_strndup (req->data + 1, name_len);
+		if (*data == NULL) {
+			LOG_WARNING("memory allocation fail");
+			goto exit;
+		}
 	}
 
 	LOG_HEX_DUMP_DEBUG(req, req_len, "read req");

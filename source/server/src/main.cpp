@@ -10,6 +10,7 @@
 #include "videoStreamer.h"
 #include "network.h"
 #include "mtcnn.h"
+#include "Logger.h"
 
 #include "NetworkTCP.h"
 #include "TcpSendRecvJpeg.h"
@@ -24,6 +25,15 @@ int kbhit()
 	FD_ZERO(&fds);
 	FD_SET(0, &fds);
 	return select(1, &fds, NULL, NULL, &tv);
+}
+
+int readysocket(int fd)
+{
+	struct timeval tv = { 0L, 0L };
+	fd_set fds;
+	FD_ZERO(&fds);
+	FD_SET(fd, &fds);
+	return select(fd + 1, &fds, NULL, NULL, &tv);
 }
 
 int getch()
@@ -68,6 +78,7 @@ int main(int argc, char *argv[])
 	TTcpConnectedPort *TcpConnectedPort_nsdata;
 	TTcpConnectedPort *TcpConnectedPort_meta;
 	const char *testmodefile = "../friends640x480.mp4";
+	log_enable("server");
 
 	std::vector<struct APP_meta> meta;
 	meta.reserve(maxFacesPerScene);
@@ -112,10 +123,13 @@ int main(int argc, char *argv[])
 			knownPersonThreshold, maxFacesPerScene, videoFrameWidth, videoFrameHeight);
 
 	VideoStreamer *videoStreamer;
+	VideoStreamer *videoStreamer_c;
+	VideoStreamer *videoStreamer_v;
 
 	// init opencv stuff
-	if (UseCamera)  videoStreamer = new VideoStreamer(0, videoFrameWidth, videoFrameHeight, 60, isCSICam);
-	else videoStreamer = new VideoStreamer(argv[2], videoFrameWidth, videoFrameHeight);
+	videoStreamer_c = new VideoStreamer(0, videoFrameWidth, videoFrameHeight, 60, isCSICam);
+	videoStreamer_v = new VideoStreamer(testmodefile, videoFrameWidth, videoFrameHeight);
+	videoStreamer = UseCamera ? videoStreamer_c : videoStreamer_v;
 
 
 
@@ -259,6 +273,42 @@ int main(int argc, char *argv[])
 			if (TcpSendMeta(TcpConnectedPort_meta, meta)<0)  break;
 			//cv::imshow("VideoSource", frame);
 			nbFrames++;
+			if (readysocket(TcpConnectedPort_control->ConnectedFd))
+			{
+				char req_id;
+				void *req_parsed_data;
+wait_req:
+				if (TcpRecvCtrlReq(TcpConnectedPort_control,&req_id,&req_parsed_data)<0) break;
+				if (req_id == REQ_LOGOUT) {
+					break;
+				} else if (req_id == REQ_DISCON) {
+					break;
+				} else if (req_id == REQ_SECURE) {
+					secure_mode = MODE_SECURE;
+					goto exit_req;
+				} else if (req_id == REQ_NONSECURE) {
+					secure_mode = MODE_NONSECURE;
+					goto exit_req;
+				} else if (req_id == REQ_TESTRUN) {
+					UseCamera=false;
+					videoStreamer = videoStreamer_v;
+					goto exit_req;
+				} else if (req_id == REQ_RUN) {
+					UseCamera=true;
+					videoStreamer = videoStreamer_c;
+					goto exit_req;
+				} else if (req_id == REQ_CAPTURE) {
+					if (meta.size())
+						goto wait_req;
+				} else if (req_id == REQ_SAVE) {
+					if (req_parsed_data && meta.size()) {
+						faceNet.addNewFace_name(frame, outputBbox, (char *)req_parsed_data);
+					}
+				} else {
+					break;
+				}
+			}
+exit_req:
 			outputBbox.clear();
 			frame.release();
 			if (kbhit())
@@ -299,10 +349,16 @@ int main(int argc, char *argv[])
 #endif  // LOG_TIMES
 		}
 
+		CloseTcpConnectedPort(&TcpConnectedPort_control);
+		CloseTcpConnectedPort(&TcpConnectedPort_sdata);
+		CloseTcpConnectedPort(&TcpConnectedPort_nsdata);
+		CloseTcpConnectedPort(&TcpConnectedPort_meta);
+
 		auto globalTimeEnd = chrono::steady_clock::now();
 
-
-		videoStreamer->release();
+		videoStreamer_c->release();
+		videoStreamer_v->release();
+		videoStreamer = NULL;
 
 		auto milliseconds = chrono::duration_cast<chrono::milliseconds>(globalTimeEnd-globalTimeStart).count();
 		double seconds = double(milliseconds)/1000.;
@@ -312,6 +368,7 @@ int main(int argc, char *argv[])
 			" This equals " << fps << "fps.\n";
 
 	}
+	log_disable();
 	return 0;
 }
 
