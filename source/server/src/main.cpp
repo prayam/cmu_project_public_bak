@@ -226,6 +226,7 @@ int main(int argc, char *argv[])
 			TTcpConnectedPort *DataPort = secure_mode == MODE_SECURE ? TcpConnectedPort_sdata :
 				TcpConnectedPort_nsdata;
 			meta.clear();
+
 			videoStreamer->getFrame(frame);
 			if (frame.empty()) {
 				std::cout << "Empty frame! Exiting...\n Try restarting nvargus-daemon by "
@@ -255,7 +256,7 @@ int main(int argc, char *argv[])
 			faceNet.resetVariables();
 
 			if (TcpSendImageAsJpeg(DataPort,frame)<0)  break;
-			if (TcpSendMeta(DataPort, meta)<0)  break;
+			if (TcpSendMeta(TcpConnectedPort_meta, meta)<0)  break;
 			//cv::imshow("VideoSource", frame);
 			nbFrames++;
 			outputBbox.clear();
@@ -281,7 +282,7 @@ int main(int argc, char *argv[])
 
 					outputBbox = mtCNN.findFace(frame);
 					if (TcpSendImageAsJpeg(DataPort,frame)<0)  break;
-					if (TcpSendMeta(DataPort, meta)<0)  break;
+					if (TcpSendMeta(TcpConnectedPort_meta, meta)<0)  break;
 					//cv::imshow("VideoSource", frame);
 					faceNet.addNewFace(frame, outputBbox);
 					auto dTimeEnd = chrono::steady_clock::now();
