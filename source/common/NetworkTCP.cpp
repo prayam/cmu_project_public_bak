@@ -7,12 +7,13 @@
 //------------------------------------------------------------------------------------------------
 #include <iostream>
 #include <new>
-#include <glib.h>
 #include <stdio.h>
 #include <string.h>
 #include <netinet/tcp.h> //for TCP_NODELAY and TCP_QUICKACK
 #include <netinet/in.h> //for IPPROTO_TCP
+#include <fcntl.h>
 #include "NetworkTCP.h"
+#include "Logger.h"
 #include "openssl_hostname_validation.h"
 
 #define TARGET_HOST "face.recog.server.Jetson"
@@ -26,6 +27,17 @@ TTcpListenPort *OpenTcpListenPort(short localport)
 	TTcpListenPort *TcpListenPort;
 	struct sockaddr_in myaddr;
 
+#if  defined(_WIN32) || defined(_WIN64)
+	WSADATA wsaData;
+	int     iResult;
+	iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
+	if (iResult != 0)
+	{
+		TcpListenPort;
+		printf("WSAStartup failed: %d\n", iResult);
+		return(NULL);
+	}
+#endif
 	TcpListenPort= g_new0(TTcpListenPort, 1);
 
 	if (TcpListenPort==NULL)
@@ -34,17 +46,6 @@ TTcpListenPort *OpenTcpListenPort(short localport)
 		return(NULL);
 	}
 	TcpListenPort->ListenFd=BAD_SOCKET_FD;
-#if  defined(_WIN32) || defined(_WIN64)
-	WSADATA wsaData;
-	int     iResult;
-	iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
-	if (iResult != 0)
-	{
-		 TcpListenPort;
-		printf("WSAStartup failed: %d\n", iResult);
-		return(NULL);
-	}
-#endif
 
 	// create a socket
 	if ((TcpListenPort->ListenFd= socket(AF_INET, SOCK_STREAM, 0)) == BAD_SOCKET_FD)
@@ -368,28 +369,22 @@ fail:
 TTcpConnectedPort *OpenTcpConnection(const char *remotehostname, const char * remoteportno,
 		const char *ca_pem, const char *cert_pem, const char *key_pem)
 {
-	TTcpConnectedPort *TcpConnectedPort;
-	struct sockaddr_in myaddr;
-	int                s;
-	struct addrinfo   hints;
-	struct addrinfo   *result = NULL;
-	gboolean isSsl = false;
-	BIO *sbio;
-	SSL *ssl;
-	SSL_CTX *ctx;
-	X509 *server_cert;
+	TTcpConnectedPort *TcpConnectedPort = NULL;
+	int option, sslfd;
+	BIO *sbio = NULL;
+	SSL *ssl = NULL;
+	SSL_CTX *ctx = NULL;
+	X509 *server_cert = NULL;
+	struct addrinfo *result = NULL;
+	struct addrinfo hints;
+	struct timeval tv;
+	fd_set fdset;
+	long arg;
 
-	TcpConnectedPort= g_new0(TTcpConnectedPort, 1);
-
-	if (TcpConnectedPort==NULL)
-	{
-		fprintf(stderr, "TUdpPort memory allocation failed\n");
-		return(NULL);
-	}
-	TcpConnectedPort->ConnectedFd=BAD_SOCKET_FD;
 #if  defined(_WIN32) || defined(_WIN64)
-	WSADATA wsaData;ssl
-		iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
+	WSADATA wsaData;
+	int iResult;
+	iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
 	if (iResult != 0)
 	{
 		g_free(TcpConnectedPort);
@@ -397,127 +392,144 @@ TTcpConnectedPort *OpenTcpConnection(const char *remotehostname, const char * re
 		return(NULL);
 	}
 #endif
-	// create a socket
-	memset(&hints, 0, sizeof(struct addrinfo));
-	hints.ai_family = AF_UNSPEC;
-	hints.ai_socktype = SOCK_STREAM;
-	hints.ai_protocol = IPPROTO_TCP;
 
-	s = getaddrinfo(remotehostname, remoteportno, &hints, &result);
-	if (s != 0)
-	{
-		g_free(TcpConnectedPort);
-		fprintf(stderr, "getaddrinfo: Failed\n");
-		return(NULL);
-	}
-	if ( result==NULL)
-	{
-		g_free(TcpConnectedPort);
-		fprintf(stderr, "getaddrinfo: Failed\n");
-		return(NULL);
-	}
-	if ((TcpConnectedPort->ConnectedFd= socket(AF_INET, SOCK_STREAM, 0)) == BAD_SOCKET_FD)
-	{
-		CloseTcpConnectedPort(&TcpConnectedPort);
-		freeaddrinfo(result);
-		perror("socket failed");
-		return(NULL);
+	TcpConnectedPort = g_new0(TTcpConnectedPort, 1);
+	if (TcpConnectedPort == NULL) {
+		LOG_WARNING("memory allocation failed");
+		goto error;
 	}
 
-	int bufsize = 200 * 1024;
-	if (setsockopt(TcpConnectedPort->ConnectedFd, SOL_SOCKET, SO_SNDBUF, (char *)&bufsize, sizeof(bufsize)) == -1)
+	TcpConnectedPort->ConnectedFd = socket(AF_INET, SOCK_STREAM, 0);
+	if (TcpConnectedPort->ConnectedFd == BAD_SOCKET_FD)
 	{
-		CloseTcpConnectedPort(&TcpConnectedPort);
-		perror("setsockopt SO_SNDBUF failed");
-		return(NULL);
-	}
-	if (setsockopt(TcpConnectedPort->ConnectedFd, SOL_SOCKET, SO_RCVBUF, (char *)&bufsize, sizeof(bufsize)) == -1)
-	{
-		CloseTcpConnectedPort(&TcpConnectedPort);
-		perror("setsockopt SO_SNDBUF failed");
-		return(NULL);
+		LOG_WARNING("socket failed");
+		goto error;
 	}
 
-	int option = 1;
+	option = 200 * 1024;
+	if (setsockopt(TcpConnectedPort->ConnectedFd, SOL_SOCKET, SO_SNDBUF, (char *)&option, sizeof(option)) == -1)
+	{
+		LOG_WARNING("setsockopt SO_SNDBUF failed");
+		goto error;
+	}
+
+	option = 200 * 1024;
+	if (setsockopt(TcpConnectedPort->ConnectedFd, SOL_SOCKET, SO_RCVBUF, (char *)&option, sizeof(option)) == -1)
+	{
+		LOG_WARNING("setsockopt SO_RCVBUF failed");
+		goto error;
+	}
+
+	option = 1;
 	if(setsockopt(TcpConnectedPort->ConnectedFd, IPPROTO_TCP, TCP_NODELAY, (char*)&option, sizeof(option)) < 0)
 	{
-		CloseTcpConnectedPort(&TcpConnectedPort);
-		perror("setsockopt failed");
-		return(NULL);
+		LOG_WARNING("setsockopt TCP_NODELAY failed");
+		goto error;
 	}
 
 	option = 1;
 	if(setsockopt(TcpConnectedPort->ConnectedFd, IPPROTO_TCP, TCP_QUICKACK, (char*)&option, sizeof(option)) < 0)
 	{
-		CloseTcpConnectedPort(&TcpConnectedPort);
-		perror("setsockopt failed");
-		return(NULL);
+		LOG_WARNING("setsockopt TCP_QUICKACK failed");
+		goto error;
 	}
 
-// recv timeout set
-#ifdef G_OS_WIN32
-	// WINDOWS
-	DWORD timeout = 5 * 1000;
-	if (setsockopt(TcpConnectedPort->ConnectedFd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&timeout, sizeof timeout) == -1) {
-		CloseTcpConnectedPort(&TcpConnectedPort);
-		perror("setsockopt SO_RCVTIMEO failed");
-		return(NULL);
-	}
-#else
-	struct timeval tv;
-	tv.tv_sec = 5;
-	tv.tv_usec = 0;
-	if (setsockopt(TcpConnectedPort->ConnectedFd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof(tv)) == -1) {
-		CloseTcpConnectedPort(&TcpConnectedPort);
-		perror("setsockopt SO_RCVTIMEO failed");
-		return(NULL);
-	}
-#endif
-
-	if(ca_pem != NULL && cert_pem != NULL && key_pem != NULL) {
-		isSsl = true;
-	}
-
-	if (isSsl) {
+	if (ca_pem != NULL && cert_pem != NULL && key_pem != NULL) {
 		/* Initialize OpenSSL */
 		SSL_load_error_strings();
 		OpenSSL_add_ssl_algorithms();
 
 		/* Get a context */
 		if (!(ctx = get_client_context(ca_pem, cert_pem, key_pem))) {
-			return (NULL);
+			LOG_WARNING("get_client_context failed");
+			goto error;
 		}
 
 		/* Get a BIO */
 		if (!(sbio = BIO_new_ssl_connect(ctx))) {
-			fprintf(stderr, "Could not get a BIO object from context\n");
-			goto fail1;
+			LOG_WARNING("BIO_new_ssl_connect failed");
+			goto error_new_ssl_connect;
 		}
 
 		/* Get the SSL handle from the BIO */
 		BIO_get_ssl(sbio, &ssl);
 
-		/* set non blocking IO */
-		// BIO_set_nbio(sbio, 1);
-
+		/* Connect to the server */
 		gchar conn_str[128];
 		g_snprintf(conn_str, sizeof(conn_str), "%s:%s", remotehostname, remoteportno);
-		/* Connect to the server */
 		if (BIO_set_conn_hostname(sbio, conn_str) != 1) {
-			fprintf(stderr, "Could not connecto to the server\n");
-			goto fail2;
+			LOG_WARNING("Could not connecto to the server");
+			goto error_connect;
 		}
 
-		/* Perform SSL handshake with the server */
-		if (SSL_do_handshake(ssl) != 1) {
-			fprintf(stderr, "SSL Handshake failed\n");
-			goto fail2;
+		/* set non blocking IO */
+		BIO_set_nbio(sbio, 1);
+
+		if (BIO_do_connect(sbio) <= 0) {
+			if (!BIO_should_retry(sbio)) {
+				LOG_WARNING("BIO_do_connect failed");
+				goto error_connect;
+			}
+
+			if (BIO_get_fd(sbio, &sslfd) < 0) {
+				LOG_WARNING("BIO_get_fd failed");
+				goto error_connect;
+			}
+
+			FD_ZERO(&fdset);
+			FD_SET(sslfd, &fdset);
+			tv.tv_sec = 2;  /* 2 second timeout */
+			tv.tv_usec = 0;
+
+			if (select(sslfd + 1, NULL, &fdset, NULL, &tv) == 1) { // check write fds
+				int so_error = 0;
+				socklen_t len = sizeof(so_error);
+
+				getsockopt(sslfd, SOL_SOCKET, SO_ERROR, &so_error, &len);
+
+				if (so_error != 0) {
+					LOG_WARNING("connection error");
+					goto error_connect;
+				}
+			}
+			else {
+				LOG_WARNING("connection timeout or error");
+				goto error_connect;
+			}
 		}
+
+		g_test_timer_start ();
+		while (1) {
+			if (SSL_do_handshake(ssl) == 1) {
+				break;
+			}
+
+			if (g_test_timer_elapsed () > 2.0f) {
+				LOG_WARNING("SSL Handshake failed");
+				goto error_connect;
+			}
+
+			g_usleep(10);
+		}
+
+		// reset fd to blocking again. if do not this, recv() is non blocking
+		if((arg = fcntl(sslfd, F_GETFL, NULL)) < 0) {
+			LOG_WARNING("fcntl block get failed");
+			goto error;
+		}
+
+		arg &= (~O_NONBLOCK);
+		if(fcntl(sslfd, F_SETFL, arg) < 0) {
+			LOG_WARNING("fcntl block set failed");
+			goto error;
+		}
+
+		BIO_set_nbio(sbio, 0);
 
 		/* Verify that SSL handshake completed successfully */
 		if (SSL_get_verify_result(ssl) != X509_V_OK) {
-			fprintf(stderr, "Verification of handshake failed\n");
-			goto fail2;
+			LOG_WARNING("Verification of handshake failed");
+			goto error_connect;
 		}
 
 		/* Host name Verification is required!!!*/
@@ -526,43 +538,110 @@ TTcpConnectedPort *OpenTcpConnection(const char *remotehostname, const char * re
 		if (server_cert == NULL) {
 			// The handshake was successful although the server did not provide a certificate
 			// Most likely using an insecure anonymous cipher suite... get out!
-			fprintf(stderr, "SSL_get_peer_certificate failed.\n");
-			goto fail3;
+			LOG_WARNING("SSL_get_peer_certificate failed");
+			goto error_verify_cert;
 		}
 
 		// Validate the hostname
 		if (validate_hostname(TARGET_HOST, server_cert) != MatchFound) {
-			fprintf(stderr, "Hostname validation failed.\n");
-			goto fail_4;
+			LOG_WARNING("Hostname validation failed");
+			goto error_verify_hostname;
 		}
 
 		/* Inform the user that we've successfully connected */
-		printf("SSL handshake successful with %s\n", conn_str);
+		LOG_INFO("SSL handshake successful with %s", conn_str);
 		TcpConnectedPort->isSsl = true;
 		TcpConnectedPort->ssl = ssl;
 		TcpConnectedPort->ctx = ctx;
 	}
 	else {
-		if (connect(TcpConnectedPort->ConnectedFd,result->ai_addr,result->ai_addrlen) < 0)
-		{
-			CloseTcpConnectedPort(&TcpConnectedPort);
-			freeaddrinfo(result);
-			perror("connect failed");
-			return(NULL);
+		// Set non-blocking
+		if( (arg = fcntl(TcpConnectedPort->ConnectedFd, F_GETFL, NULL)) < 0) {
+			LOG_WARNING("fcntl nonblock get failed");
+			goto error;
 		}
-	}
-	freeaddrinfo(result);
-	return(TcpConnectedPort);
 
-	/* Cleanup and exit */
-fail_4:
+		arg |= O_NONBLOCK;
+		if( fcntl(TcpConnectedPort->ConnectedFd, F_SETFL, arg) < 0) {
+			LOG_WARNING("fcntl nonblock set failed");
+			goto error;
+		}
+
+		// set addr info to connect
+		memset(&hints, 0, sizeof(struct addrinfo));
+		hints.ai_family = AF_UNSPEC;
+		hints.ai_socktype = SOCK_STREAM;
+		hints.ai_protocol = IPPROTO_TCP;
+
+		if (getaddrinfo(remotehostname, remoteportno, &hints, &result) != 0) {
+			LOG_WARNING("getaddrinfo failed");
+			goto error;
+		}
+
+		if (result == NULL) {
+			LOG_WARNING("getaddrinfo result is NULL");
+			goto error;
+		}
+
+		if (connect(TcpConnectedPort->ConnectedFd, result->ai_addr, result->ai_addrlen) < 0)
+		{
+			FD_ZERO(&fdset);
+			FD_SET(TcpConnectedPort->ConnectedFd, &fdset);
+			tv.tv_sec = 2;
+			tv.tv_usec = 0;
+
+			if (select(TcpConnectedPort->ConnectedFd + 1, NULL, &fdset, NULL, &tv) == 1) { // check write fds
+				int so_error = 0;
+				socklen_t len = sizeof(so_error);
+
+				getsockopt(TcpConnectedPort->ConnectedFd, SOL_SOCKET, SO_ERROR, &so_error, &len);
+
+				if (so_error != 0) {
+					LOG_WARNING("connection error");
+					goto error;
+				}
+			}
+			else {
+				LOG_WARNING("connection timeout or error");
+				goto error;
+			}
+		}
+
+		if( (arg = fcntl(TcpConnectedPort->ConnectedFd, F_GETFL, NULL)) < 0) {
+			LOG_WARNING("fcntl block get failed");
+			goto error;
+		}
+
+		arg &= (~O_NONBLOCK);
+		if( fcntl(TcpConnectedPort->ConnectedFd, F_SETFL, arg) < 0) {
+			LOG_WARNING("fcntl block set failed");
+			goto error;
+		}
+
+		if (result != NULL) {
+			freeaddrinfo(result);
+		}
+
+		LOG_INFO("success TCP connection");
+	}
+
+	return TcpConnectedPort;
+
+	/* Cleanup and error */
+error_verify_hostname:
 	X509_free(server_cert);
-fail3:
+error_verify_cert:
 	BIO_ssl_shutdown(sbio);
-fail2:
+error_connect:
 	BIO_free_all(sbio);
-fail1:
+error_new_ssl_connect:
 	SSL_CTX_free(ctx);
+error:
+	if (result != NULL) {
+		freeaddrinfo(result);
+	}
+
+	CloseTcpConnectedPort(&TcpConnectedPort);
 	return NULL;
 }
 //-----------------------------------------------------------------
@@ -573,7 +652,7 @@ fail1:
 //-----------------------------------------------------------------
 void CloseTcpConnectedPort(TTcpConnectedPort **TcpConnectedPort)
 {
-	if ((*TcpConnectedPort) == NULL) {
+	if (TcpConnectedPort == NULL || (*TcpConnectedPort) == NULL) {
 		return;
 	}
 
