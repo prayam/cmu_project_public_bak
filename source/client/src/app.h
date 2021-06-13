@@ -10,6 +10,7 @@ public:
 	App();
 	virtual ~App();
 
+	Gtk::Image m_Image;
 	guint handle_port_secure_id;
 	gboolean connected_server;
 	TTcpConnectedPort *port_recv_photo;
@@ -29,6 +30,7 @@ protected:
 	void on_button_learn_capture();
 	void on_button_learn_save();
 	void on_entry_changed();
+	void on_entry_password_entered();
 	virtual bool on_delete_event(GdkEventAny* any_event) override;
 
 	//Child widgets:
@@ -41,6 +43,7 @@ protected:
 
 private:
 	gboolean button_learn_paused;
+	gboolean check_valid_input (const gchar *regex, const gchar *target);
 	gboolean connect_server ();
 	gboolean disconnect_server ();
 };

@@ -22,6 +22,62 @@ static gboolean change_thread_priority(gpointer data)
 	return G_SOURCE_REMOVE;
 }
 
+static gboolean handle_port_secure(gpointer data) {
+	App *app = static_cast<App *>(data);
+	Mat image;
+	float fontScaler;
+	std::vector<struct APP_meta> meta_vector;
+	ssize_t ret;
+
+	LOG_INFO("start");
+
+	while (app->connected_server) {
+		if (app->port_recv_photo == NULL) {
+			waitKey(10);
+			continue;
+		}
+
+		ret = TcpRecvImageAsJpeg(app->port_recv_photo, &image);
+		if (ret == TCP_RECV_PEER_DISCONNECTED || ret == TCP_RECV_ERROR) {
+			LOG_WARNING("TcpRecvImageAsJpeg fail");
+			break;
+		}
+		else if (ret == TCP_RECV_TIMEOUT) {
+			waitKey(10);
+			continue;
+		}
+
+		meta_vector.clear();
+		ret = TcpRecvMeta(app->port_meta, meta_vector);
+		if (ret == TCP_RECV_PEER_DISCONNECTED || ret == TCP_RECV_ERROR) {
+			LOG_WARNING("TcpRecvMeta fail");
+			break;
+		}
+		else if (ret == TCP_RECV_TIMEOUT) {
+			waitKey(10);
+			continue;
+		}
+
+		for (struct APP_meta const & meta : meta_vector) {
+			fontScaler = static_cast<float>(meta.x2 - meta.x1) / static_cast<float>(image.cols);
+			putText(image, meta.name, Point(meta.y1 + 2, meta.x1 - 3),
+				FONT_HERSHEY_DUPLEX, 0.1 + (2 * fontScaler * 3), Scalar(0, 0, 255, 255), 1);
+			rectangle(image, Point(meta.y1, meta.x1), Point(meta.y2, meta.x2), Scalar(0, 0, 255), 2, 8, 0);
+		}
+
+		cvtColor(image, image, COLOR_BGR2RGB);
+		app->m_Image.set(Gdk::Pixbuf::create_from_data(image.data, Gdk::COLORSPACE_RGB, false, 8, image.cols, image.rows, image.step));
+		waitKey(10);
+	}
+
+	LOG_INFO("end func");
+	app->m_Image.clear();
+	app->handle_port_secure_id = 0;
+	app->on_button_logout();
+	app->show_dialog("End Connection");
+	return G_SOURCE_REMOVE;
+}
+
 App::App()
 	: m_VBox_Left(Gtk::ORIENTATION_VERTICAL),
 	  m_VBox_Right(Gtk::ORIENTATION_VERTICAL),
@@ -44,8 +100,7 @@ App::App()
 	this->connected_server = false;
 	this->button_learn_paused = false;
 
-	// set_size_request(800, 600);
-	set_title("App");
+	set_title("Team6 Client App");
 
 	add(m_HBox_Top);
 	m_HBox_Top.add(m_VBox_Left);
@@ -88,6 +143,7 @@ App::App()
 	m_Entry_Password.set_input_purpose(Gtk::INPUT_PURPOSE_PASSWORD);
 
 	m_Entry_Password.signal_changed().connect( sigc::mem_fun(*this, &App::on_entry_changed) );
+	m_Entry_Password.signal_activate().connect( sigc::mem_fun(*this, &App::on_entry_password_entered) );
 	m_Entry_Id.signal_changed().connect( sigc::mem_fun(*this, &App::on_entry_changed) );
 	m_Entry_Name.signal_changed().connect( sigc::mem_fun(*this, &App::on_entry_changed) );
 
@@ -105,6 +161,9 @@ App::App()
 	m_Entry_Id.set_can_default();
 	m_Entry_Id.grab_default();
 
+	m_VBox_Right.pack_start(m_Image);
+	m_Image.set_size_request(640, 480);
+
 	show_all_children();
 	g_timeout_add_seconds(5, (GSourceFunc) change_thread_priority, NULL);
 }
@@ -112,63 +171,6 @@ App::App()
 App::~App()
 {
 	LOG_INFO("exit");
-}
-
-static gboolean handle_port_secure(gpointer data) {
-	App *app = static_cast<App *>(data);
-	Mat image;
-    float fontScaler;
-	std::vector<struct APP_meta> meta_vector;
-	ssize_t ret;
-
-	LOG_INFO("start");
-	namedWindow( "Server", WINDOW_AUTOSIZE );// Create a window for displa.
-
-	while (app->connected_server) {
-		if (app->port_recv_photo == NULL) {
-			waitKey(10);
-			continue;
-		}
-
-		ret = TcpRecvImageAsJpeg(app->port_recv_photo, &image);
-		if (ret == TCP_RECV_PEER_DISCONNECTED || ret == TCP_RECV_ERROR) {
-			LOG_WARNING("TcpRecvImageAsJpeg fail");
-			break;
-		}
-		else if (ret == TCP_RECV_TIMEOUT) {
-			waitKey(10);
-			continue;
-		}
-
-		meta_vector.clear();
-		ret = TcpRecvMeta(app->port_meta, meta_vector);
-		if (ret == TCP_RECV_PEER_DISCONNECTED || ret == TCP_RECV_ERROR) {
-			LOG_WARNING("TcpRecvMeta fail");
-			break;
-		}
-		else if (ret == TCP_RECV_TIMEOUT) {
-			waitKey(10);
-			continue;
-		}
-
-		for (struct APP_meta const & meta : meta_vector) {
-			fontScaler = static_cast<float>(meta.x2 - meta.x1) / static_cast<float>(image.cols);
-			putText(image, meta.name, Point(meta.y1 + 2, meta.x1 - 3),
-				FONT_HERSHEY_DUPLEX, 0.1 + (2 * fontScaler * 3), Scalar(0, 0, 255, 255), 1);
-			rectangle(image, Point(meta.y1, meta.x1), Point(meta.y2, meta.x2), Scalar(0, 0, 255), 2, 8, 0);
-		}
-
-		imshow("Server", image); // If a valid image is received then display it
-		waitKey(10);
-	}
-
-	destroyWindow("Server");
-	LOG_INFO("end func");
-
-	app->handle_port_secure_id = 0;
-	app->on_button_logout();
-	app->show_dialog("End Connection");
-	return G_SOURCE_REMOVE;
 }
 
 void App::show_dialog(const char* contents)
@@ -299,6 +301,37 @@ gboolean App::disconnect_server ()
 	return TRUE;
 }
 
+gboolean App::check_valid_input (const gchar *regex_str, const gchar *target_str)
+{
+	gboolean ret = FALSE;
+	GError *err = NULL;
+	GMatchInfo *match_info = NULL;
+	GRegex *regex;
+
+	regex = g_regex_new (regex_str, (GRegexCompileFlags)0, (GRegexMatchFlags)0, &err);
+	if (regex == NULL) {
+		LOG_WARNING ("regex error!");
+		if (err != NULL) {
+			LOG_WARNING ("error %s!", err->message);
+			g_clear_error(&err);
+		}
+
+		goto exit;
+	}
+
+	g_regex_match (regex, target_str, (GRegexMatchFlags)0, &match_info);
+
+	if (g_match_info_matches (match_info)) {
+		ret = TRUE;
+	}
+
+	g_match_info_free (match_info);
+	g_regex_unref (regex);
+
+exit:
+	return ret;
+}
+
 void App::on_button_login()
 {
 	LOG_INFO("start");
@@ -321,6 +354,7 @@ void App::on_button_login()
 		m_Label_Name.set_sensitive(true);
 	}
 	else {
+		m_Entry_Id.grab_focus();
 		m_Entry_Id.set_text("");
 		m_Entry_Password.set_text("");
 		m_Entry_Name.set_text("");
@@ -352,6 +386,7 @@ void App::on_button_logout()
 	m_Label_Password.set_sensitive(true);
 
 	/* setting values */
+	m_Entry_Id.grab_focus();
 	m_Entry_Id.set_text("");
 	m_Entry_Password.set_text("");
 	m_Entry_Name.set_text("");
@@ -368,13 +403,13 @@ void App::on_checkbox_secure_toggled()
 	if (this->connected_server) {
 		if (m_CheckButton_Secure.get_active()) {
 			// send secure mode
-			this->port_recv_photo = this->port_secure;
 			TcpSendSecureModeReq(this->port_control);
+			this->port_recv_photo = this->port_secure;
 		}
 		else {
 			// send non secure mode
-			this->port_recv_photo = this->port_nonsecure;
 			TcpSendNonSecureModeReq(this->port_control);
+			this->port_recv_photo = this->port_nonsecure;
 		}
 	}
 }
@@ -424,10 +459,15 @@ void App::on_button_learn_capture()
 
 void App::on_button_learn_save()
 {
-	LOG_INFO("Name: %s", m_Entry_Name.get_text().c_str());
 	LOG_INFO("on_button_learn_save");
+
 	if (this->connected_server) {
-		TcpSendSaveReq(this->port_control, m_Entry_Name.get_text().c_str());
+		if (check_valid_input("^[a-zA-Z0-9 ,._'`-]+$", m_Entry_Name.get_text().c_str())) {
+			TcpSendSaveReq(this->port_control, m_Entry_Name.get_text().c_str());
+		}
+		else {
+			this->show_dialog("Name is only allowed alphabet, number, and ,._'`- character only");
+		}
 	}
 }
 
@@ -445,6 +485,13 @@ void App::on_entry_changed()
 	}
 	else {
 		m_Button_LearnSave.set_sensitive(false);
+	}
+}
+
+void App::on_entry_password_entered()
+{
+	if (m_Entry_Id.get_text().length() != 0 && m_Entry_Password.get_text().length() != 0) {
+		this->on_button_login();
 	}
 }
 
