@@ -32,11 +32,7 @@ static gboolean handle_port_secure(gpointer data) {
 	LOG_INFO("start");
 
 	while (app->connected_server) {
-		if (app->port_recv_photo == NULL) {
-			waitKey(10);
-			continue;
-		}
-
+		// recv photo
 		ret = TcpRecvImageAsJpeg(app->port_recv_photo, &image);
 		if (ret == TCP_RECV_PEER_DISCONNECTED || ret == TCP_RECV_ERROR) {
 			LOG_WARNING("TcpRecvImageAsJpeg fail");
@@ -46,28 +42,36 @@ static gboolean handle_port_secure(gpointer data) {
 			waitKey(10);
 			continue;
 		}
+		else {
+			// recv meta
+			meta_vector.clear();
+			ret = TcpRecvMeta(app->port_meta, meta_vector);
+			if (ret == TCP_RECV_PEER_DISCONNECTED || ret == TCP_RECV_ERROR) {
+				LOG_WARNING("TcpRecvMeta fail");
+				break;
+			}
+			else if (ret == TCP_RECV_TIMEOUT) {
+				if (app->get_current_app_state() == CLIENT_STATE_LEARN && app->learn_mode_state == LEARN_REQUESTED) {
+					app->learn_mode_state = LEARN_READY;
+					app->m_Entry_Name.set_sensitive(true);
+					app->m_Label_Name.set_sensitive(true);
+					LOG_INFO("Ready Learn");
+				}
+				waitKey(10);
+				continue;
+			}
 
-		meta_vector.clear();
-		ret = TcpRecvMeta(app->port_meta, meta_vector);
-		if (ret == TCP_RECV_PEER_DISCONNECTED || ret == TCP_RECV_ERROR) {
-			LOG_WARNING("TcpRecvMeta fail");
-			break;
-		}
-		else if (ret == TCP_RECV_TIMEOUT) {
+			for (struct APP_meta const & meta : meta_vector) {
+				fontScaler = static_cast<float>(meta.x2 - meta.x1) / static_cast<float>(image.cols);
+				putText(image, meta.name, Point(meta.y1 + 2, meta.x1 - 3),
+					FONT_HERSHEY_DUPLEX, 0.1 + (2 * fontScaler * 3), Scalar(0, 0, 255, 255), 1);
+				rectangle(image, Point(meta.y1, meta.x1), Point(meta.y2, meta.x2), Scalar(0, 0, 255), 2, 8, 0);
+			}
+
+			cvtColor(image, image, COLOR_BGR2RGB);
+			app->m_Image.set(Gdk::Pixbuf::create_from_data(image.data, Gdk::COLORSPACE_RGB, false, 8, image.cols, image.rows, image.step));
 			waitKey(10);
-			continue;
 		}
-
-		for (struct APP_meta const & meta : meta_vector) {
-			fontScaler = static_cast<float>(meta.x2 - meta.x1) / static_cast<float>(image.cols);
-			putText(image, meta.name, Point(meta.y1 + 2, meta.x1 - 3),
-				FONT_HERSHEY_DUPLEX, 0.1 + (2 * fontScaler * 3), Scalar(0, 0, 255, 255), 1);
-			rectangle(image, Point(meta.y1, meta.x1), Point(meta.y2, meta.x2), Scalar(0, 0, 255), 2, 8, 0);
-		}
-
-		cvtColor(image, image, COLOR_BGR2RGB);
-		app->m_Image.set(Gdk::Pixbuf::create_from_data(image.data, Gdk::COLORSPACE_RGB, false, 8, image.cols, image.rows, image.step));
-		waitKey(10);
 	}
 
 	LOG_INFO("end func");
@@ -83,9 +87,9 @@ App::App()
 	  m_VBox_Right(Gtk::ORIENTATION_VERTICAL),
 	  m_Button_Login("Login"),
 	  m_Button_Logout("Logout"),
-	  m_Button_LearnCapture("Learn Mode - Capture"),
+	  m_Button_PauseResume("Pause"),
 	  m_Button_LearnSave("Learn Mode - Save"),
-	  m_Label_Login("Login: "),
+	  m_Label_Login("ID:      "),
 	  m_Label_Password("Pass:  "),
 	  m_Label_Name("Name:  "),
 	  m_CheckButton_Secure("Secure Mode"),
@@ -98,7 +102,7 @@ App::App()
 	this->port_meta = NULL;
 	this->handle_port_secure_id = 0;
 	this->connected_server = false;
-	this->button_learn_paused = false;
+	this->learn_mode_state = LEARN_NONE;
 
 	set_title("Team6 Client App");
 
@@ -123,7 +127,7 @@ App::App()
 
 	m_VBox_Left.pack_start(m_CheckButton_Secure);
 	m_VBox_Left.pack_start(m_CheckButton_Test);
-	m_VBox_Left.pack_start(m_Button_LearnCapture);
+	m_VBox_Left.pack_start(m_Button_PauseResume);
 	m_VBox_Left.add(m_HBox_Name);
 
 	m_Entry_Name.set_max_length(20);
@@ -136,22 +140,23 @@ App::App()
 	m_CheckButton_Test.signal_toggled().connect( sigc::mem_fun(*this, &App::on_checkbox_test_toggled) );
 	m_Button_Login.signal_clicked().connect( sigc::mem_fun(*this, &App::on_button_login) );
 	m_Button_Logout.signal_clicked().connect( sigc::mem_fun(*this, &App::on_button_logout) );
-	m_Button_LearnCapture.signal_clicked().connect( sigc::mem_fun(*this, &App::on_button_learn_capture) );
+	m_Button_PauseResume.signal_clicked().connect( sigc::mem_fun(*this, &App::on_button_pause_resume) );
 	m_Button_LearnSave.signal_clicked().connect( sigc::mem_fun(*this, &App::on_button_learn_save) );
 
 	m_Entry_Password.set_visibility(false);
 	m_Entry_Password.set_input_purpose(Gtk::INPUT_PURPOSE_PASSWORD);
 
 	m_Entry_Password.signal_changed().connect( sigc::mem_fun(*this, &App::on_entry_changed) );
-	m_Entry_Password.signal_activate().connect( sigc::mem_fun(*this, &App::on_entry_password_entered) );
+	m_Entry_Password.signal_activate().connect( sigc::mem_fun(*this, &App::on_entry_id_pass_changed) );
 	m_Entry_Id.signal_changed().connect( sigc::mem_fun(*this, &App::on_entry_changed) );
+	m_Entry_Id.signal_activate().connect( sigc::mem_fun(*this, &App::on_entry_id_pass_changed) );
 	m_Entry_Name.signal_changed().connect( sigc::mem_fun(*this, &App::on_entry_changed) );
 
 	m_CheckButton_Secure.set_active(true);
 	m_CheckButton_Test.set_active(false);
 	m_Button_Login.set_sensitive(false);
 	m_Button_Logout.set_sensitive(false);
-	m_Button_LearnCapture.set_sensitive(false);
+	m_Button_PauseResume.set_sensitive(false);
 	m_Button_LearnSave.set_sensitive(false);
 	m_CheckButton_Secure.set_sensitive(false);
 	m_CheckButton_Test.set_sensitive(false);
@@ -301,6 +306,35 @@ gboolean App::disconnect_server ()
 	return TRUE;
 }
 
+CLIENT_STATE App::get_current_app_state()
+{
+	if (this->connected_server) {
+		if (this->learn_mode_state != LEARN_NONE) {
+			return CLIENT_STATE_LEARN;
+		}
+		else if (m_CheckButton_Secure.get_active()) {
+			if (m_CheckButton_Test.get_active()) {
+				return  CLIENT_STATE_SECURE_TESTRUN;
+			}
+			else {
+				return  CLIENT_STATE_SECURE_RUN;
+			}
+		}
+		else { // non secure
+			if (m_CheckButton_Test.get_active()) {
+				return CLIENT_STATE_NONSECURE_TESTRUN;
+			}
+			else {
+				return CLIENT_STATE_NONSECURE_RUN;
+			}
+		}
+	}
+	else
+	{
+		return CLIENT_STATE_LOGOUT;
+	}
+}
+
 gboolean App::check_valid_input (const gchar *regex_str, const gchar *target_str)
 {
 	gboolean ret = FALSE;
@@ -344,14 +378,14 @@ void App::on_button_login()
 		m_Button_LearnSave.set_sensitive(false);
 		m_Label_Login.set_sensitive(false);
 		m_Label_Password.set_sensitive(false);
+		m_Entry_Name.set_sensitive(false);
+		m_Label_Name.set_sensitive(false);
 
 		/* enables */
 		m_Button_Logout.set_sensitive(true);
-		m_Button_LearnCapture.set_sensitive(true);
+		m_Button_PauseResume.set_sensitive(true);
 		m_CheckButton_Secure.set_sensitive(true);
 		m_CheckButton_Test.set_sensitive(true);
-		m_Entry_Name.set_sensitive(true);
-		m_Label_Name.set_sensitive(true);
 	}
 	else {
 		m_Entry_Id.grab_focus();
@@ -371,7 +405,7 @@ void App::on_button_logout()
 
 	/* disables */
 	m_Button_Logout.set_sensitive(false);
-	m_Button_LearnCapture.set_sensitive(false);
+	m_Button_PauseResume.set_sensitive(false);
 	m_Button_LearnSave.set_sensitive(false);
 	m_CheckButton_Secure.set_sensitive(false);
 	m_CheckButton_Test.set_sensitive(false);
@@ -392,6 +426,7 @@ void App::on_button_logout()
 	m_Entry_Name.set_text("");
 	m_CheckButton_Secure.set_active(true);
 	m_CheckButton_Test.set_active(false);
+	m_Button_PauseResume.set_label("Pause");
 
 	LOG_INFO("end");
 }
@@ -430,17 +465,23 @@ void App::on_checkbox_test_toggled()
 	}
 }
 
-void App::on_button_learn_capture()
+void App::on_button_pause_resume()
 {
-	//:TODO: Need to consider sequence.
-	LOG_INFO("on_button_learn_capture");
+	LOG_INFO("on_button_pause_resume");
 	if (this->connected_server) {
-		if (!this->button_learn_paused) { //:TODO: change the button label
+		if (this->learn_mode_state == LEARN_NONE) {
 			// paused
-			this->port_recv_photo = NULL;
+			this->learn_mode_state = LEARN_REQUESTED;
+			m_Button_PauseResume.set_label("Resume");
 			TcpSendCaptureReq(this->port_control);
 		}
 		else {
+			// play = resume
+			this->learn_mode_state = LEARN_NONE;
+			m_Entry_Name.set_text("");
+			m_Entry_Name.set_sensitive(false);
+			m_Label_Name.set_sensitive(false);
+			m_Button_PauseResume.set_label("Pause");
 			if (m_CheckButton_Secure.get_active()) {
 				// send secure mode
 				this->port_recv_photo = this->port_secure;
@@ -452,8 +493,6 @@ void App::on_button_learn_capture()
 				TcpSendNonSecureModeReq(this->port_control);
 			}
 		}
-
-		this->button_learn_paused = !this->button_learn_paused;
 	}
 }
 
@@ -464,6 +503,8 @@ void App::on_button_learn_save()
 	if (this->connected_server) {
 		if (check_valid_input("^[a-zA-Z0-9 ,._'`-]+$", m_Entry_Name.get_text().c_str())) {
 			TcpSendSaveReq(this->port_control, m_Entry_Name.get_text().c_str());
+			this->on_button_pause_resume(); // resume again
+			this->show_dialog("save done");
 		}
 		else {
 			this->show_dialog("Name is only allowed alphabet, number, and ,._'`- character only");
@@ -488,7 +529,7 @@ void App::on_entry_changed()
 	}
 }
 
-void App::on_entry_password_entered()
+void App::on_entry_id_pass_changed()
 {
 	if (m_Entry_Id.get_text().length() != 0 && m_Entry_Password.get_text().length() != 0) {
 		this->on_button_login();

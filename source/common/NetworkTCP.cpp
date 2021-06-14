@@ -703,8 +703,8 @@ ssize_t ReadDataTcp(TTcpConnectedPort *TcpConnectedPort, unsigned char *data, si
 	for (size_t i = 0; i < length; i += bytes)
 	{
 		FD_ZERO(&fdset);
-		tv.tv_sec = 1;
-		tv.tv_usec = 0;
+		tv.tv_sec = 0;
+		tv.tv_usec = 100000; //100ms
 
 		if (TcpConnectedPort->isSsl) {
 			FD_SET(sslfd, &fdset);
