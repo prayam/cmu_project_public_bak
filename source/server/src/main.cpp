@@ -316,8 +316,14 @@ int main(int argc, char *argv[])
 			{
 				char req_id;
 				void *req_parsed_data;
+				int ret;
 wait_req:
-				if (TcpRecvCtrlReq(TcpConnectedPort_control,&req_id,&req_parsed_data) <= 0) break;
+				do {
+					ret = TcpRecvCtrlReq(TcpConnectedPort_control,&req_id,&req_parsed_data);
+				} while (ret == -2);
+				if (ret <= 0) break;
+
+				//if (TcpRecvCtrlReq(TcpConnectedPort_control,&req_id,&req_parsed_data) <= 0) break;
 				if (req_id == REQ_LOGOUT) {
 					if (TcpSendRes(TcpConnectedPort_control, RES_OK) <= 0)
 						break;
