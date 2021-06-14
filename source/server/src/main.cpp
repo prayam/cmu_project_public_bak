@@ -187,12 +187,12 @@ int main(int argc, char *argv[])
 			continue;
 		}
 		if (!UserAthenticate(&userid, &userpw)) {
-			TcpSendLoginRes(TcpConnectedPort_control, 0);
+			TcpSendRes(TcpConnectedPort_control, 0);
 			CloseTcpConnectedPort(&TcpConnectedPort_control);
 			continue;
 		}
 		else {
-			if (TcpSendLoginRes(TcpConnectedPort_control, 1) < 0) {
+			if (TcpSendRes(TcpConnectedPort_control, 1) < 0) {
 				CloseTcpConnectedPort(&TcpConnectedPort_control);
 				continue;
 			}

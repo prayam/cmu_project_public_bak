@@ -520,12 +520,12 @@ exit:
 	return read_len;
 }
 
-int TcpSendLoginRes(TTcpConnectedPort * TcpConnectedPort, unsigned char res)
+int TcpSendRes(TTcpConnectedPort * TcpConnectedPort, unsigned char res)
 {
 	return WriteDataTcp(TcpConnectedPort, &res, sizeof(char));
 }
 
-ssize_t TcpRecvLoginRes(TTcpConnectedPort * TcpConnectedPort, unsigned char *res)
+ssize_t TcpRecvRes(TTcpConnectedPort * TcpConnectedPort, unsigned char *res)
 {
 	return ReadDataTcp(TcpConnectedPort, res, sizeof(char));
 }
@@ -602,7 +602,6 @@ ssize_t TcpRecvMeta(TTcpConnectedPort * TcpConnectedPort, std::vector<struct APP
 exit:
 	return read_ret;
 }
-
 
 //-----------------------------------------------------------------
 // END of File

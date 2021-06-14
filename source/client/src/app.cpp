@@ -225,7 +225,7 @@ gboolean App::connect_server ()
 
 	// send login info and check
 	TcpSendLoginData(this->port_control, m_Entry_Id.get_text().c_str(), m_Entry_Password.get_text().c_str());
-	recv_ret = TcpRecvLoginRes(this->port_control, &res);
+	recv_ret = TcpRecvRes(this->port_control, &res);
 
 	if ((recv_ret == TCP_RECV_PEER_DISCONNECTED || recv_ret == TCP_RECV_ERROR || recv_ret == TCP_RECV_TIMEOUT) ||
 			res == 0) {
