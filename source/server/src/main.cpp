@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
 
 	struct sockaddr_in cli_addr;
 	socklen_t          clilen;
-	bool               UseCamera=false;
+	bool               UseCamera=true;
 
 	if (argc <2)
 	{
@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
 		exit(0);
 	}
 
-	if (argc==2) UseCamera=true;
+	if (argc==3) UseCamera=false;
 
 
 	Logger gLogger = Logger();
@@ -161,7 +161,6 @@ int main(int argc, char *argv[])
 	// init opencv stuff
 	videoStreamer_c = new VideoStreamer(0, videoFrameWidth, videoFrameHeight, 60, isCSICam);
 	videoStreamer_v = new VideoStreamer(testmodefile, videoFrameWidth, videoFrameHeight);
-	videoStreamer = UseCamera ? videoStreamer_c : videoStreamer_v;
 
 
 
@@ -201,6 +200,8 @@ int main(int argc, char *argv[])
 	printf("Listening for connections\n");
 
 	while (1) {
+		videoStreamer = UseCamera ? videoStreamer_c : videoStreamer_v;
+
 		if (check_server_cert()) {
 			printf("Cert error\n");
 			return(-1);
@@ -419,12 +420,12 @@ exit_req:
 		CloseTcpConnectedPort(&TcpConnectedPort_sdata);
 		CloseTcpConnectedPort(&TcpConnectedPort_nsdata);
 		CloseTcpConnectedPort(&TcpConnectedPort_meta);
+		secure_mode = MODE_SECURE;
+		run_mode = MODE_RUN;
+		UseCamera=true;
+		videoStreamer = videoStreamer_c;
 
 		auto globalTimeEnd = chrono::steady_clock::now();
-
-		videoStreamer_c->release();
-		videoStreamer_v->release();
-		videoStreamer = NULL;
 
 		auto milliseconds = chrono::duration_cast<chrono::milliseconds>(globalTimeEnd-globalTimeStart).count();
 		double seconds = double(milliseconds)/1000.;
@@ -434,6 +435,9 @@ exit_req:
 			" This equals " << fps << "fps.\n";
 
 	}
+	videoStreamer_c->release();
+	videoStreamer_v->release();
+	videoStreamer = NULL;
 	log_disable();
 	return 0;
 }
