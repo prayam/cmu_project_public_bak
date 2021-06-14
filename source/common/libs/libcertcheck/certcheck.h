@@ -128,6 +128,11 @@ const char* getFilepath_client_key(void);
 const char* getFilepath_server_cert(void);
 const char* getFilepath_server_key(void);
 
-
+/**
+ * @brief : return string for file name
+ * @out param : buf for file name, length must be 33
+ * @return : 0 for success
+ */
+int getFileName_leng32(char* fname);
 
 #endif /* SRC_SSLCRYPTO_H_ */
