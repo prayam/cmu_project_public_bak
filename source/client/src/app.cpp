@@ -254,9 +254,20 @@ gboolean App::connect_server ()
 	gboolean ret = FALSE;
 	guint8 res = 255;
 	ssize_t recv_ret = 0;
-	const gchar *ca = getFilepath_ca_cert();
-	const gchar *crt = getFilepath_client_cert();
-	const gchar *key = getFilepath_client_key();
+	const gchar *ca;
+	const gchar *crt;
+	const gchar *key;
+
+	if (0 != check_client_cert()) {
+		LOG_WARNING("Certificate Error");
+		show_dialog("Certificate Error");
+		goto exit;
+	}
+	else {
+		ca = getFilepath_ca_cert();
+		crt = getFilepath_client_cert();
+		key = getFilepath_client_key();
+	}
 
 	if (this->port_control != NULL) {
 		LOG_WARNING("this.port_control is not NULL");
@@ -376,10 +387,10 @@ CLIENT_STATE App::get_current_app_state()
 		}
 		else if (m_CheckButton_Secure.get_active()) {
 			if (m_CheckButton_Test.get_active()) {
-				return  CLIENT_STATE_SECURE_TESTRUN;
+				return CLIENT_STATE_SECURE_TESTRUN;
 			}
 			else {
-				return  CLIENT_STATE_SECURE_RUN;
+				return CLIENT_STATE_SECURE_RUN;
 			}
 		}
 		else { // non secure
@@ -430,42 +441,51 @@ exit:
 
 void App::on_button_login()
 {
-	LOG_INFO("start");
+	if (check_valid_input("^[a-zA-Z0-9]+$", m_Entry_Id.get_text().c_str()) &&
+		check_valid_input("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[\\^@$!%*#?&])[A-Za-z\\d\\^@$!%*#?&]{8,}$", m_Entry_Password.get_text().c_str())) {
+		// id: alphabet and number
+		// pass: Minimum eight characters, at least one letter, one number and one special character
+		if (this->connect_server()) {
+			/* disables */
+			m_Entry_Id.set_sensitive(false);
+			m_Entry_Password.set_sensitive(false);
+			m_Button_Login.set_sensitive(false);
+			m_Button_LearnSave.set_sensitive(false);
+			m_Label_Login.set_sensitive(false);
+			m_Label_Password.set_sensitive(false);
+			m_Entry_Name.set_sensitive(false);
+			m_Label_Name.set_sensitive(false);
 
-	if (this->connect_server()) {
-		/* disables */
-		m_Entry_Id.set_sensitive(false);
-		m_Entry_Password.set_sensitive(false);
-		m_Button_Login.set_sensitive(false);
-		m_Button_LearnSave.set_sensitive(false);
-		m_Label_Login.set_sensitive(false);
-		m_Label_Password.set_sensitive(false);
-		m_Entry_Name.set_sensitive(false);
-		m_Label_Name.set_sensitive(false);
-
-		/* enables */
-		m_Button_Logout.set_sensitive(true);
-		m_Button_PauseResume.set_sensitive(true);
-		m_CheckButton_Secure.set_sensitive(true);
-		m_CheckButton_Test.set_sensitive(true);
+			/* enables */
+			m_Button_Logout.set_sensitive(true);
+			m_Button_PauseResume.set_sensitive(true);
+			m_CheckButton_Secure.set_sensitive(true);
+			m_CheckButton_Test.set_sensitive(true);
+		}
+		else {
+			m_Entry_Id.grab_focus();
+			m_Entry_Id.set_text("");
+			m_Entry_Password.set_text("");
+			m_Entry_Name.set_text("");
+		}
 	}
 	else {
 		m_Entry_Id.grab_focus();
 		m_Entry_Id.set_text("");
 		m_Entry_Password.set_text("");
-		m_Entry_Name.set_text("");
+		m_Button_Login.set_sensitive(false);
+		LOG_WARNING("login syntax");
+		show_dialog("Login Fail");
 	}
-	LOG_INFO("end");
 }
 
 void App::on_button_logout()
 {
-	LOG_INFO("start");
-
 	this->disconnect_server();
 	TcpSendLogoutReq(this->port_control);
 
 	/* disables */
+	m_Button_Login.set_sensitive(false);
 	m_Button_Logout.set_sensitive(false);
 	m_Button_PauseResume.set_sensitive(false);
 	m_Button_LearnSave.set_sensitive(false);
@@ -477,7 +497,6 @@ void App::on_button_logout()
 	/* enables */
 	m_Entry_Id.set_sensitive(true);
 	m_Entry_Password.set_sensitive(true);
-	m_Button_Login.set_sensitive(true);
 	m_Label_Login.set_sensitive(true);
 	m_Label_Password.set_sensitive(true);
 
@@ -489,15 +508,12 @@ void App::on_button_logout()
 	m_CheckButton_Secure.set_active(true);
 	m_CheckButton_Test.set_active(false);
 	m_Button_PauseResume.set_label("Pause");
-
-	LOG_INFO("end");
 }
 
 void App::on_checkbox_secure_toggled()
 {
 	ssize_t recv_ret = 0;
 	guint8 res = 255;
-	LOG_INFO("on_checkbox_secure_toggled, %d", m_CheckButton_Secure.get_active());
 
 	if (this->connected_server) {
 		if (m_CheckButton_Secure.get_active()) {
@@ -537,7 +553,6 @@ void App::on_checkbox_test_toggled()
 {
 	ssize_t recv_ret = 0;
 	guint8 res = 255;
-	LOG_INFO("on_checkbox_test_toggled, %d", m_CheckButton_Test.get_active());
 
 	if (this->connected_server) {
 		if (m_CheckButton_Test.get_active()) {
@@ -572,12 +587,13 @@ void App::on_button_pause_resume()
 	ssize_t recv_ret = 0;
 	guint8 res = 255;
 
-	LOG_INFO("on_button_pause_resume");
 	if (this->connected_server) {
 		if (this->learn_mode_state == LEARN_NONE) {
 			// paused
 			this->learn_mode_state = LEARN_REQUESTED;
 			m_Button_PauseResume.set_label("Resume");
+			m_CheckButton_Secure.set_sensitive(false);
+			m_CheckButton_Test.set_sensitive(false);
 			TcpSendCaptureReq(this->port_control);
 			recv_ret = TcpRecvRes(this->port_control, &res);
 
@@ -594,6 +610,8 @@ void App::on_button_pause_resume()
 			m_Entry_Name.set_text("");
 			m_Entry_Name.set_sensitive(false);
 			m_Label_Name.set_sensitive(false);
+			m_CheckButton_Secure.set_sensitive(true);
+			m_CheckButton_Test.set_sensitive(true);
 			m_Button_PauseResume.set_label("Pause");
 			if (m_CheckButton_Secure.get_active()) {
 				// send secure mode
@@ -628,7 +646,6 @@ void App::on_button_learn_save()
 {
 	ssize_t recv_ret = 0;
 	guint8 res = 255;
-	LOG_INFO("on_button_learn_save");
 
 	if (this->connected_server) {
 		if (check_valid_input("^[a-zA-Z0-9 ,._'`-]+$", m_Entry_Name.get_text().c_str())) {
