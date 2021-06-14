@@ -222,9 +222,9 @@ int main(int argc, char *argv[])
 
 		/* 4. Establish meta channel */
 		if  ((TcpConnectedPort_meta=AcceptTcpConnection(TcpListenPort,&cli_addr,&clilen,
-						"../../custom/keys/ca/ca.crt",
-						"../../custom/keys/server/server.crt",
-						"../../custom/keys/server/server.key"))==NULL)
+						"./keys/ca.crt",
+						"./keys/server.crt",
+						"./keys/server.key"))==NULL)
 		{
 			printf("AcceptTcpConnection Failed\n");
 			return(-1);

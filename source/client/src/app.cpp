@@ -192,9 +192,9 @@ gboolean App::connect_server ()
 	gboolean ret = FALSE;
 	guint8 res = 255;
 	ssize_t recv_ret = 0;
-	const gchar *ca = "../../custom/keys/ca/ca.crt";
-	const gchar *crt = "../../custom/keys/client/client.crt";
-	const gchar *key = "../../custom/keys/client/client.key";
+	const gchar *ca = "./keys/ca.crt";
+	const gchar *crt = "./keys/client.crt";
+	const gchar *key = "./keys/client.key";
 
 	if (this->port_control != NULL) {
 		LOG_WARNING("this.port_control is not NULL");

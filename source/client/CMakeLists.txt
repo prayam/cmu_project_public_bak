@@ -55,3 +55,7 @@ target_link_libraries(client
         ${OPENCV_LIBRARIES}
         ${OPENSSL_LIBRARIES}
 )
+
+file(COPY "../custom/keys/ca/ca.crt" "../custom/keys/client/client.crt" "../custom/keys/client/client.key"
+    DESTINATION "keys"
+)
