@@ -16,6 +16,15 @@
 using namespace cv;
 using namespace std;
 
+static int readysocket(int fd)
+{
+	struct timeval tv = { 0L, 0L };
+	fd_set fds;
+	FD_ZERO(&fds);
+	FD_SET(fd, &fds);
+	return select(fd + 1, &fds, NULL, NULL, &tv);
+}
+
 static gboolean change_thread_priority(gpointer data)
 {
 	LOG_INFO("hello timer");
@@ -28,50 +37,76 @@ static gboolean handle_port_secure(gpointer data) {
 	float fontScaler;
 	std::vector<struct APP_meta> meta_vector;
 	ssize_t ret;
+	static CLIENT_STATE prev_state = CLIENT_STATE_SECURE_RUN;
+	gint skip_picture_count = 0;
 
 	LOG_INFO("start");
 
 	while (app->connected_server) {
+		CLIENT_STATE current_state = app->get_current_app_state();
+		if ((prev_state == CLIENT_STATE_SECURE_RUN && (current_state == CLIENT_STATE_NONSECURE_RUN || current_state == CLIENT_STATE_NONSECURE_TESTRUN)) ||
+			(prev_state == CLIENT_STATE_SECURE_TESTRUN && (current_state == CLIENT_STATE_NONSECURE_RUN || current_state == CLIENT_STATE_NONSECURE_TESTRUN)) ||
+			(prev_state == CLIENT_STATE_NONSECURE_RUN && (current_state == CLIENT_STATE_SECURE_RUN || current_state == CLIENT_STATE_SECURE_TESTRUN)) ||
+			(prev_state == CLIENT_STATE_NONSECURE_TESTRUN && (current_state == CLIENT_STATE_SECURE_RUN || current_state == CLIENT_STATE_SECURE_TESTRUN))) {
+			// if mode is changed between *secure* and *non-secure*,
+			//  1. client request the change mode to sever and change the receiving channel
+			//  2. server change the sending channel after receiving the rqeuest
+			// so, the some data is remain in the tcp recv buffer since the time interval between step 1~2.
+			// to prevent showing the date received 1~2, skip some pictures.
+			LOG_WARNING("enable skipping pictures");
+			skip_picture_count = 5;
+		}
+		prev_state = current_state;
+
+recv:
 		// recv photo
-		ret = TcpRecvImageAsJpeg(app->port_recv_photo, &image);
-		if (ret == TCP_RECV_PEER_DISCONNECTED || ret == TCP_RECV_ERROR) {
-			LOG_WARNING("TcpRecvImageAsJpeg fail");
-			break;
-		}
-		else if (ret == TCP_RECV_TIMEOUT) {
-			waitKey(10);
-			continue;
-		}
-		else {
-			// recv meta
-			meta_vector.clear();
-			ret = TcpRecvMeta(app->port_meta, meta_vector);
+		if (app->port_recv_photo != NULL && readysocket(app->port_recv_photo->ConnectedFd)) {
+			ret = TcpRecvImageAsJpeg(app->port_recv_photo, &image);
 			if (ret == TCP_RECV_PEER_DISCONNECTED || ret == TCP_RECV_ERROR) {
-				LOG_WARNING("TcpRecvMeta fail");
+				LOG_WARNING("TcpRecvImageAsJpeg fail");
 				break;
 			}
 			else if (ret == TCP_RECV_TIMEOUT) {
-				if (app->get_current_app_state() == CLIENT_STATE_LEARN && app->learn_mode_state == LEARN_REQUESTED) {
-					app->learn_mode_state = LEARN_READY;
-					app->m_Entry_Name.set_sensitive(true);
-					app->m_Label_Name.set_sensitive(true);
-					LOG_INFO("Ready Learn");
-				}
 				waitKey(10);
-				continue;
+				goto recv;
 			}
+			else {
+				// recv meta
+				meta_vector.clear();
+				ret = TcpRecvMeta(app->port_meta, meta_vector);
+				if (ret == TCP_RECV_PEER_DISCONNECTED || ret == TCP_RECV_ERROR) {
+					LOG_WARNING("TcpRecvMeta fail");
+					break;
+				}
+				else if (ret == TCP_RECV_TIMEOUT) {
+					if (app->get_current_app_state() == CLIENT_STATE_LEARN && app->learn_mode_state == LEARN_REQUESTED) {
+						app->learn_mode_state = LEARN_READY;
+						app->m_Entry_Name.set_sensitive(true);
+						app->m_Label_Name.set_sensitive(true);
+						LOG_INFO("Ready Learn");
+					}
+					waitKey(10);
+					goto recv;
+				}
 
-			for (struct APP_meta const & meta : meta_vector) {
-				fontScaler = static_cast<float>(meta.x2 - meta.x1) / static_cast<float>(image.cols);
-				putText(image, meta.name, Point(meta.y1 + 2, meta.x1 - 3),
-					FONT_HERSHEY_DUPLEX, 0.1 + (2 * fontScaler * 3), Scalar(0, 0, 255, 255), 1);
-				rectangle(image, Point(meta.y1, meta.x1), Point(meta.y2, meta.x2), Scalar(0, 0, 255), 2, 8, 0);
+				while (skip_picture_count > 0) {
+					skip_picture_count--;
+					goto recv;
+				}
+
+				for (struct APP_meta const & meta : meta_vector) {
+					fontScaler = static_cast<float>(meta.x2 - meta.x1) / static_cast<float>(image.cols);
+					putText(image, meta.name, Point(meta.y1 + 2, meta.x1 - 3),
+						FONT_HERSHEY_DUPLEX, 0.1 + (2 * fontScaler * 3), Scalar(0, 0, 255, 255), 1);
+					rectangle(image, Point(meta.y1, meta.x1), Point(meta.y2, meta.x2), Scalar(0, 0, 255), 2, 8, 0);
+				}
+
+				cvtColor(image, image, COLOR_BGR2RGB);
+				app->m_Image.set(Gdk::Pixbuf::create_from_data(image.data, Gdk::COLORSPACE_RGB, false, 8, image.cols, image.rows, image.step));
 			}
-
-			cvtColor(image, image, COLOR_BGR2RGB);
-			app->m_Image.set(Gdk::Pixbuf::create_from_data(image.data, Gdk::COLORSPACE_RGB, false, 8, image.cols, image.rows, image.step));
-			waitKey(10);
 		}
+
+		waitKey(10);
 	}
 
 	LOG_INFO("end func");
