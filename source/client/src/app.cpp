@@ -26,6 +26,29 @@ static int readysocket(int fd)
 	return select(fd + 1, &fds, NULL, NULL, &tv);
 }
 
+static gboolean timer_keepalive(gpointer data)
+{
+	ssize_t recv_ret = 0;
+	guint8 res = 255;
+	App *app = static_cast<App *>(data);
+
+	if (app != NULL && app->learn_mode_state == LEARN_REQUESTED) {
+		if (app->port_control != NULL) {
+			TcpSendCaptureReq(app->port_control);
+			recv_ret = TcpRecvRes(app->port_control, &res);
+
+			if ((recv_ret == TCP_RECV_PEER_DISCONNECTED || recv_ret == TCP_RECV_ERROR || recv_ret == TCP_RECV_TIMEOUT) ||
+					res != RES_OK) {
+				LOG_WARNING("TcpRecvRes fail");
+				app->disconnect_server();
+				app->show_dialog("fail request. error no: 9");
+			}
+		}
+	}
+
+	return G_SOURCE_CONTINUE;
+}
+
 static gboolean handle_port_secure(gpointer data) {
 	App *app = static_cast<App *>(data);
 	Mat image;
@@ -34,8 +57,7 @@ static gboolean handle_port_secure(gpointer data) {
 	ssize_t ret;
 	static CLIENT_STATE prev_state = CLIENT_STATE_SECURE_RUN;
 	gint skip_picture_count = 0;
-	gint fd = 0;
-	gboolean recv_meta = FALSE, recv_photo = FALSE;
+
 	LOG_INFO("start");
 
 	while (app->connected_server) {
@@ -50,131 +72,54 @@ static gboolean handle_port_secure(gpointer data) {
 			// so, the some data is remain in the tcp recv buffer since the time interval between step 1~2.
 			// to prevent showing the date received 1~2, skip some pictures.
 			LOG_WARNING("enable skipping pictures");
-			skip_picture_count = 20;
+			skip_picture_count = 10;
 		}
 		prev_state = current_state;
-		recv_meta = FALSE;
-		recv_photo = FALSE;
 
 recv:
-		if (app->port_recv_photo != NULL) {
-			if (app->port_recv_photo->isSsl) {
-				fd = SSL_get_fd(app->port_recv_photo->ssl);
+		// recv photo
+		if (app->port_recv_photo != NULL && readysocket(app->port_recv_photo->ConnectedFd)) {
+			ret = TcpRecvImageAsJpeg(app->port_recv_photo, &image);
+			if (ret == TCP_RECV_PEER_DISCONNECTED || ret == TCP_RECV_ERROR) {
+				LOG_WARNING("TcpRecvImageAsJpeg fail");
+				break;
+			}
+			else if (ret == TCP_RECV_TIMEOUT) {
+				waitKey(10);
+				goto recv;
 			}
 			else {
-				fd = app->port_recv_photo->ConnectedFd;
-			}
-
-			if (app->get_current_app_state() == CLIENT_STATE_LEARN && app->learn_mode_state == LEARN_REQUESTED) {
-				LOG_INFO("enter");
-
+				// recv meta
 				meta_vector.clear();
-
-				// recv photo
-				do {
-					ret = TcpRecvImageAsJpeg(app->port_recv_photo, &image);
-					if (ret == TCP_RECV_PEER_DISCONNECTED || ret == TCP_RECV_ERROR) {
-						LOG_WARNING("TcpRecvImageAsJpeg fail");
-						break;
-					}
-					else if (ret == TCP_RECV_TIMEOUT) {
-						break;
-					}
-					else {
-						recv_photo = TRUE;
-					}
-
-					if (readysocket(SSL_get_fd(app->port_meta->ssl))) {
-						ret = TcpRecvMeta(app->port_meta, meta_vector);
-						if (ret == TCP_RECV_PEER_DISCONNECTED || ret == TCP_RECV_ERROR) {
-							LOG_WARNING("TcpRecvMeta fail");
-						}
-						else if (ret == TCP_RECV_TIMEOUT) {
-							// waitKey(10);
-							// goto recv;
-						}
-						else {
-							recv_meta = TRUE;
-						}
-					}
-				} while (readysocket(fd));
-
-				// recv meta
-				while (readysocket(SSL_get_fd(app->port_meta->ssl))) {
-					meta_vector.clear();
-					ret = TcpRecvMeta(app->port_meta, meta_vector);
-
-					if (ret == TCP_RECV_PEER_DISCONNECTED || ret == TCP_RECV_ERROR) {
-						LOG_WARNING("TcpRecvMeta fail");
-						break;
-					}
-					else if (ret == TCP_RECV_TIMEOUT) {
-						break;
-					}
-					else {
-						recv_meta = TRUE;
-					}
+				ret = TcpRecvMeta(app->port_meta, meta_vector);
+				if (ret == TCP_RECV_PEER_DISCONNECTED || ret == TCP_RECV_ERROR) {
+					LOG_WARNING("TcpRecvMeta fail");
+					break;
 				}
-
-				if(meta_vector.size() != 0) {
-					app->learn_mode_state = LEARN_READY;
-					app->m_Entry_Name.set_sensitive(true);
-					app->m_Label_Name.set_sensitive(true);
-					LOG_INFO("Ready Learn");
-				}
-			}
-			else {
-				// recv photo
-				if (readysocket(fd)) {
-					ret = TcpRecvImageAsJpeg(app->port_recv_photo, &image);
-					if (ret == TCP_RECV_PEER_DISCONNECTED || ret == TCP_RECV_ERROR) {
-						LOG_WARNING("TcpRecvImageAsJpeg fail");
-						break;
+				else if (ret == TCP_RECV_TIMEOUT) {
+					if (app->get_current_app_state() == CLIENT_STATE_LEARN && app->learn_mode_state == LEARN_REQUESTED) {
+						app->learn_mode_state = LEARN_READY;
+						app->m_Entry_Name.set_sensitive(true);
+						app->m_Label_Name.set_sensitive(true);
+						LOG_INFO("Ready Learn");
 					}
-					else if (ret == TCP_RECV_TIMEOUT) {
-						// waitKey(10);
-						// goto recv;
-					}
-					else {
-						recv_photo = TRUE;
-					}
-				}
-
-				// recv meta
-				if (readysocket(SSL_get_fd(app->port_meta->ssl))) {
-					meta_vector.clear();
-					ret = TcpRecvMeta(app->port_meta, meta_vector);
-					if (ret == TCP_RECV_PEER_DISCONNECTED || ret == TCP_RECV_ERROR) {
-						LOG_WARNING("TcpRecvMeta fail");
-						break;
-					}
-					else if (ret == TCP_RECV_TIMEOUT) {
-						// waitKey(10);
-						// goto recv;
-					}
-					else {
-						recv_meta = TRUE;
-					}
-				}
-				while (skip_picture_count > 0) {
-					skip_picture_count--;
-					LOG_INFO("skip index %d", skip_picture_count);
+					waitKey(10);
 					goto recv;
 				}
-			}
 
-			if (recv_photo) {
+				while (skip_picture_count > 0) {
+					skip_picture_count--;
+					goto recv;
+				}
+
+				for (struct APP_meta const & meta : meta_vector) {
+					fontScaler = static_cast<float>(meta.x2 - meta.x1) / static_cast<float>(image.cols);
+					putText(image, meta.name, Point(meta.y1 + 2, meta.x1 - 3),
+						FONT_HERSHEY_DUPLEX, 0.1 + (2 * fontScaler * 3), Scalar(0, 0, 255, 255), 1);
+					rectangle(image, Point(meta.y1, meta.x1), Point(meta.y2, meta.x2), Scalar(0, 0, 255), 2, 8, 0);
+				}
+
 				cvtColor(image, image, COLOR_BGR2RGB);
-			}
-
-			for (struct APP_meta const & meta : meta_vector) {
-				fontScaler = static_cast<float>(meta.x2 - meta.x1) / static_cast<float>(image.cols);
-				putText(image, meta.name, Point(meta.y1 + 2, meta.x1 - 3),
-					FONT_HERSHEY_DUPLEX, 0.1 + (2 * fontScaler * 3), Scalar(255, 0, 0, 255), 1);
-				rectangle(image, Point(meta.y1, meta.x1), Point(meta.y2, meta.x2), Scalar(255, 0, 0), 2, 8, 0);
-			}
-
-			if (recv_photo || recv_meta) {
 				app->m_Image.set(Gdk::Pixbuf::create_from_data(image.data, Gdk::COLORSPACE_RGB, false, 8, image.cols, image.rows, image.step));
 			}
 		}
@@ -211,6 +156,7 @@ App::App()
 	this->handle_recv_data = 0;
 	this->connected_server = false;
 	this->learn_mode_state = LEARN_NONE;
+	this->timer_id_keepalive = g_timeout_add(600, (GSourceFunc) timer_keepalive, this);
 
 	if (0 != check_client_cert()) {
 		LOG_WARNING("certificate error");
@@ -287,6 +233,10 @@ App::App()
 
 App::~App()
 {
+	if(this->timer_id_keepalive) {
+		g_source_remove(this->timer_id_keepalive);
+		this->timer_id_keepalive = 0;
+	}
 	LOG_INFO("exit");
 }
 
@@ -531,20 +481,8 @@ void App::on_button_login()
 
 void App::on_button_logout()
 {
-	ssize_t recv_ret = 0;
-	guint8 res = 255;
-
-	if (this->port_control != NULL) {
-		TcpSendLogoutReq(this->port_control);
-		recv_ret = TcpRecvRes(this->port_control, &res);
-
-		if ((recv_ret == TCP_RECV_PEER_DISCONNECTED || recv_ret == TCP_RECV_ERROR || recv_ret == TCP_RECV_TIMEOUT) ||
-				res != RES_OK) {
-			LOG_WARNING("TcpRecvRes fail");
-		}
-	}
-
 	this->disconnect_server();
+	TcpSendLogoutReq(this->port_control);
 
 	/* disables */
 	m_Button_Login.set_sensitive(false);
@@ -658,7 +596,6 @@ void App::on_button_pause_resume()
 			m_CheckButton_Test.set_sensitive(false);
 			TcpSendCaptureReq(this->port_control);
 			recv_ret = TcpRecvRes(this->port_control, &res);
-			LOG_WARNING("get resp");
 
 			if ((recv_ret == TCP_RECV_PEER_DISCONNECTED || recv_ret == TCP_RECV_ERROR || recv_ret == TCP_RECV_TIMEOUT) ||
 					res != RES_OK) {
@@ -693,7 +630,6 @@ void App::on_button_pause_resume()
 				// send non secure mode
 				this->port_recv_photo = this->port_nonsecure;
 				TcpSendNonSecureModeReq(this->port_control);
-				recv_ret = TcpRecvRes(this->port_control, &res);
 
 				if ((recv_ret == TCP_RECV_PEER_DISCONNECTED || recv_ret == TCP_RECV_ERROR || recv_ret == TCP_RECV_TIMEOUT) ||
 						res != RES_OK) {
