@@ -27,6 +27,7 @@ pkg_check_modules(OPENCV REQUIRED opencv4)
 pkg_check_modules(OPENSSL REQUIRED openssl)
 
 link_directories(
+        "../common/libs/libcertcheck"
         ${GTKMM3_LIBRARY_DIRS}
         ${OPENCV_LIBRARY_DIRS}
         ${OPENSSL_LIBRARY_DIRS}
@@ -44,6 +45,7 @@ file(GLOB CLIENT_SRC
 include_directories(
         "src/"
         "../common/"
+        "../common/libs/libcertcheck"
         ${GTKMM3_INCLUDE_DIRS}
         ${OPENCV_INCLUDE_DIRS}
         ${OPENSSL_INCLUDE_DIRS}
@@ -57,7 +59,7 @@ add_compile_options(
 
 add_executable(client ${CLIENT_SRC})
 target_link_libraries(client
-        libcertcheck
+        certcheck_x64
         ${GTKMM3_LIBRARIES}
         ${OPENCV_LIBRARIES}
         ${OPENSSL_LIBRARIES}

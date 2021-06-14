@@ -29,7 +29,8 @@ public:
 
 	LEARN_MODE_STATE learn_mode_state;
 	Gtk::Image m_Image;
-	guint handle_port_secure_id;
+	guint timer_id_keepalive;
+	guint handle_recv_data;
 	gboolean connected_server;
 	TTcpConnectedPort *port_recv_photo;
 	TTcpConnectedPort *port_control;
@@ -59,7 +60,6 @@ public:
 	Gtk::CheckButton m_CheckButton_Secure, m_CheckButton_Test;
 	std::unique_ptr<Gtk::MessageDialog> m_pDialog;
 
-private:
 	gboolean check_valid_input (const gchar *regex, const gchar *target);
 	gboolean connect_server ();
 	gboolean disconnect_server ();

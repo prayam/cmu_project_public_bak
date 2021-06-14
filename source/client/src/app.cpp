@@ -2,6 +2,7 @@
 #include "TcpSendRecvJpeg.h"
 #include "CommonStruct.h"
 #include "Logger.h"
+#include "certcheck.h"
 #include <iostream>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/core.hpp>
@@ -25,10 +26,27 @@ static int readysocket(int fd)
 	return select(fd + 1, &fds, NULL, NULL, &tv);
 }
 
-static gboolean change_thread_priority(gpointer data)
+static gboolean timer_keepalive(gpointer data)
 {
-	LOG_INFO("hello timer");
-	return G_SOURCE_REMOVE;
+	ssize_t recv_ret = 0;
+	guint8 res = 255;
+	App *app = static_cast<App *>(data);
+
+	if (app != NULL && app->learn_mode_state == LEARN_REQUESTED) {
+		if (app->port_control != NULL) {
+			TcpSendCaptureReq(app->port_control);
+			recv_ret = TcpRecvRes(app->port_control, &res);
+
+			if ((recv_ret == TCP_RECV_PEER_DISCONNECTED || recv_ret == TCP_RECV_ERROR || recv_ret == TCP_RECV_TIMEOUT) ||
+					res != RES_OK) {
+				LOG_WARNING("TcpRecvRes fail");
+				app->disconnect_server();
+				app->show_dialog("fail request. error no: 9");
+			}
+		}
+	}
+
+	return G_SOURCE_CONTINUE;
 }
 
 static gboolean handle_port_secure(gpointer data) {
@@ -54,7 +72,7 @@ static gboolean handle_port_secure(gpointer data) {
 			// so, the some data is remain in the tcp recv buffer since the time interval between step 1~2.
 			// to prevent showing the date received 1~2, skip some pictures.
 			LOG_WARNING("enable skipping pictures");
-			skip_picture_count = 5;
+			skip_picture_count = 10;
 		}
 		prev_state = current_state;
 
@@ -111,7 +129,7 @@ recv:
 
 	LOG_INFO("end func");
 	app->m_Image.clear();
-	app->handle_port_secure_id = 0;
+	app->handle_recv_data = 0;
 	app->on_button_logout();
 	app->show_dialog("End Connection");
 	return G_SOURCE_REMOVE;
@@ -135,9 +153,15 @@ App::App()
 	this->port_secure = NULL;
 	this->port_nonsecure = NULL;
 	this->port_meta = NULL;
-	this->handle_port_secure_id = 0;
+	this->handle_recv_data = 0;
 	this->connected_server = false;
 	this->learn_mode_state = LEARN_NONE;
+	this->timer_id_keepalive = g_timeout_add(600, (GSourceFunc) timer_keepalive, this);
+
+	if (0 != check_client_cert()) {
+		LOG_WARNING("certificate error");
+		exit(-1);
+	}
 
 	set_title("Team6 Client App");
 
@@ -205,11 +229,14 @@ App::App()
 	m_Image.set_size_request(640, 480);
 
 	show_all_children();
-	g_timeout_add_seconds(5, (GSourceFunc) change_thread_priority, NULL);
 }
 
 App::~App()
 {
+	if(this->timer_id_keepalive) {
+		g_source_remove(this->timer_id_keepalive);
+		this->timer_id_keepalive = 0;
+	}
 	LOG_INFO("exit");
 }
 
@@ -227,9 +254,9 @@ gboolean App::connect_server ()
 	gboolean ret = FALSE;
 	guint8 res = 255;
 	ssize_t recv_ret = 0;
-	const gchar *ca = "./keys/ca.crt";
-	const gchar *crt = "./keys/client.crt";
-	const gchar *key = "./keys/client.key";
+	const gchar *ca = getFilepath_ca_cert();
+	const gchar *crt = getFilepath_client_cert();
+	const gchar *key = getFilepath_client_key();
 
 	if (this->port_control != NULL) {
 		LOG_WARNING("this.port_control is not NULL");
@@ -263,7 +290,7 @@ gboolean App::connect_server ()
 	recv_ret = TcpRecvRes(this->port_control, &res);
 
 	if ((recv_ret == TCP_RECV_PEER_DISCONNECTED || recv_ret == TCP_RECV_ERROR || recv_ret == TCP_RECV_TIMEOUT) ||
-			res == 0) {
+			res != RES_OK) {
 		LOG_WARNING("login fail");
 		disconnect_server();
 		show_dialog("Login Fail");
@@ -296,7 +323,7 @@ gboolean App::connect_server ()
 
 	this->connected_server = true;
 	this->port_recv_photo = this->port_secure;
-	this->handle_port_secure_id = g_idle_add(handle_port_secure, this);
+	this->handle_recv_data = g_idle_add(handle_port_secure, this);
 	ret = TRUE;
 
 exit:
@@ -330,9 +357,9 @@ gboolean App::disconnect_server ()
 		this->port_meta = NULL;
 	}
 
-	if(this->handle_port_secure_id) {
-		g_source_remove(this->handle_port_secure_id);
-		this->handle_port_secure_id = 0;
+	if(this->handle_recv_data) {
+		g_source_remove(this->handle_recv_data);
+		this->handle_recv_data = 0;
 	}
 
 	this->port_recv_photo = NULL;
@@ -468,40 +495,83 @@ void App::on_button_logout()
 
 void App::on_checkbox_secure_toggled()
 {
+	ssize_t recv_ret = 0;
+	guint8 res = 255;
 	LOG_INFO("on_checkbox_secure_toggled, %d", m_CheckButton_Secure.get_active());
 
 	if (this->connected_server) {
 		if (m_CheckButton_Secure.get_active()) {
 			// send secure mode
 			TcpSendSecureModeReq(this->port_control);
-			this->port_recv_photo = this->port_secure;
+			recv_ret = TcpRecvRes(this->port_control, &res);
+
+			if ((recv_ret == TCP_RECV_PEER_DISCONNECTED || recv_ret == TCP_RECV_ERROR || recv_ret == TCP_RECV_TIMEOUT) ||
+					res != RES_OK) {
+				LOG_WARNING("TcpRecvRes fail");
+				disconnect_server();
+				show_dialog("fail request. error no: 1");
+			}
+			else {
+				this->port_recv_photo = this->port_secure;
+			}
 		}
 		else {
 			// send non secure mode
 			TcpSendNonSecureModeReq(this->port_control);
-			this->port_recv_photo = this->port_nonsecure;
+			recv_ret = TcpRecvRes(this->port_control, &res);
+
+			if ((recv_ret == TCP_RECV_PEER_DISCONNECTED || recv_ret == TCP_RECV_ERROR || recv_ret == TCP_RECV_TIMEOUT) ||
+					res != RES_OK) {
+				LOG_WARNING("TcpRecvRes fail");
+				disconnect_server();
+				show_dialog("fail request. error no: 2");
+			}
+			else {
+				this->port_recv_photo = this->port_nonsecure;
+			}
 		}
 	}
 }
 
 void App::on_checkbox_test_toggled()
 {
+	ssize_t recv_ret = 0;
+	guint8 res = 255;
 	LOG_INFO("on_checkbox_test_toggled, %d", m_CheckButton_Test.get_active());
 
 	if (this->connected_server) {
 		if (m_CheckButton_Test.get_active()) {
 			// send test mode
 			TcpSendTestRunModeReq(this->port_control);
+			recv_ret = TcpRecvRes(this->port_control, &res);
+
+			if ((recv_ret == TCP_RECV_PEER_DISCONNECTED || recv_ret == TCP_RECV_ERROR || recv_ret == TCP_RECV_TIMEOUT) ||
+					res != RES_OK) {
+				LOG_WARNING("TcpRecvRes fail");
+				disconnect_server();
+				show_dialog("fail request. error no: 3");
+			}
 		}
 		else {
 			// send run mode
 			TcpSendRunModeReq(this->port_control);
+			recv_ret = TcpRecvRes(this->port_control, &res);
+
+			if ((recv_ret == TCP_RECV_PEER_DISCONNECTED || recv_ret == TCP_RECV_ERROR || recv_ret == TCP_RECV_TIMEOUT) ||
+					res != RES_OK) {
+				LOG_WARNING("TcpRecvRes fail");
+				disconnect_server();
+				show_dialog("fail request. error no: 4");
+			}
 		}
 	}
 }
 
 void App::on_button_pause_resume()
 {
+	ssize_t recv_ret = 0;
+	guint8 res = 255;
+
 	LOG_INFO("on_button_pause_resume");
 	if (this->connected_server) {
 		if (this->learn_mode_state == LEARN_NONE) {
@@ -509,6 +579,14 @@ void App::on_button_pause_resume()
 			this->learn_mode_state = LEARN_REQUESTED;
 			m_Button_PauseResume.set_label("Resume");
 			TcpSendCaptureReq(this->port_control);
+			recv_ret = TcpRecvRes(this->port_control, &res);
+
+			if ((recv_ret == TCP_RECV_PEER_DISCONNECTED || recv_ret == TCP_RECV_ERROR || recv_ret == TCP_RECV_TIMEOUT) ||
+					res != RES_OK) {
+				LOG_WARNING("TcpRecvRes fail");
+				disconnect_server();
+				show_dialog("fail request. error no: 5");
+			}
 		}
 		else {
 			// play = resume
@@ -521,11 +599,26 @@ void App::on_button_pause_resume()
 				// send secure mode
 				this->port_recv_photo = this->port_secure;
 				TcpSendSecureModeReq(this->port_control);
+				recv_ret = TcpRecvRes(this->port_control, &res);
+
+				if ((recv_ret == TCP_RECV_PEER_DISCONNECTED || recv_ret == TCP_RECV_ERROR || recv_ret == TCP_RECV_TIMEOUT) ||
+						res != RES_OK) {
+					LOG_WARNING("TcpRecvRes fail");
+					disconnect_server();
+					show_dialog("fail request. error no: 6");
+				}
 			}
 			else {
 				// send non secure mode
 				this->port_recv_photo = this->port_nonsecure;
 				TcpSendNonSecureModeReq(this->port_control);
+
+				if ((recv_ret == TCP_RECV_PEER_DISCONNECTED || recv_ret == TCP_RECV_ERROR || recv_ret == TCP_RECV_TIMEOUT) ||
+						res != RES_OK) {
+					LOG_WARNING("TcpRecvRes fail");
+					disconnect_server();
+					show_dialog("fail request. error no: 7");
+				}
 			}
 		}
 	}
@@ -533,13 +626,25 @@ void App::on_button_pause_resume()
 
 void App::on_button_learn_save()
 {
+	ssize_t recv_ret = 0;
+	guint8 res = 255;
 	LOG_INFO("on_button_learn_save");
 
 	if (this->connected_server) {
 		if (check_valid_input("^[a-zA-Z0-9 ,._'`-]+$", m_Entry_Name.get_text().c_str())) {
 			TcpSendSaveReq(this->port_control, m_Entry_Name.get_text().c_str());
-			this->on_button_pause_resume(); // resume again
-			this->show_dialog("save done");
+			recv_ret = TcpRecvRes(this->port_control, &res);
+
+			if ((recv_ret == TCP_RECV_PEER_DISCONNECTED || recv_ret == TCP_RECV_ERROR || recv_ret == TCP_RECV_TIMEOUT) ||
+					res != RES_OK) {
+				LOG_WARNING("TcpRecvRes fail");
+				disconnect_server();
+				show_dialog("fail request. error no: 8");
+			}
+			else {
+				this->on_button_pause_resume(); // resume again
+				this->show_dialog("save done");
+			}
 		}
 		else {
 			this->show_dialog("Name is only allowed alphabet, number, and ,._'`- character only");
