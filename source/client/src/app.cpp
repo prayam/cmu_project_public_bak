@@ -40,23 +40,27 @@ static gboolean handle_port_secure(gpointer data) {
 
 	while (app->connected_server) {
 		CLIENT_STATE current_state = app->get_current_app_state();
-		if ((prev_state == CLIENT_STATE_SECURE_RUN && (current_state == CLIENT_STATE_NONSECURE_RUN || current_state == CLIENT_STATE_NONSECURE_TESTRUN)) ||
-			(prev_state == CLIENT_STATE_SECURE_TESTRUN && (current_state == CLIENT_STATE_NONSECURE_RUN || current_state == CLIENT_STATE_NONSECURE_TESTRUN)) ||
-			(prev_state == CLIENT_STATE_NONSECURE_RUN && (current_state == CLIENT_STATE_SECURE_RUN || current_state == CLIENT_STATE_SECURE_TESTRUN)) ||
-			(prev_state == CLIENT_STATE_NONSECURE_TESTRUN && (current_state == CLIENT_STATE_SECURE_RUN || current_state == CLIENT_STATE_SECURE_TESTRUN))) {
+		if (prev_state != current_state) {
 			// if mode is changed between *secure* and *non-secure*,
 			//  1. client request the change mode to sever and change the receiving channel
 			//  2. server change the sending channel after receiving the rqeuest
 			// so, the some data is remain in the tcp recv buffer since the time interval between step 1~2.
 			// to prevent showing the date received 1~2, skip some pictures.
 			LOG_WARNING("enable skipping pictures");
-			skip_picture_count = 20;
+
+			if (current_state == CLIENT_STATE_SECURE_RUN || current_state == CLIENT_STATE_NONSECURE_RUN) {
+				skip_picture_count = 15;
+			}
+			else if (current_state == CLIENT_STATE_SECURE_TESTRUN || current_state == CLIENT_STATE_NONSECURE_TESTRUN) {
+				skip_picture_count = 6;
+			}
 		}
 		prev_state = current_state;
+
+recv:
 		recv_meta = FALSE;
 		recv_photo = FALSE;
 
-recv:
 		if (app->port_recv_photo != NULL) {
 			if (app->port_recv_photo->isSsl) {
 				fd = SSL_get_fd(app->port_recv_photo->ssl);
@@ -66,8 +70,6 @@ recv:
 			}
 
 			if (app->get_current_app_state() == CLIENT_STATE_LEARN && app->learn_mode_state == LEARN_REQUESTED) {
-				LOG_INFO("enter");
-
 				meta_vector.clear();
 
 				// recv photo
@@ -117,10 +119,16 @@ recv:
 				}
 
 				if(meta_vector.size() != 0) {
+					meta_vector.resize(1);
 					app->learn_mode_state = LEARN_READY;
 					app->m_Entry_Name.set_sensitive(true);
 					app->m_Label_Name.set_sensitive(true);
 					LOG_INFO("Ready Learn");
+				}
+				else {
+					app->learn_mode_state = LEARN_NOTREADY;
+					app->m_Button_PauseResume.set_label("Resume\nneed to pause again\nto Save Picture");
+					LOG_INFO("NotReady to Learn. need to pause again");
 				}
 			}
 			else {
@@ -156,9 +164,13 @@ recv:
 						recv_meta = TRUE;
 					}
 				}
-				while (skip_picture_count > 0) {
-					skip_picture_count--;
-					LOG_INFO("skip index %d", skip_picture_count);
+
+				if (skip_picture_count > 0) {
+					if (recv_photo) {
+						skip_picture_count--;
+					}
+
+					waitKey(10);
 					goto recv;
 				}
 			}
@@ -259,11 +271,11 @@ App::App()
 	m_Entry_Password.set_visibility(false);
 	m_Entry_Password.set_input_purpose(Gtk::INPUT_PURPOSE_PASSWORD);
 
-	m_Entry_Password.signal_changed().connect( sigc::mem_fun(*this, &App::on_entry_changed) );
-	m_Entry_Password.signal_activate().connect( sigc::mem_fun(*this, &App::on_entry_id_pass_changed) );
-	m_Entry_Id.signal_changed().connect( sigc::mem_fun(*this, &App::on_entry_changed) );
-	m_Entry_Id.signal_activate().connect( sigc::mem_fun(*this, &App::on_entry_id_pass_changed) );
-	m_Entry_Name.signal_changed().connect( sigc::mem_fun(*this, &App::on_entry_changed) );
+	m_Entry_Password.signal_changed().connect( sigc::mem_fun(*this, &App::on_entry_id_password_changed) );
+	m_Entry_Password.signal_activate().connect( sigc::mem_fun(*this, &App::on_entry_id_pass_entered) );
+	m_Entry_Id.signal_changed().connect( sigc::mem_fun(*this, &App::on_entry_id_password_changed) );
+	m_Entry_Id.signal_activate().connect( sigc::mem_fun(*this, &App::on_entry_id_pass_entered) );
+	m_Entry_Name.signal_changed().connect( sigc::mem_fun(*this, &App::on_entry_name_changed) );
 
 	m_CheckButton_Secure.set_active(true);
 	m_CheckButton_Test.set_active(false);
@@ -733,15 +745,8 @@ void App::on_button_learn_save()
 	}
 }
 
-void App::on_entry_changed()
+void App::on_entry_name_changed()
 {
-	if (m_Entry_Id.get_text().length() != 0 && m_Entry_Password.get_text().length() != 0) {
-		m_Button_Login.set_sensitive(true);
-	}
-	else {
-		m_Button_Login.set_sensitive(false);
-	}
-
 	if (m_Entry_Name.get_text().length() != 0) {
 		m_Button_LearnSave.set_sensitive(true);
 	}
@@ -750,7 +755,17 @@ void App::on_entry_changed()
 	}
 }
 
-void App::on_entry_id_pass_changed()
+void App::on_entry_id_password_changed()
+{
+	if (m_Entry_Id.get_text().length() != 0 && m_Entry_Password.get_text().length() != 0) {
+		m_Button_Login.set_sensitive(true);
+	}
+	else {
+		m_Button_Login.set_sensitive(false);
+	}
+}
+
+void App::on_entry_id_pass_entered()
 {
 	if (m_Entry_Id.get_text().length() != 0 && m_Entry_Password.get_text().length() != 0) {
 		this->on_button_login();

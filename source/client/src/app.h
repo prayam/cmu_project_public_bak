@@ -17,6 +17,7 @@ typedef enum {
 typedef enum {
 	LEARN_NONE,
 	LEARN_REQUESTED,
+	LEARN_NOTREADY,
 	LEARN_READY,
 	LEARN_DONE
 } LEARN_MODE_STATE;
@@ -47,8 +48,9 @@ public:
 	void on_button_login();
 	void on_button_pause_resume();
 	void on_button_learn_save();
-	void on_entry_changed();
-	void on_entry_id_pass_changed();
+	void on_entry_name_changed();
+	void on_entry_id_password_changed();
+	void on_entry_id_pass_entered();
 	virtual bool on_delete_event(GdkEventAny* any_event) override;
 
 	//Child widgets:

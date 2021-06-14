@@ -135,7 +135,7 @@ bool TcpSendLoginData(TTcpConnectedPort * TcpConnectedPort, const char* userid, 
 	}
 
 	ret = TRUE;
-	LOG_HEX_DUMP_DEBUG(req, req_len, "read req. len: %ld", write_ret);
+	LOG_DEBUG("done TcpSendLoginData");
 
 exit:
 	g_free(req);
@@ -202,7 +202,7 @@ ssize_t TcpRecvLoginData(TTcpConnectedPort * TcpConnectedPort, char** userid, ch
 		goto exit;
 	}
 
-	LOG_HEX_DUMP_DEBUG(req, req_len, "read req");
+	LOG_DEBUG("done TcpRecvLoginData");
 
 exit:
 	g_free(req);
@@ -236,7 +236,7 @@ bool TcpSendLogoutReq(TTcpConnectedPort * TcpConnectedPort)
 	}
 
 	ret = TRUE;
-	LOG_HEX_DUMP_DEBUG(req, req_len, "read req. len: %ld", write_ret);
+	LOG_DEBUG("done TcpSendLogoutReq");
 
 exit:
 	g_free(req);
@@ -270,7 +270,7 @@ bool TcpSendSecureModeReq(TTcpConnectedPort * TcpConnectedPort)
 	}
 
 	ret = TRUE;
-	LOG_HEX_DUMP_DEBUG(req, req_len, "read req. len: %ld", write_ret);
+	LOG_DEBUG("done TcpSendSecureModeReq");
 
 exit:
 	g_free(req);
@@ -304,7 +304,7 @@ bool TcpSendNonSecureModeReq(TTcpConnectedPort * TcpConnectedPort)
 	}
 
 	ret = TRUE;
-	LOG_HEX_DUMP_DEBUG(req, req_len, "read req. len: %ld", write_ret);
+	LOG_DEBUG("done TcpSendNonSecureModeReq");
 
 exit:
 	g_free(req);
@@ -338,7 +338,7 @@ bool TcpSendTestRunModeReq(TTcpConnectedPort * TcpConnectedPort)
 	}
 
 	ret = TRUE;
-	LOG_HEX_DUMP_DEBUG(req, req_len, "read req. len: %ld", write_ret);
+	LOG_DEBUG("done TcpSendTestRunModeReq");
 
 exit:
 	g_free(req);
@@ -372,7 +372,7 @@ bool TcpSendRunModeReq(TTcpConnectedPort * TcpConnectedPort)
 	}
 
 	ret = TRUE;
-	LOG_HEX_DUMP_DEBUG(req, req_len, "read req. len: %ld", write_ret);
+	LOG_DEBUG("done TcpSendRunModeReq");
 
 exit:
 	g_free(req);
@@ -406,7 +406,7 @@ bool TcpSendCaptureReq(TTcpConnectedPort * TcpConnectedPort)
 	}
 
 	ret = TRUE;
-	LOG_HEX_DUMP_DEBUG(req, req_len, "read req. len: %ld", write_ret);
+	LOG_DEBUG("done TcpSendCaptureReq");
 
 exit:
 	g_free(req);
@@ -462,7 +462,7 @@ bool TcpSendSaveReq(TTcpConnectedPort * TcpConnectedPort, const char *name)
 	}
 
 	ret = TRUE;
-	LOG_HEX_DUMP_DEBUG(req, req_len, "read req. len: %ld", write_ret);
+	LOG_DEBUG("done TcpSendSaveReq");
 
 exit:
 	g_free(req);
@@ -513,7 +513,7 @@ ssize_t TcpRecvCtrlReq(TTcpConnectedPort * TcpConnectedPort, char *req_id, void 
 		}
 	}
 
-	LOG_HEX_DUMP_DEBUG(req, req_len, "read req");
+	LOG_DEBUG("done TcpRecvCtrlReq");
 
 exit:
 	g_free(req);
