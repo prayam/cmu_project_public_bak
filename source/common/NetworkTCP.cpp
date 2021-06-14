@@ -685,6 +685,8 @@ void CloseTcpConnectedPort(TTcpConnectedPort **TcpConnectedPort)
 //		- -1 = TCP_RECV_ERROR
 //		- -2 = TCP_RECV_TIMEOUT
 //-----------------------------------------------------------------
+// TCP_RECV_TIMEOUT_VALUE should be microseconds unit G_USEC_PER_SEC = 1,000,000 micro second = 1sec. defined at glib
+#define TCP_RECV_TIMEOUT_VALUE G_USEC_PER_SEC
 ssize_t ReadDataTcp(TTcpConnectedPort *TcpConnectedPort, unsigned char *data, size_t length)
 {
 	int ret;
@@ -703,8 +705,8 @@ ssize_t ReadDataTcp(TTcpConnectedPort *TcpConnectedPort, unsigned char *data, si
 	for (size_t i = 0; i < length; i += bytes)
 	{
 		FD_ZERO(&fdset);
-		tv.tv_sec = 0;
-		tv.tv_usec = 100000; //100ms
+		tv.tv_sec = TCP_RECV_TIMEOUT_VALUE / G_USEC_PER_SEC;
+		tv.tv_usec = TCP_RECV_TIMEOUT_VALUE % G_USEC_PER_SEC;
 
 		if (TcpConnectedPort->isSsl) {
 			FD_SET(sslfd, &fdset);
