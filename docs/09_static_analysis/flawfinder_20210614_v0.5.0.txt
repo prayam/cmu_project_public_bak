@@ -1,0 +1,202 @@
+Flawfinder version 2.0.17, (C) 2001-2019 David A. Wheeler.
+Number of rules (primarily dangerous function names) in C/C++ ruleset: 222
+Examining ../cmu_project/source/common/TcpSendRecvJpeg.h
+Examining ../cmu_project/source/common/NetworkTCP.h
+Examining ../cmu_project/source/common/openssl_hostname_validation.cpp
+Examining ../cmu_project/source/common/CommonStruct.h
+Examining ../cmu_project/source/common/openssl_hostname_validation.h
+Examining ../cmu_project/source/common/Logger.cpp
+Examining ../cmu_project/source/common/TcpSendRecvJpeg.cpp
+Examining ../cmu_project/source/common/Logger.h
+Examining ../cmu_project/source/common/NetworkTCP.cpp
+Examining ../cmu_project/source/server/libs/libsslcrypto/sealck.h
+Examining ../cmu_project/source/server/trt_l2norm_helper/l2norm_helper.cpp
+Examining ../cmu_project/source/server/trt_l2norm_helper/l2norm_helper.h
+Examining ../cmu_project/source/server/src/baseEngine.h
+Examining ../cmu_project/source/server/src/onet_rt.cpp
+Examining ../cmu_project/source/server/src/rnet_rt.h
+Examining ../cmu_project/source/server/src/videoStreamer.h
+Examining ../cmu_project/source/server/src/faceNet.h
+Examining ../cmu_project/source/server/src/pnet_rt.h
+Examining ../cmu_project/source/server/src/videoStreamer.cpp
+Examining ../cmu_project/source/server/src/network.cpp
+Examining ../cmu_project/source/server/src/baseEngine.cpp
+Examining ../cmu_project/source/server/src/network.h
+Examining ../cmu_project/source/server/src/pBox.h
+Examining ../cmu_project/source/server/src/mtcnn.h
+Examining ../cmu_project/source/server/src/faceNet.cpp
+Examining ../cmu_project/source/server/src/main.cpp
+Examining ../cmu_project/source/server/src/common.cpp
+Examining ../cmu_project/source/server/src/mtcnn.cpp
+Examining ../cmu_project/source/server/src/rnet_rt.cpp
+Examining ../cmu_project/source/server/src/onet_rt.h
+Examining ../cmu_project/source/server/src/common.h
+Examining ../cmu_project/source/server/src/pnet_rt.cpp
+Examining ../cmu_project/source/client/src/app.h
+Examining ../cmu_project/source/client/src/app.cpp
+Examining ../cmu_project/source/client/src/main.cpp
+Examining ../cmu_project/source/custom/two-way-ssl-c/server.c
+Examining ../cmu_project/source/custom/two-way-ssl-c/main.c
+Examining ../cmu_project/source/custom/two-way-ssl-c/openssl_hostname_validation.c
+Examining ../cmu_project/source/custom/two-way-ssl-c/client.h
+Examining ../cmu_project/source/custom/two-way-ssl-c/openssl_hostname_validation.h
+Examining ../cmu_project/source/custom/two-way-ssl-c/client.c
+Examining ../cmu_project/source/custom/two-way-ssl-c/server.h
+
+FINAL RESULTS:
+
+../cmu_project/source/common/CommonStruct.h:59:  [2] (buffer) char:
+  Statically-sized arrays can be improperly restricted, leading to potential
+  overflows or other issues (CWE-119!/CWE-120). Perform bounds checking, use
+  functions that limit length, or ensure that the size is larger than the
+  maximum possible length.
+../cmu_project/source/common/CommonStruct.h:67:  [2] (buffer) char:
+  Statically-sized arrays can be improperly restricted, leading to potential
+  overflows or other issues (CWE-119!/CWE-120). Perform bounds checking, use
+  functions that limit length, or ensure that the size is larger than the
+  maximum possible length.
+../cmu_project/source/common/Logger.cpp:135:  [2] (buffer) char:
+  Statically-sized arrays can be improperly restricted, leading to potential
+  overflows or other issues (CWE-119!/CWE-120). Perform bounds checking, use
+  functions that limit length, or ensure that the size is larger than the
+  maximum possible length.
+../cmu_project/source/common/Logger.cpp:138:  [2] (buffer) char:
+  Statically-sized arrays can be improperly restricted, leading to potential
+  overflows or other issues (CWE-119!/CWE-120). Perform bounds checking, use
+  functions that limit length, or ensure that the size is larger than the
+  maximum possible length.
+../cmu_project/source/common/Logger.cpp:139:  [2] (buffer) char:
+  Statically-sized arrays can be improperly restricted, leading to potential
+  overflows or other issues (CWE-119!/CWE-120). Perform bounds checking, use
+  functions that limit length, or ensure that the size is larger than the
+  maximum possible length.
+../cmu_project/source/common/TcpSendRecvJpeg.cpp:123:  [2] (buffer) memcpy:
+  Does not check for buffer overflows when copying to destination (CWE-120).
+  Make sure destination can always hold the source data.
+../cmu_project/source/common/TcpSendRecvJpeg.cpp:128:  [2] (buffer) memcpy:
+  Does not check for buffer overflows when copying to destination (CWE-120).
+  Make sure destination can always hold the source data.
+../cmu_project/source/custom/two-way-ssl-c/client.c:76:  [2] (buffer) char:
+  Statically-sized arrays can be improperly restricted, leading to potential
+  overflows or other issues (CWE-119!/CWE-120). Perform bounds checking, use
+  functions that limit length, or ensure that the size is larger than the
+  maximum possible length.
+../cmu_project/source/custom/two-way-ssl-c/server.c:157:  [2] (buffer) char:
+  Statically-sized arrays can be improperly restricted, leading to potential
+  overflows or other issues (CWE-119!/CWE-120). Perform bounds checking, use
+  functions that limit length, or ensure that the size is larger than the
+  maximum possible length.
+../cmu_project/source/custom/two-way-ssl-c/server.c:171:  [2] (integer) atoi:
+  Unless checked, the resulting number can exceed the expected range
+  (CWE-190). If source untrusted, check both minimum and maximum, even if the
+  input had no minus sign (large numbers can roll over into negative number;
+  consider saving to an unsigned value if that is intended).
+../cmu_project/source/server/src/baseEngine.cpp:92:  [2] (misc) open:
+  Check when opening files - can an attacker redirect it (via symlinks),
+  force the opening of special file type (e.g., device files), move things
+  around to create a race condition, control its ancestors, or change its
+  contents? (CWE-362).
+../cmu_project/source/server/src/faceNet.cpp:93:  [2] (misc) open:
+  Check when opening files - can an attacker redirect it (via symlinks),
+  force the opening of special file type (e.g., device files), move things
+  around to create a race condition, control its ancestors, or change its
+  contents? (CWE-362).
+../cmu_project/source/server/src/main.cpp:135:  [2] (integer) atoi:
+  Unless checked, the resulting number can exceed the expected range
+  (CWE-190). If source untrusted, check both minimum and maximum, even if the
+  input had no minus sign (large numbers can roll over into negative number;
+  consider saving to an unsigned value if that is intended).
+../cmu_project/source/server/src/mtcnn.cpp:125:  [2] (buffer) memcpy:
+  Does not check for buffer overflows when copying to destination (CWE-120).
+  Make sure destination can always hold the source data.
+../cmu_project/source/server/src/mtcnn.cpp:157:  [2] (buffer) memcpy:
+  Does not check for buffer overflows when copying to destination (CWE-120).
+  Make sure destination can always hold the source data.
+../cmu_project/source/server/src/pnet_rt.cpp:24:  [2] (misc) open:
+  Check when opening files - can an attacker redirect it (via symlinks),
+  force the opening of special file type (e.g., device files), move things
+  around to create a race condition, control its ancestors, or change its
+  contents? (CWE-362).
+../cmu_project/source/server/src/pnet_rt.cpp:41:  [2] (misc) open:
+  Check when opening files - can an attacker redirect it (via symlinks),
+  force the opening of special file type (e.g., device files), move things
+  around to create a race condition, control its ancestors, or change its
+  contents? (CWE-362).
+../cmu_project/source/common/TcpSendRecvJpeg.cpp:99:  [1] (buffer) strlen:
+  Does not handle strings that are not \0-terminated; if given one it may
+  perform an over-read (it could cause a crash if unprotected) (CWE-126).
+../cmu_project/source/common/TcpSendRecvJpeg.cpp:100:  [1] (buffer) strlen:
+  Does not handle strings that are not \0-terminated; if given one it may
+  perform an over-read (it could cause a crash if unprotected) (CWE-126).
+../cmu_project/source/common/TcpSendRecvJpeg.cpp:102:  [1] (buffer) strlen:
+  Does not handle strings that are not \0-terminated; if given one it may
+  perform an over-read (it could cause a crash if unprotected) (CWE-126).
+../cmu_project/source/common/TcpSendRecvJpeg.cpp:103:  [1] (buffer) strlen:
+  Does not handle strings that are not \0-terminated; if given one it may
+  perform an over-read (it could cause a crash if unprotected) (CWE-126).
+../cmu_project/source/common/openssl_hostname_validation.cpp:59:  [1] (buffer) strlen:
+  Does not handle strings that are not \0-terminated; if given one it may
+  perform an over-read (it could cause a crash if unprotected) (CWE-126).
+../cmu_project/source/common/openssl_hostname_validation.cpp:108:  [1] (buffer) strlen:
+  Does not handle strings that are not \0-terminated; if given one it may
+  perform an over-read (it could cause a crash if unprotected) (CWE-126).
+../cmu_project/source/custom/two-way-ssl-c/client.c:148:  [1] (buffer) strlen:
+  Does not handle strings that are not \0-terminated; if given one it may
+  perform an over-read (it could cause a crash if unprotected) (CWE-126).
+../cmu_project/source/custom/two-way-ssl-c/openssl_hostname_validation.c:59:  [1] (buffer) strlen:
+  Does not handle strings that are not \0-terminated; if given one it may
+  perform an over-read (it could cause a crash if unprotected) (CWE-126).
+../cmu_project/source/custom/two-way-ssl-c/openssl_hostname_validation.c:104:  [1] (buffer) strlen:
+  Does not handle strings that are not \0-terminated; if given one it may
+  perform an over-read (it could cause a crash if unprotected) (CWE-126).
+../cmu_project/source/server/src/baseEngine.cpp:55:  [1] (buffer) read:
+  Check buffer boundaries if used in a loop including recursive loops
+  (CWE-120, CWE-20).
+../cmu_project/source/server/src/faceNet.cpp:44:  [1] (buffer) read:
+  Check buffer boundaries if used in a loop including recursive loops
+  (CWE-120, CWE-20).
+../cmu_project/source/server/src/main.cpp:33:  [1] (buffer) read:
+  Check buffer boundaries if used in a loop including recursive loops
+  (CWE-120, CWE-20).
+../cmu_project/source/server/trt_l2norm_helper/l2norm_helper.cpp:27:  [1] (buffer) read:
+  Check buffer boundaries if used in a loop including recursive loops
+  (CWE-120, CWE-20).
+../cmu_project/source/server/trt_l2norm_helper/l2norm_helper.cpp:28:  [1] (buffer) read:
+  Check buffer boundaries if used in a loop including recursive loops
+  (CWE-120, CWE-20).
+../cmu_project/source/server/trt_l2norm_helper/l2norm_helper.cpp:29:  [1] (buffer) read:
+  Check buffer boundaries if used in a loop including recursive loops
+  (CWE-120, CWE-20).
+../cmu_project/source/server/trt_l2norm_helper/l2norm_helper.cpp:30:  [1] (buffer) read:
+  Check buffer boundaries if used in a loop including recursive loops
+  (CWE-120, CWE-20).
+../cmu_project/source/server/trt_l2norm_helper/l2norm_helper.cpp:31:  [1] (buffer) read:
+  Check buffer boundaries if used in a loop including recursive loops
+  (CWE-120, CWE-20).
+../cmu_project/source/server/trt_l2norm_helper/l2norm_helper.cpp:32:  [1] (buffer) read:
+  Check buffer boundaries if used in a loop including recursive loops
+  (CWE-120, CWE-20).
+../cmu_project/source/server/trt_l2norm_helper/l2norm_helper.h:126:  [1] (buffer) read:
+  Check buffer boundaries if used in a loop including recursive loops
+  (CWE-120, CWE-20).
+
+ANALYSIS SUMMARY:
+
+Hits = 36
+Lines analyzed = 4993 in approximately 0.13 seconds (37725 lines/second)
+Physical Source Lines of Code (SLOC) = 3516
+Hits@level = [0]  90 [1]  19 [2]  17 [3]   0 [4]   0 [5]   0
+Hits@level+ = [0+] 126 [1+]  36 [2+]  17 [3+]   0 [4+]   0 [5+]   0
+Hits/KSLOC@level+ = [0+] 35.8362 [1+] 10.2389 [2+] 4.83504 [3+]   0 [4+]   0 [5+]   0
+Dot directories skipped = 2 (--followdotdir overrides)
+Minimum risk level = 1
+
+Not every hit is necessarily a security vulnerability.
+You can inhibit a report by adding a comment in this form:
+// flawfinder: ignore
+Make *sure* it's a false positive!
+You can use the option --neverignore to show these.
+
+There may be other security vulnerabilities; review your code!
+See 'Secure Programming HOWTO'
+(https://dwheeler.com/secure-programs) for more information.

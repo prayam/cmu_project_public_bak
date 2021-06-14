@@ -182,7 +182,7 @@ int main(int argc, char *argv[])
 
 		char *userid;
 		char *userpw;
-		if (TcpRecvLoginData(TcpConnectedPort_control,&userid,&userpw)<0) {
+		if (TcpRecvLoginData(TcpConnectedPort_control,&userid,&userpw) <= 0) { /* Timeout or error */
 			CloseTcpConnectedPort(&TcpConnectedPort_control);
 			continue;
 		}
@@ -192,7 +192,7 @@ int main(int argc, char *argv[])
 			continue;
 		}
 		else {
-			if (TcpSendRes(TcpConnectedPort_control, 1) < 0) {
+			if (TcpSendRes(TcpConnectedPort_control, 1) == FALSE) {
 				CloseTcpConnectedPort(&TcpConnectedPort_control);
 				continue;
 			}
@@ -270,7 +270,7 @@ int main(int argc, char *argv[])
 			faceNet.resetVariables();
 
 			if (TcpSendImageAsJpeg(DataPort,frame)<0)  break;
-			if (TcpSendMeta(TcpConnectedPort_meta, meta)<0)  break;
+			if (TcpSendMeta(TcpConnectedPort_meta, meta) == FALSE)  break;
 			//cv::imshow("VideoSource", frame);
 			nbFrames++;
 			if (readysocket(TcpConnectedPort_control->ConnectedFd))
@@ -278,7 +278,7 @@ int main(int argc, char *argv[])
 				char req_id;
 				void *req_parsed_data;
 wait_req:
-				if (TcpRecvCtrlReq(TcpConnectedPort_control,&req_id,&req_parsed_data)<0) break;
+				if (TcpRecvCtrlReq(TcpConnectedPort_control,&req_id,&req_parsed_data) <= 0) break;
 				if (req_id == REQ_LOGOUT) {
 					break;
 				} else if (req_id == REQ_DISCON) {
@@ -332,7 +332,7 @@ exit_req:
 
 					outputBbox = mtCNN.findFace(frame);
 					if (TcpSendImageAsJpeg(DataPort,frame)<0)  break;
-					if (TcpSendMeta(TcpConnectedPort_meta, meta)<0)  break;
+					if (TcpSendMeta(TcpConnectedPort_meta, meta) == FALSE)  break;
 					//cv::imshow("VideoSource", frame);
 					faceNet.addNewFace(frame, outputBbox);
 					auto dTimeEnd = chrono::steady_clock::now();

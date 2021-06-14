@@ -1,0 +1,101 @@
+File, Line, Severity, Id, Summary
+temp\cmu_project\source\client\src\app.cpp,109,style,variableScope,The scope of the variable 'retvalue' can be reduced.
+temp\cmu_project\source\common\NetworkTCP.cpp,116,style,variableScope,The scope of the variable 'line' can be reduced.
+temp\cmu_project\source\common\NetworkTCP.cpp,43,warning,constStatement,Unused variable value 'TcpListenPort'
+temp\cmu_project\source\common\TcpSendRecvJpeg.cpp,214,performance,passedByValue,Function parameter 'meta' should be passed by const reference.
+temp\cmu_project\source\common\TcpSendRecvJpeg.cpp,144,style,unusedFunction,The function 'TcpRecvLoginData' is never used.
+temp\cmu_project\source\custom\two-way-ssl-c\server.c,192,style,knownConditionTrueFalse,Condition 'do_work!=0' is always true
+temp\cmu_project\source\custom\two-way-ssl-c\server.c,33,style,variableScope,The scope of the variable 'line' can be reduced.
+temp\cmu_project\source\server\src\baseEngine.cpp,9,warning,uninitMemberVar,Member variable 'baseEngine::context' is not initialized in the constructor.
+temp\cmu_project\source\server\src\common.cpp,50,style,variableScope,The scope of the variable 'entry' can be reduced.
+temp\cmu_project\source\server\src\common.cpp,22,style,unusedFunction,The function 'calculateBindingBufferSizes' is never used.
+temp\cmu_project\source\server\src\common.cpp,8,style,unusedFunction,The function 'safeCudaMalloc' is never used.
+temp\cmu_project\source\server\src\faceNet.cpp,6,warning,uninitMemberVar,Member variable 'FaceNetClassifier::m_output' is not initialized in the constructor.
+temp\cmu_project\source\server\src\faceNet.cpp,15,performance,useInitializationList,Variable 'm_gLogger' is assigned in constructor body. Consider performing initialization in initialization list.
+temp\cmu_project\source\server\src\faceNet.cpp,16,performance,useInitializationList,Variable 'm_dtype' is assigned in constructor body. Consider performing initialization in initialization list.
+temp\cmu_project\source\server\src\faceNet.cpp,17,performance,useInitializationList,Variable 'm_uffFile' is assigned in constructor body. Consider performing initialization in initialization list.
+temp\cmu_project\source\server\src\faceNet.cpp,18,performance,useInitializationList,Variable 'm_engineFile' is assigned in constructor body. Consider performing initialization in initialization list.
+temp\cmu_project\source\server\src\faceNet.cpp,213,style,variableScope,The scope of the variable 'currDistance' can be reduced.
+temp\cmu_project\source\server\src\faceNet.cpp,216,style,unusedLabel,Label 'std' is not used.
+temp\cmu_project\source\server\src\faceNet.cpp,7,performance,passedByValue,Function parameter 'uffFile' should be passed by const reference.
+temp\cmu_project\source\server\src\faceNet.cpp,7,performance,passedByValue,Function parameter 'engineFile' should be passed by const reference.
+temp\cmu_project\source\server\src\faceNet.cpp,182,performance,passedByValue,Function parameter 'outputBbox' should be passed by const reference.
+temp\cmu_project\source\server\src\faceNet.cpp,183,performance,passedByValue,Function parameter 'className' should be passed by const reference.
+temp\cmu_project\source\server\src\faceNet.cpp,200,performance,passedByValue,Function parameter 'outputBbox' should be passed by const reference.
+temp\cmu_project\source\server\src\faceNet.cpp,259,performance,passedByValue,Function parameter 'outputBbox' should be passed by const reference.
+temp\cmu_project\source\server\src\faceNet.cpp,109,performance,postfixOperator,Prefer prefix ++/-- operators for non-primitive types.
+temp\cmu_project\source\server\src\faceNet.cpp,300,style,unusedFunction,The function 'elementSize' is never used.
+temp\cmu_project\source\server\src\rnet_rt.h,24,style,noExplicitConstructor,Class 'Rnet' has a constructor with 1 argument that is not explicit.
+temp\cmu_project\source\server\src\rnet_rt.h,17,style,missingOverride,The function 'init' overrides a function in a base class but is not marked with a 'override' specifier.
+temp\cmu_project\source\server\src\onet_rt.h,23,style,noExplicitConstructor,Class 'Onet' has a constructor with 1 argument that is not explicit.
+temp\cmu_project\source\server\src\onet_rt.h,16,style,missingOverride,The function 'init' overrides a function in a base class but is not marked with a 'override' specifier.
+temp\cmu_project\source\server\src\pnet_rt.h,21,style,missingOverride,The function 'init' overrides a function in a base class but is not marked with a 'override' specifier.
+temp\cmu_project\source\server\src\faceNet.h,34,performance,passedByValue,Function parameter 'uffFile' should be passed by const reference.
+temp\cmu_project\source\server\src\faceNet.h,34,performance,passedByValue,Function parameter 'engineFile' should be passed by const reference.
+temp\cmu_project\source\server\src\faceNet.h,42,performance,passedByValue,Function parameter 'className' should be passed by const reference.
+temp\cmu_project\source\server\src\main.cpp,45,performance,passedByValue,Function parameter 'userid' should be passed by const reference.
+temp\cmu_project\source\server\src\main.cpp,45,performance,passedByValue,Function parameter 'userpw' should be passed by const reference.
+temp\cmu_project\source\server\src\main.cpp,192,style,unreadVariable,Variable 'TcpConnectedPort_meta' is assigned a value that is never used.
+temp\cmu_project\source\server\src\mtcnn.cpp,39,warning,noCopyConstructor,Class 'mtcnn' does not have a copy constructor which is recommended since it has dynamic memory/resource allocation(s).
+temp\cmu_project\source\server\src\mtcnn.cpp,39,warning,noOperatorEq,Class 'mtcnn' does not have a operator= which is recommended since it has dynamic memory/resource allocation(s).
+temp\cmu_project\source\server\src\mtcnn.cpp,79,style,unreadVariable,Variable 'first_time' is assigned a value that is never used.
+temp\cmu_project\source\server\src\mtcnn.cpp,141,style,unreadVariable,Variable 'second_time' is assigned a value that is never used.
+temp\cmu_project\source\server\src\mtcnn.cpp,147,style,unreadVariable,Variable 'third_time' is assigned a value that is never used.
+temp\cmu_project\source\server\src\mtcnn.cpp,25,performance,postfixOperator,Prefer prefix ++/-- operators for non-primitive types.
+temp\cmu_project\source\server\src\mtcnn.cpp,93,performance,postfixOperator,Prefer prefix ++/-- operators for non-primitive types.
+temp\cmu_project\source\server\src\mtcnn.cpp,117,performance,postfixOperator,Prefer prefix ++/-- operators for non-primitive types.
+temp\cmu_project\source\server\src\mtcnn.cpp,148,performance,postfixOperator,Prefer prefix ++/-- operators for non-primitive types.
+temp\cmu_project\source\server\src\network.cpp,34,style,variableScope,The scope of the variable 'order' can be reduced.
+temp\cmu_project\source\server\src\network.cpp,34,style,unreadVariable,Variable 'order' is assigned a value that is never used.
+temp\cmu_project\source\server\src\network.cpp,84,style,unreadVariable,Variable 'bbw' is assigned a value that is never used.
+temp\cmu_project\source\server\src\network.cpp,84,style,unreadVariable,Variable 'bbh' is assigned a value that is never used.
+temp\cmu_project\source\server\src\network.cpp,84,style,unreadVariable,Variable 'maxSide' is assigned a value that is never used.
+temp\cmu_project\source\server\src\network.cpp,85,style,unreadVariable,Variable 'h' is assigned a value that is never used.
+temp\cmu_project\source\server\src\network.cpp,85,style,unreadVariable,Variable 'w' is assigned a value that is never used.
+temp\cmu_project\source\server\src\network.cpp,86,style,unreadVariable,Variable 'x1' is assigned a value that is never used.
+temp\cmu_project\source\server\src\network.cpp,86,style,unreadVariable,Variable 'y1' is assigned a value that is never used.
+temp\cmu_project\source\server\src\network.cpp,86,style,unreadVariable,Variable 'x2' is assigned a value that is never used.
+temp\cmu_project\source\server\src\network.cpp,86,style,unreadVariable,Variable 'y2' is assigned a value that is never used.
+temp\cmu_project\source\server\src\network.cpp,66,performance,postfixOperator,Prefer prefix ++/-- operators for non-primitive types.
+temp\cmu_project\source\server\src\network.cpp,87,performance,postfixOperator,Prefer prefix ++/-- operators for non-primitive types.
+temp\cmu_project\source\server\src\onet_rt.cpp,36,warning,noCopyConstructor,Class 'Onet' does not have a copy constructor which is recommended since it has dynamic memory/resource allocation(s).
+temp\cmu_project\source\server\src\onet_rt.cpp,36,warning,noOperatorEq,Class 'Onet' does not have a operator= which is recommended since it has dynamic memory/resource allocation(s).
+temp\cmu_project\source\server\src\onet_rt.cpp,89,style,constParameter,Parameter 'image' can be declared with const
+temp\cmu_project\source\server\src\pnet_rt.cpp,57,warning,noCopyConstructor,Class 'Pnet' does not have a copy constructor which is recommended since it has dynamic memory/resource allocation(s).
+temp\cmu_project\source\server\src\pnet_rt.cpp,57,warning,noOperatorEq,Class 'Pnet' does not have a operator= which is recommended since it has dynamic memory/resource allocation(s).
+temp\cmu_project\source\server\src\pnet_rt.cpp,100,style,constParameter,Parameter 'image' can be declared with const
+temp\cmu_project\source\server\src\rnet_rt.cpp,37,warning,noCopyConstructor,Class 'Rnet' does not have a copy constructor which is recommended since it has dynamic memory/resource allocation(s).
+temp\cmu_project\source\server\src\rnet_rt.cpp,37,warning,noOperatorEq,Class 'Rnet' does not have a operator= which is recommended since it has dynamic memory/resource allocation(s).
+temp\cmu_project\source\server\src\rnet_rt.cpp,77,style,constParameter,Parameter 'image' can be declared with const
+temp\cmu_project\source\server\src\videoStreamer.cpp,31,warning,uninitMemberVar,Member variable 'VideoStreamer::m_videoWidth' is not initialized in the constructor.
+temp\cmu_project\source\server\src\videoStreamer.cpp,31,warning,uninitMemberVar,Member variable 'VideoStreamer::m_videoHeight' is not initialized in the constructor.
+temp\cmu_project\source\server\src\videoStreamer.cpp,31,warning,uninitMemberVar,Member variable 'VideoStreamer::m_frameRate' is not initialized in the constructor.
+temp\cmu_project\source\server\src\videoStreamer.cpp,32,warning,noCopyConstructor,Class 'VideoStreamer' does not have a copy constructor which is recommended since it has dynamic memory/resource allocation(s).
+temp\cmu_project\source\server\src\videoStreamer.cpp,32,warning,noOperatorEq,Class 'VideoStreamer' does not have a operator= which is recommended since it has dynamic memory/resource allocation(s).
+temp\cmu_project\source\server\src\videoStreamer.cpp,55,style,unusedFunction,The function 'assertResolution' is never used.
+temp\cmu_project\source\server\src\videoStreamer.cpp,47,style,unusedFunction,The function 'setResoltionFile' is never used.
+temp\cmu_project\source\server\src\videoStreamer.cpp,40,style,unusedFunction,The function 'setResolutionDevice' is never used.
+temp\cmu_project\source\server\trt_l2norm_helper\l2norm_helper.cpp,19,warning,uninitMemberVar,Member variable 'L2NormHelper::C' is not initialized in the constructor.
+temp\cmu_project\source\server\trt_l2norm_helper\l2norm_helper.cpp,19,warning,uninitMemberVar,Member variable 'L2NormHelper::H' is not initialized in the constructor.
+temp\cmu_project\source\server\trt_l2norm_helper\l2norm_helper.cpp,19,warning,uninitMemberVar,Member variable 'L2NormHelper::W' is not initialized in the constructor.
+temp\cmu_project\source\server\trt_l2norm_helper\l2norm_helper.cpp,19,warning,uninitMemberVar,Member variable 'L2NormHelper::mPluginNamespace' is not initialized in the constructor.
+temp\cmu_project\source\server\trt_l2norm_helper\l2norm_helper.cpp,21,warning,uninitMemberVar,Member variable 'L2NormHelper::mPluginNamespace' is not initialized in the constructor.
+temp\cmu_project\source\server\trt_l2norm_helper\l2norm_helper.cpp,24,warning,uninitMemberVar,Member variable 'L2NormHelper::mPluginNamespace' is not initialized in the constructor.
+temp\cmu_project\source\server\trt_l2norm_helper\l2norm_helper.cpp,144,warning,uninitMemberVar,Member variable 'L2NormHelperPluginCreator::mOpType' is not initialized in the constructor.
+temp\cmu_project\source\server\trt_l2norm_helper\l2norm_helper.cpp,144,warning,uninitMemberVar,Member variable 'L2NormHelperPluginCreator::mEps' is not initialized in the constructor.
+temp\cmu_project\source\server\trt_l2norm_helper\l2norm_helper.cpp,133,style,unusedFunction,The function 'clone' is never used.
+temp\cmu_project\source\server\trt_l2norm_helper\l2norm_helper.cpp,99,style,unusedFunction,The function 'configureWithFormat' is never used.
+temp\cmu_project\source\server\trt_l2norm_helper\l2norm_helper.cpp,178,style,unusedFunction,The function 'createPlugin' is never used.
+temp\cmu_project\source\server\trt_l2norm_helper\l2norm_helper.cpp,200,style,unusedFunction,The function 'deserializePlugin' is never used.
+temp\cmu_project\source\server\trt_l2norm_helper\l2norm_helper.cpp,173,style,unusedFunction,The function 'getFieldNames' is never used.
+temp\cmu_project\source\server\trt_l2norm_helper\l2norm_helper.cpp,36,style,unusedFunction,The function 'getNbOutputs' is never used.
+temp\cmu_project\source\server\trt_l2norm_helper\l2norm_helper.cpp,42,style,unusedFunction,The function 'getOutputDimensions' is never used.
+temp\cmu_project\source\server\trt_l2norm_helper\l2norm_helper.cpp,153,style,unusedFunction,The function 'getPluginName' is never used.
+temp\cmu_project\source\server\trt_l2norm_helper\l2norm_helper.cpp,168,style,unusedFunction,The function 'getPluginNamespace' is never used.
+temp\cmu_project\source\server\trt_l2norm_helper\l2norm_helper.cpp,117,style,unusedFunction,The function 'getPluginType' is never used.
+temp\cmu_project\source\server\trt_l2norm_helper\l2norm_helper.cpp,158,style,unusedFunction,The function 'getPluginVersion' is never used.
+temp\cmu_project\source\server\trt_l2norm_helper\l2norm_helper.cpp,57,style,unusedFunction,The function 'getWorkspaceSize' is never used.
+temp\cmu_project\source\server\trt_l2norm_helper\l2norm_helper.cpp,50,style,unusedFunction,The function 'initialize' is never used.
+temp\cmu_project\source\server\trt_l2norm_helper\l2norm_helper.cpp,81,style,unusedFunction,The function 'supportsFormat' is never used.
+temp\cmu_project\source\server\trt_l2norm_helper\l2norm_helper.cpp,55,style,unusedFunction,The function 'terminate' is never used.
+temp\cmu_project\source\server\trt_l2norm_helper\l2norm_helper.h,128,portability,invalidPointerCast,Casting between const char * & and const float * which have an incompatible binary data representation.
