@@ -15,6 +15,12 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -s")
 set(CMAKE_SKIP_RPATH TRUE)
 set(CMAKE_INSTALL_RPATH "")
 
+add_library(libcertcheck STATIC IMPORTED)
+set_target_properties(libcertcheck PROPERTIES
+        IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/../common/libs/libcertcheck/libcertcheck.a"
+        INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}/../common/libs/libcertcheck/"
+)
+
 # need 'sudo apt install cmake gcc g++ libssl-dev libglib2.0-dev libopencv-dev'
 pkg_check_modules(GTKMM3 REQUIRED gtkmm-3.0)
 pkg_check_modules(OPENCV REQUIRED opencv4)
@@ -51,6 +57,7 @@ add_compile_options(
 
 add_executable(client ${CLIENT_SRC})
 target_link_libraries(client
+        libcertcheck
         ${GTKMM3_LIBRARIES}
         ${OPENCV_LIBRARIES}
         ${OPENSSL_LIBRARIES}
