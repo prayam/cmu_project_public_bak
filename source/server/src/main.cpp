@@ -15,6 +15,8 @@
 #include "NetworkTCP.h"
 #include "TcpSendRecvJpeg.h"
 #include "CommonStruct.h"
+#include "certcheck.h"
+#include "common.h"
 #include <termios.h>
 
 #define MAXFACES	8
@@ -54,17 +56,47 @@ using namespace nvuffparser;
 
 static int UserAthenticate(char **userid, char **userpw)
 {
-	int ret;
+	int ret = 0;
 
-	if (!g_strcmp0(*userid, "admin"))
-		ret = 1;
-	else
-		ret = 0;
+	if(fileExists("../credential")) {
+		std::ifstream file("../credential", std::ios::binary);
+		if (file.good())
+		{
+			char buf_id[32];
+			char buf_pw[32];
+			char user_pw[MAX_ACCOUNT_PW + 2]; /* 2 is for salt */
+			unsigned char *user_hashed_id;
+			unsigned char *user_hashed_pw;
+
+			file.read(buf_id, 32);
+			file.read(buf_pw, 32);
+			file.close();
+
+			g_strlcpy(user_pw, *userpw, MAX_ACCOUNT_PW + 2);
+			g_strlcat(user_pw, "6^", MAX_ACCOUNT_PW + 2);
+
+			make_sha256_m((unsigned char *)*userid, strlen(*userid), &user_hashed_id);
+			make_sha256_m((unsigned char *)user_pw, strlen(user_pw), &user_hashed_pw);
+
+			if (memcmp(buf_id, user_hashed_id, 32) == 0 &&
+			    memcmp(buf_pw, user_hashed_pw, 32) == 0)
+				ret = 1;
+
+			g_free(user_hashed_id);
+			g_free(user_hashed_pw);
+		}
+	}
 
 	g_free(*userid);
 	g_free(*userpw);
 	*userid = NULL;
 	*userpw = NULL;
+
+	if (ret)
+		LOG_INFO("Authentication success\n");
+	else
+		LOG_INFO("Authentication failed\n");
+
 	return ret;
 }
 
@@ -87,7 +119,7 @@ int main(int argc, char *argv[])
 
 	struct sockaddr_in cli_addr;
 	socklen_t          clilen;
-	bool               UseCamera=false;
+	bool               UseCamera=true;
 
 	if (argc <2)
 	{
@@ -95,7 +127,7 @@ int main(int argc, char *argv[])
 		exit(0);
 	}
 
-	if (argc==2) UseCamera=true;
+	if (argc==3) UseCamera=false;
 
 
 	Logger gLogger = Logger();
@@ -129,7 +161,6 @@ int main(int argc, char *argv[])
 	// init opencv stuff
 	videoStreamer_c = new VideoStreamer(0, videoFrameWidth, videoFrameHeight, 60, isCSICam);
 	videoStreamer_v = new VideoStreamer(testmodefile, videoFrameWidth, videoFrameHeight);
-	videoStreamer = UseCamera ? videoStreamer_c : videoStreamer_v;
 
 
 
@@ -169,11 +200,17 @@ int main(int argc, char *argv[])
 	printf("Listening for connections\n");
 
 	while (1) {
+		videoStreamer = UseCamera ? videoStreamer_c : videoStreamer_v;
+
+		if (check_server_cert()) {
+			printf("Cert error\n");
+			return(-1);
+		}
 		/* 1. Establish control channel */
 		if  ((TcpConnectedPort_control=AcceptTcpConnection(TcpListenPort,&cli_addr,&clilen,
-						"./keys/ca.crt",
-						"./keys/server.crt",
-						"./keys/server.key"))==NULL)
+						getFilepath_ca_cert(),
+						getFilepath_server_cert(),
+						getFilepath_server_key()))==NULL)
 		{
 			printf("AcceptTcpConnection Failed\n");
 			return(-1);
@@ -203,9 +240,9 @@ int main(int argc, char *argv[])
 
 		/* 2. Establish secure channel */
 		if  ((TcpConnectedPort_sdata=AcceptTcpConnection(TcpListenPort,&cli_addr,&clilen,
-						"./keys/ca.crt",
-						"./keys/server.crt",
-						"./keys/server.key"))==NULL)
+						getFilepath_ca_cert(),
+						getFilepath_server_cert(),
+						getFilepath_server_key()))==NULL)
 		{
 			printf("AcceptTcpConnection Failed\n");
 			return(-1);
@@ -225,9 +262,9 @@ int main(int argc, char *argv[])
 
 		/* 4. Establish meta channel */
 		if  ((TcpConnectedPort_meta=AcceptTcpConnection(TcpListenPort,&cli_addr,&clilen,
-						"./keys/ca.crt",
-						"./keys/server.crt",
-						"./keys/server.key"))==NULL)
+						getFilepath_ca_cert(),
+						getFilepath_server_cert(),
+						getFilepath_server_key()))==NULL)
 		{
 			printf("AcceptTcpConnection Failed\n");
 			return(-1);
@@ -280,8 +317,14 @@ int main(int argc, char *argv[])
 			{
 				char req_id;
 				void *req_parsed_data;
+				int ret;
 wait_req:
-				if (TcpRecvCtrlReq(TcpConnectedPort_control,&req_id,&req_parsed_data) <= 0) break;
+				do {
+					ret = TcpRecvCtrlReq(TcpConnectedPort_control,&req_id,&req_parsed_data);
+				} while (ret == -2);
+				if (ret <= 0) break;
+
+				//if (TcpRecvCtrlReq(TcpConnectedPort_control,&req_id,&req_parsed_data) <= 0) break;
 				if (req_id == REQ_LOGOUT) {
 					if (TcpSendRes(TcpConnectedPort_control, RES_OK) <= 0)
 						break;
@@ -377,12 +420,12 @@ exit_req:
 		CloseTcpConnectedPort(&TcpConnectedPort_sdata);
 		CloseTcpConnectedPort(&TcpConnectedPort_nsdata);
 		CloseTcpConnectedPort(&TcpConnectedPort_meta);
+		secure_mode = MODE_SECURE;
+		run_mode = MODE_RUN;
+		UseCamera=true;
+		videoStreamer = videoStreamer_c;
 
 		auto globalTimeEnd = chrono::steady_clock::now();
-
-		videoStreamer_c->release();
-		videoStreamer_v->release();
-		videoStreamer = NULL;
 
 		auto milliseconds = chrono::duration_cast<chrono::milliseconds>(globalTimeEnd-globalTimeStart).count();
 		double seconds = double(milliseconds)/1000.;
@@ -392,6 +435,9 @@ exit_req:
 			" This equals " << fps << "fps.\n";
 
 	}
+	videoStreamer_c->release();
+	videoStreamer_v->release();
+	videoStreamer = NULL;
 	log_disable();
 	return 0;
 }
