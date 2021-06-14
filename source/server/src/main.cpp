@@ -171,9 +171,9 @@ int main(int argc, char *argv[])
 	while (1) {
 		/* 1. Establish control channel */
 		if  ((TcpConnectedPort_control=AcceptTcpConnection(TcpListenPort,&cli_addr,&clilen,
-						"../../custom/keys/ca/ca.crt",
-						"../../custom/keys/server/server.crt",
-						"../../custom/keys/server/server.key"))==NULL)
+						"./keys/ca.crt",
+						"./keys/server.crt",
+						"./keys/server.key"))==NULL)
 		{
 			printf("AcceptTcpConnection Failed\n");
 			return(-1);
@@ -200,9 +200,9 @@ int main(int argc, char *argv[])
 
 		/* 2. Establish secure channel */
 		if  ((TcpConnectedPort_sdata=AcceptTcpConnection(TcpListenPort,&cli_addr,&clilen,
-						"../../custom/keys/ca/ca.crt",
-						"../../custom/keys/server/server.crt",
-						"../../custom/keys/server/server.key"))==NULL)
+						"./keys/ca.crt",
+						"./keys/server.crt",
+						"./keys/server.key"))==NULL)
 		{
 			printf("AcceptTcpConnection Failed\n");
 			return(-1);
