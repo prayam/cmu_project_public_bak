@@ -29,7 +29,6 @@ public:
 
 	LEARN_MODE_STATE learn_mode_state;
 	Gtk::Image m_Image;
-	guint timer_id_keepalive;
 	guint handle_recv_data;
 	gboolean connected_server;
 	TTcpConnectedPort *port_recv_photo;
