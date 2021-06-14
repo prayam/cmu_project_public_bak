@@ -187,12 +187,15 @@ int main(int argc, char *argv[])
 			continue;
 		}
 		if (!UserAthenticate(&userid, &userpw)) {
-			TcpSendRes(TcpConnectedPort_control, 0);
+			if (TcpSendRes(TcpConnectedPort_control, RES_FAIL_AUTH) <= 0) {
+				CloseTcpConnectedPort(&TcpConnectedPort_control);
+				continue;
+			}
 			CloseTcpConnectedPort(&TcpConnectedPort_control);
 			continue;
 		}
 		else {
-			if (TcpSendRes(TcpConnectedPort_control, 1) == FALSE) {
+			if (TcpSendRes(TcpConnectedPort_control, RES_OK) <= 0) {
 				CloseTcpConnectedPort(&TcpConnectedPort_control);
 				continue;
 			}
@@ -280,31 +283,52 @@ int main(int argc, char *argv[])
 wait_req:
 				if (TcpRecvCtrlReq(TcpConnectedPort_control,&req_id,&req_parsed_data) <= 0) break;
 				if (req_id == REQ_LOGOUT) {
+					if (TcpSendRes(TcpConnectedPort_control, RES_OK) <= 0)
+						break;
 					break;
 				} else if (req_id == REQ_DISCON) {
+					if (TcpSendRes(TcpConnectedPort_control, RES_OK) <= 0)
+						break;
 					break;
 				} else if (req_id == REQ_SECURE) {
+					if (TcpSendRes(TcpConnectedPort_control, RES_OK) <= 0)
+						break;
 					secure_mode = MODE_SECURE;
 					goto exit_req;
 				} else if (req_id == REQ_NONSECURE) {
+					if (TcpSendRes(TcpConnectedPort_control, RES_OK) <= 0)
+						break;
 					secure_mode = MODE_NONSECURE;
 					goto exit_req;
 				} else if (req_id == REQ_TESTRUN) {
+					if (TcpSendRes(TcpConnectedPort_control, RES_OK) <= 0)
+						break;
 					UseCamera=false;
 					videoStreamer = videoStreamer_v;
 					goto exit_req;
 				} else if (req_id == REQ_RUN) {
+					if (TcpSendRes(TcpConnectedPort_control, RES_OK) <= 0)
+						break;
 					UseCamera=true;
 					videoStreamer = videoStreamer_c;
 					goto exit_req;
 				} else if (req_id == REQ_CAPTURE) {
-					if (meta.size())
-						goto wait_req;
+					if (TcpSendRes(TcpConnectedPort_control, RES_OK) <= 0)
+						break;
+					goto wait_req;
 				} else if (req_id == REQ_SAVE) {
 					if (req_parsed_data && meta.size()) {
+						if (TcpSendRes(TcpConnectedPort_control, RES_OK) <= 0)
+							break;
 						faceNet.addNewFace_name(frame, outputBbox, (char *)req_parsed_data);
+					} else {
+						if (TcpSendRes(TcpConnectedPort_control, RES_FAIL_OTHERS) <= 0)
+							break;
 					}
+					goto wait_req;
 				} else {
+					if (TcpSendRes(TcpConnectedPort_control, RES_FAIL_OTHERS))
+						break;
 					break;
 				}
 			}
