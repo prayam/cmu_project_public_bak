@@ -105,10 +105,18 @@ void baseEngine::caffeToGIEModel(const std::string &deployFile,                /
 
         // Serialize engine
         ofstream planFile;
-        planFile.open(enginePath);
-        IHostMemory *serializedEngine = engine->serialize();
-        planFile.write((gchar *) serializedEngine->data(), serializedEngine->size());
-        planFile.close();
+        planFile.exceptions(ofstream::failbit | ofstream::badbit);
+        try{
+            planFile.open(enginePath);
+            if (planFile.is_open()) {
+                IHostMemory *serializedEngine = engine->serialize();
+                planFile.write((gchar *) serializedEngine->data(), serializedEngine->size());
+                planFile.close();
+            }
+        }
+        catch(ofstream::failure e) {
+            std::cerr << "Exception opening/writing/closing file\n";
+        }
 
 
         // we don't need the network any more, and we can destroy the parser

@@ -116,10 +116,19 @@ void FaceNetClassifier::createOrLoadEngine() {
 		/* serialize engine and write to file */
 		if(m_serializeEngine) {
 			ofstream planFile;
-			planFile.open(m_engineFile);
-			IHostMemory *serializedEngine = m_engine->serialize();
-			planFile.write((gchar *) serializedEngine->data(), serializedEngine->size());
-			planFile.close();
+			planFile.exceptions(ofstream::failbit | ofstream::badbit);
+			try {
+				planFile.open(m_engineFile);
+				if (planFile.is_open()) {
+					IHostMemory *serializedEngine = m_engine->serialize();
+					planFile.write((gchar *) serializedEngine->data(), serializedEngine->size());
+					planFile.close();
+
+				}
+			}
+			catch(ofstream::failure e) {
+				std::cerr << "Exception opening/writing/closing file\n";
+			}
 		}
 
 		/* break down */
