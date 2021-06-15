@@ -7,6 +7,8 @@ project(trt_l2norm_helper)# LANGUAGES CXX CUDA)
 include(FindPkgConfig)
 pkg_check_modules(GLIB2 REQUIRED glib-2.0)
 
+set(CMAKE_CXX_FLAGS  "-Wall -Wextra")
+
 # tensorRT
 find_path(TENSORRT_INCLUDE_DIR NvInfer.h
   HINTS ${TENSORRT_ROOT} ${CUDA_TOOLKIT_ROOT_DIR}

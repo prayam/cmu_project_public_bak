@@ -147,6 +147,8 @@ gint L2NormHelper::enqueue(
     void* workspace,
     cudaStream_t stream)
 {
+    (void) workspace;
+
     switch(mDataType)
     {
       case DataType::kFLOAT:
