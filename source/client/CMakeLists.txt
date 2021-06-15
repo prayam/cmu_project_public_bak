@@ -27,7 +27,7 @@ pkg_check_modules(OPENCV REQUIRED opencv4)
 pkg_check_modules(OPENSSL REQUIRED openssl)
 
 link_directories(
-        "../common/libs/libcertcheck"
+        "${CMAKE_SOURCE_DIR}/../common/libs/libcertcheck"
         ${GTKMM3_LIBRARY_DIRS}
         ${OPENCV_LIBRARY_DIRS}
         ${OPENSSL_LIBRARY_DIRS}
@@ -36,16 +36,16 @@ link_directories(
 file(GLOB CLIENT_SRC
         "src/*.h"
         "src/*.cpp"
-        "../common/Logger.cpp"
-        "../common/NetworkTCP.cpp"
-        "../common/TcpSendRecvJpeg.cpp"
-        "../common/openssl_hostname_validation.cpp"
+        "${CMAKE_SOURCE_DIR}/../common/Logger.cpp"
+        "${CMAKE_SOURCE_DIR}/../common/NetworkTCP.cpp"
+        "${CMAKE_SOURCE_DIR}/../common/TcpSendRecvJpeg.cpp"
+        "${CMAKE_SOURCE_DIR}/../common/openssl_hostname_validation.cpp"
 )
 
 include_directories(
         "src/"
-        "../common/"
-        "../common/libs/libcertcheck"
+        "${CMAKE_SOURCE_DIR}/../common/"
+        "${CMAKE_SOURCE_DIR}/../common/libs/libcertcheck"
         ${GTKMM3_INCLUDE_DIRS}
         ${OPENCV_INCLUDE_DIRS}
         ${OPENSSL_INCLUDE_DIRS}
@@ -65,6 +65,6 @@ target_link_libraries(client
         ${OPENSSL_LIBRARIES}
 )
 
-file(COPY "../common/keys/ca/ca.crt" "../common/keys/client/client.crt" "../common/keys/client/client.key"
+file(COPY "${CMAKE_SOURCE_DIR}/../common/keys/ca/ca.crt" "${CMAKE_SOURCE_DIR}/../common/keys/client/client.crt" "${CMAKE_SOURCE_DIR}/../common/keys/client/client.key"
     DESTINATION "keys"
 )

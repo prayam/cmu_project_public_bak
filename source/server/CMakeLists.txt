@@ -91,15 +91,19 @@ message("TENSORRT_LIBRARY = ${TENSORRT_LIBRARY}")
 
 file(GLOB DIR_SRCS
         "src/*.cpp"
-	"../common/Logger.cpp"
-        "../common/NetworkTCP.cpp"
-        "../common/TcpSendRecvJpeg.cpp"
-        "../common/TcpSendRecvJpeg.cpp"
-        "../common/openssl_hostname_validation.cpp"
+        "${CMAKE_SOURCE_DIR}/../common/Logger.cpp"
+        "${CMAKE_SOURCE_DIR}/../common/NetworkTCP.cpp"
+        "${CMAKE_SOURCE_DIR}/../common/TcpSendRecvJpeg.cpp"
+        "${CMAKE_SOURCE_DIR}/../common/TcpSendRecvJpeg.cpp"
+        "${CMAKE_SOURCE_DIR}/../common/openssl_hostname_validation.cpp"
 )
 
-file(COPY "../common/keys/ca/ca.crt" "../common/keys/server/server.crt" "../common/keys/server/server.key"
+file(COPY "${CMAKE_SOURCE_DIR}/../common/keys/ca/ca.crt" "${CMAKE_SOURCE_DIR}/../common/keys/server/server.crt" "${CMAKE_SOURCE_DIR}/../common/keys/server/server.key"
     DESTINATION "keys"
+)
+
+file(COPY "${CMAKE_SOURCE_DIR}/credential"
+    DESTINATION "./"
 )
 
 message("DIR_SRCS = ${DIR_SRCS}")

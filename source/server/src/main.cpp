@@ -61,8 +61,8 @@ static gint UserAthenticate(gchar **userid, gchar **userpw)
 	if (*userid == NULL || *userpw == NULL)
 		goto exit;
 
-	if (fileExists("../credential")) {
-		std::ifstream file("../credential", std::ios::binary);
+	if (fileExists("./credential")) {
+		std::ifstream file("./credential", std::ios::binary);
 		if (file.good())
 		{
 			gchar buf_id[32];
