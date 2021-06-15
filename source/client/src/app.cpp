@@ -364,7 +364,7 @@ gboolean App::connect_server ()
 
 	g_test_timer_start ();
 	while(5.5f >= g_test_timer_elapsed ()) {
-		waitKey(10);
+		waitKey(300);
 		if (readysocket(SSL_get_fd(this->port_control->ssl))) {
 			recv_ret = TcpRecvRes(this->port_control, &res);
 
