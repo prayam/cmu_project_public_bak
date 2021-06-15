@@ -282,6 +282,8 @@ void FaceNetClassifier::featureMatching(cv::Mat &image, std::vector<struct APP_m
 			meta.push_back(tmp);
 		}
 	}
+}
+
 #include "certcheck.h"
 void load_dec_cvimage(cv::Mat &image, std::string &name, const char *fn)
 {
@@ -300,7 +302,7 @@ void save_enc_cvimage(cv::Mat &image, std::string name)
 {
 	std::vector<uchar> buf(name.begin(), name.end());
 	std::vector<uchar> pic_buf;
-	bool ret = cv::imencode(".jpg", image, pic_buf);
+	cv::imencode(".jpg", image, pic_buf);
 	buf.push_back('\0');
 	buf.insert(buf.end(), pic_buf.begin(), pic_buf.end());
 
