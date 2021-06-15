@@ -70,7 +70,8 @@ gssize TcpRecvImageAsJpeg(TTcpConnectedPort * TcpConnectedPort,cv::Mat *Image)
 	}
 
 exit:
-	g_free(buff);
+	if (buff)
+		g_free(buff);
 	return ret;
 }
 //-----------------------------------------------------------------
@@ -138,7 +139,8 @@ gboolean TcpSendLoginData(TTcpConnectedPort * TcpConnectedPort, const gchar* use
 	LOG_DEBUG("done TcpSendLoginData");
 
 exit:
-	g_free(req);
+	if (req)
+		g_free(req);
 	return ret;
 }
 
@@ -199,13 +201,15 @@ gssize TcpRecvLoginData(TTcpConnectedPort * TcpConnectedPort, gchar** userid, gc
 	if (*userpw == NULL) {
 		LOG_WARNING("memory allocation fail");
 		g_free(*userid);
+		*userid = NULL;
 		goto exit;
 	}
 
 	LOG_DEBUG("done TcpRecvLoginData");
 
 exit:
-	g_free(req);
+	if (req)
+		g_free(req);
 	return read_len;
 }
 
@@ -239,7 +243,8 @@ gboolean TcpSendLogoutReq(TTcpConnectedPort * TcpConnectedPort)
 	LOG_DEBUG("done TcpSendLogoutReq");
 
 exit:
-	g_free(req);
+	if (req)
+		g_free(req);
 	return ret;
 }
 
@@ -273,7 +278,8 @@ gboolean TcpSendSecureModeReq(TTcpConnectedPort * TcpConnectedPort)
 	LOG_DEBUG("done TcpSendSecureModeReq");
 
 exit:
-	g_free(req);
+	if (req)
+		g_free(req);
 	return ret;
 }
 
@@ -307,7 +313,8 @@ gboolean TcpSendNonSecureModeReq(TTcpConnectedPort * TcpConnectedPort)
 	LOG_DEBUG("done TcpSendNonSecureModeReq");
 
 exit:
-	g_free(req);
+	if (req)
+		g_free(req);
 	return ret;
 }
 
@@ -341,7 +348,8 @@ gboolean TcpSendTestRunModeReq(TTcpConnectedPort * TcpConnectedPort)
 	LOG_DEBUG("done TcpSendTestRunModeReq");
 
 exit:
-	g_free(req);
+	if (req)
+		g_free(req);
 	return ret;
 }
 
@@ -375,7 +383,8 @@ gboolean TcpSendRunModeReq(TTcpConnectedPort * TcpConnectedPort)
 	LOG_DEBUG("done TcpSendRunModeReq");
 
 exit:
-	g_free(req);
+	if (req)
+		g_free(req);
 	return ret;
 }
 
@@ -409,7 +418,8 @@ gboolean TcpSendCaptureReq(TTcpConnectedPort * TcpConnectedPort)
 	LOG_DEBUG("done TcpSendCaptureReq");
 
 exit:
-	g_free(req);
+	if (req)
+		g_free(req);
 	return ret;
 }
 
@@ -465,7 +475,8 @@ gboolean TcpSendSaveReq(TTcpConnectedPort * TcpConnectedPort, const gchar *name)
 	LOG_DEBUG("done TcpSendSaveReq");
 
 exit:
-	g_free(req);
+	if (req)
+		g_free(req);
 	return ret;
 }
 
@@ -516,7 +527,8 @@ gssize TcpRecvCtrlReq(TTcpConnectedPort * TcpConnectedPort, gchar *req_id, void 
 	LOG_DEBUG("done TcpRecvCtrlReq");
 
 exit:
-	g_free(req);
+	if (req)
+		g_free(req);
 	return read_len;
 }
 

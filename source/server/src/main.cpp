@@ -58,7 +58,10 @@ static gint UserAthenticate(gchar **userid, gchar **userpw)
 {
 	gint ret = 0;
 
-	if(fileExists("../credential")) {
+	if (*userid == NULL || *userpw == NULL)
+		goto exit;
+
+	if (fileExists("../credential")) {
 		std::ifstream file("../credential", std::ios::binary);
 		if (file.good())
 		{
@@ -87,8 +90,11 @@ static gint UserAthenticate(gchar **userid, gchar **userpw)
 		}
 	}
 
-	g_free(*userid);
-	g_free(*userpw);
+exit:
+	if (*userid)
+		g_free(*userid);
+	if (*userpw)
+		g_free(*userpw);
 	*userid = NULL;
 	*userpw = NULL;
 
@@ -218,8 +224,8 @@ gint main(gint argc, gchar *argv[])
 		}
 		printf("Accepted control channel connection Request\n");
 
-		gchar *userid;
-		gchar *userpw;
+		gchar *userid = NULL;
+		gchar *userpw = NULL;
 		if (TcpRecvLoginData(TcpConnectedPort_control,&userid,&userpw) <= 0) { /* Timeout or error */
 			CloseTcpConnectedPort(&TcpConnectedPort_control);
 			continue;
