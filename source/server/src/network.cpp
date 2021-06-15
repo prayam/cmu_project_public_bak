@@ -64,7 +64,7 @@ void nms(vector<struct Bbox> &boundingBox_, vector<struct orderScore> &bboxScore
 				if(IOU>overlap_threshold){
 					boundingBox_.at(num).exist=false;
 					for(vector<orderScore>::iterator it=bboxScore_.begin(); it!=bboxScore_.end();it++){
-						if((*it).oriOrder < 0 || (guint)((*it).oriOrder) == num) {
+						if((*it).oriOrder >= 0 && (guint)((*it).oriOrder) == num) {
 							(*it).oriOrder = -1;
 							break;
 						}
