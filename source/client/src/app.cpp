@@ -582,6 +582,8 @@ void App::on_button_logout()
 	m_CheckButton_Secure.set_active(true);
 	m_CheckButton_Test.set_active(false);
 	m_Button_PauseResume.set_label("Pause");
+
+	this->learn_mode_state = LEARN_NONE;
 }
 
 void App::on_checkbox_secure_toggled()
