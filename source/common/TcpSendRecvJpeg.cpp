@@ -98,8 +98,8 @@ gboolean TcpSendLoginData(TTcpConnectedPort * TcpConnectedPort, const gchar* use
 	userid_len = strlen(userid);
 	userpw_len = strlen(userpw);
 	if (userid_len > MAX_ACCOUNT_ID || userpw_len > MAX_ACCOUNT_PW) {
-		LOG_WARNING("expected userid max len(%d), but it's (%ld)", MAX_ACCOUNT_ID, strlen(userid));
-		LOG_WARNING("expected userpw max len(%d), but it's (%ld)", MAX_ACCOUNT_PW, strlen(userpw));
+		LOG_WARNING("expected userid max len(%d), but it's (%ld)", MAX_ACCOUNT_ID, userid_len);
+		LOG_WARNING("expected userpw max len(%d), but it's (%ld)", MAX_ACCOUNT_PW, userpw_len);
 		goto exit;
 	}
 

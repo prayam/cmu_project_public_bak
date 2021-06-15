@@ -98,7 +98,7 @@ file(GLOB DIR_SRCS
         "../common/openssl_hostname_validation.cpp"
 )
 
-file(COPY "../custom/keys/ca/ca.crt" "../custom/keys/server/server.crt" "../custom/keys/server/server.key"
+file(COPY "../common/keys/ca/ca.crt" "../common/keys/server/server.crt" "../common/keys/server/server.key"
     DESTINATION "keys"
 )
 

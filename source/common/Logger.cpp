@@ -132,13 +132,13 @@ void log_hexdump (const gchar *log_domain, GLogLevelFlags log_level, const void 
 	ascii_dst = 0;
 
 	for (byte = 0; byte < count; byte ++) {
-		g_sprintf (&hex[hex_dst], "%02X ", ((guchar *)data)[byte]);
+		g_snprintf (&hex[hex_dst], 3, "%02X ", ((guchar *)data)[byte]);
 		hex_dst += 3;
 
 		if (g_ascii_isprint (((guchar *)data)[byte])) {
-			g_sprintf (&ascii[ascii_dst], "%c", ((guchar *)data)[byte]);
+			g_snprintf (&ascii[ascii_dst], 1, "%c", ((guchar *)data)[byte]);
 		} else {
-			g_sprintf (&ascii[ascii_dst], ".");
+			g_snprintf (&ascii[ascii_dst], 1, ".");
 		}
 		ascii_dst++;
 
@@ -148,9 +148,9 @@ void log_hexdump (const gchar *log_domain, GLogLevelFlags log_level, const void 
 			ascii_dst = 0;
 		}
 		else if (byte % 8 == 7) {
-			g_sprintf (&hex[hex_dst], " ");
+			g_snprintf (&hex[hex_dst], 1, " ");
 			hex_dst++;
-			g_sprintf (&ascii[ascii_dst], " ");
+			g_snprintf (&ascii[ascii_dst], 1, " ");
 			ascii_dst++;
 		}
 	}

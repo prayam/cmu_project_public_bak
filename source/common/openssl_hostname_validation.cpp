@@ -34,6 +34,7 @@ static HostnameValidationResult matches_common_name(const gchar *hostname, const
 	X509_NAME_ENTRY *common_name_entry = NULL;
 	ASN1_STRING *common_name_asn1 = NULL;
 	gchar *common_name_str = NULL;
+	gsize len;
 
 	// Find the position of the CN field in the Subject field of the certificate
 	common_name_loc = X509_NAME_get_index_by_NID(X509_get_subject_name((X509 *) server_cert), NID_commonName, -1);
@@ -55,8 +56,13 @@ static HostnameValidationResult matches_common_name(const gchar *hostname, const
 	// common_name_str = (gchar *) ASN1_STRING_data(common_name_asn1); // Deprecated
 	common_name_str = (gchar *) ASN1_STRING_get0_data(common_name_asn1);
 
+	len = strlen(common_name_str);
+	if (len > G_MAXINT) {
+		return MalformedCertificate;
+	}
+
 	// Make sure there isn't an embedded NUL character in the CN
-	if (ASN1_STRING_length(common_name_asn1) != strlen(common_name_str)) {
+	if (ASN1_STRING_length(common_name_asn1) != (gint)len) {
 		return MalformedCertificate;
 	}
 
@@ -83,12 +89,9 @@ static HostnameValidationResult matches_subject_alternative_name(const gchar *ho
 	gint i;
 	gint san_names_nb = -1;
 	STACK_OF(GENERAL_NAME) *san_names = NULL;
+	gsize len;
 
 	// Try to extract the names within the SAN extension from the certificate
-
-	//:TODO: Need to review
-	// 	cmu_project/source/common/openssl_hostname_validation.cpp:88:30: error: invalid conversion from ‘void*’ to ‘stack_st_GENERAL_NAME*’ [-fpermissive]
-	//   san_names = X509_get_ext_d2i((X509 *) server_cert, NID_subject_alt_name, NULL, NULL);
 	san_names = (STACK_OF(GENERAL_NAME) *)X509_get_ext_d2i((X509 *) server_cert, NID_subject_alt_name, NULL, NULL);
 	if (san_names == NULL) {
 		return NoSANPresent;
@@ -105,7 +108,13 @@ static HostnameValidationResult matches_subject_alternative_name(const gchar *ho
 			gchar *dns_name = (gchar *) ASN1_STRING_get0_data(current_name->d.dNSName);
 
 			// Make sure there isn't an embedded NUL character in the DNS name
-			if (ASN1_STRING_length(current_name->d.dNSName) != strlen(dns_name)) {
+			len = strlen(dns_name);
+			if (len > G_MAXINT) {
+				result = MalformedCertificate;
+				break;
+			}
+
+			if (ASN1_STRING_length(current_name->d.dNSName) != (gint)len) {
 				result = MalformedCertificate;
 				break;
 			}
