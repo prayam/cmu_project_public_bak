@@ -100,14 +100,11 @@ static gint FaceAuthencticate(gchar *userid, mtcnn &mtCNN, FaceNetClassifier &fa
 	return 0;
 }
 
-static gint UserAthenticate(gchar **userid, gchar **userpw, mtcnn &mtCNN, FaceNetClassifier &faceNet, VideoStreamer *videoStreamer_c)
+static gint __UserAthenticate(gchar *userid, gchar *userpw)
 {
 	gint ret = 0;
 
-	if (*userid == NULL || *userpw == NULL)
-		goto exit;
-
-	if (!FaceAuthencticate(*userid, mtCNN, faceNet, videoStreamer_c))
+	if (userid == NULL || userpw == NULL)
 		goto exit;
 
 	if (fileExists("./asset/credential")) {
@@ -124,10 +121,10 @@ static gint UserAthenticate(gchar **userid, gchar **userpw, mtcnn &mtCNN, FaceNe
 			file.read(buf_pw, 32);
 			file.close();
 
-			g_strlcpy(user_pw, *userpw, MAX_ACCOUNT_PW + 2);
+			g_strlcpy(user_pw, userpw, MAX_ACCOUNT_PW + 2);
 			g_strlcat(user_pw, "6^", MAX_ACCOUNT_PW + 2);
 
-			make_sha256_m((guchar *)*userid, strlen(*userid), &user_hashed_id);
+			make_sha256_m((guchar *)userid, strlen(userid), &user_hashed_id);
 			make_sha256_m((guchar *)user_pw, strlen(user_pw), &user_hashed_pw);
 
 			if (memcmp(buf_id, user_hashed_id, 32) == 0 &&
@@ -140,12 +137,33 @@ static gint UserAthenticate(gchar **userid, gchar **userpw, mtcnn &mtCNN, FaceNe
 	}
 
 exit:
-	if (*userid)
+	return ret;
+}
+
+static gint UserAthenticate(gchar **userid, gchar **userpw, mtcnn &mtCNN, FaceNetClassifier &faceNet, VideoStreamer *videoStreamer_c)
+{
+	gint ret = 0;
+
+	if (userid == NULL || userpw == NULL)
+		goto exit;
+
+	if (!__UserAthenticate(*userid, *userpw))
+		goto exit;
+
+	if (!FaceAuthencticate(*userid, mtCNN, faceNet, videoStreamer_c))
+		goto exit;
+
+	ret = 1;
+
+exit:
+	if (userid && *userid)
 		g_free(*userid);
-	if (*userpw)
+	if (userpw && *userpw)
 		g_free(*userpw);
-	*userid = NULL;
-	*userpw = NULL;
+	if (userid)
+		*userid = NULL;
+	if (userpw)
+		*userpw = NULL;
 
 	if (ret)
 		LOG_INFO("Authentication success\n");
