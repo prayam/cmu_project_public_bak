@@ -403,7 +403,7 @@ exit_req:
 			if (kbhit())
 			{
 				// Stores the pressed key in ch
-				gchar keyboard =  getch();
+				gint keyboard =  getch();
 
 				if (keyboard == 'q') break;
 				else if(keyboard == 'n')
