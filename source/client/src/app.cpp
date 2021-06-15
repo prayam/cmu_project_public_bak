@@ -319,7 +319,6 @@ gboolean App::connect_server ()
 	const gchar *ca;
 	const gchar *crt;
 	const gchar *key;
-	gint i = 0;
 
 	if (0 != check_client_cert()) {
 		LOG_WARNING("Certificate Error");
@@ -363,17 +362,22 @@ gboolean App::connect_server ()
 	TcpSendLoginData(this->port_control, m_Entry_Id.get_text().c_str(), m_Entry_Password.get_text().c_str());
 	show_dialog("Show your face on camera");
 
-	for (i = 0; i < 5; i++) {
-		recv_ret = TcpRecvRes(this->port_control, &res);
+	g_test_timer_start ();
+	while(5.5f >= g_test_timer_elapsed ()) {
+		waitKey(10);
+		if (readysocket(SSL_get_fd(this->port_control->ssl))) {
+			recv_ret = TcpRecvRes(this->port_control, &res);
 
-		if (recv_ret == TCP_RECV_TIMEOUT) {
-			continue;
-		}
+			if (recv_ret == TCP_RECV_TIMEOUT) {
+				continue;
+			}
 
-		if (recv_ret == TCP_RECV_PEER_DISCONNECTED || recv_ret == TCP_RECV_ERROR || res == RES_OK) {
-			break;
+			if (recv_ret == TCP_RECV_PEER_DISCONNECTED || recv_ret == TCP_RECV_ERROR || res == RES_OK) {
+				break;
+			}
 		}
 	}
+	g_test_timer_last ();
 
 	m_pDialog->hide();
 
