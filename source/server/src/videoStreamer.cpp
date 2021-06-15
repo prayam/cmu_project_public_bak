@@ -29,6 +29,9 @@ VideoStreamer::VideoStreamer(gint nmbrDevice, gint videoWidth, gint videoHeight,
 }
 
 VideoStreamer::VideoStreamer(std::string filename, gint videoWith, gint videoHeight) {
+	(void) videoWith;
+	(void) videoHeight;
+
 	m_capture = new cv::VideoCapture(filename);
 	if (!m_capture->isOpened()){
 		//error in opening the video input
@@ -45,6 +48,8 @@ void VideoStreamer::setResolutionDevice(gint width, gint height) {
 }
 
 void VideoStreamer::setResoltionFile(gint width, gint height) {
+	(void) width;
+	(void) height;
 	// ToDo set resolution for input files
 }
 

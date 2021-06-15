@@ -76,11 +76,15 @@ vector<struct Bbox> mtcnn::findFace(cv::Mat &image){
 	struct orderScore order;
 	gint count = 0;
 
+#ifdef LOG
 	clock_t first_time = clock();
+#endif
 	for (gsize i = 0; i < scales_.size(); i++) {
 		gint changedH = (gint)ceil(image.rows*scales_.at(i));
 		gint changedW = (gint)ceil(image.cols*scales_.at(i));
+#ifdef LOG
 		clock_t run_first_time = clock();
+#endif
 		resize(image, reImage, cv::Size(changedW, changedH), 0, 0, cv::INTER_LINEAR);
 		(*simpleFace_[i]).run(reImage, scales_.at(i),pnet_engine[i]);
 
@@ -144,7 +148,9 @@ vector<struct Bbox> mtcnn::findFace(cv::Mat &image){
 #endif
 	//third stage
 	count = 0;
+#ifdef LOG
 	clock_t third_time = clock();
+#endif
 	for(vector<struct Bbox>::iterator it=secondBbox_.begin(); it!=secondBbox_.end();it++){
 		if((*it).exist){
 			cv::Rect temp((*it).y1, (*it).x1, (*it).y2-(*it).y1, (*it).x2-(*it).x1);

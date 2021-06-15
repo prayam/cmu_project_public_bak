@@ -44,7 +44,7 @@ void nms(vector<struct Bbox> &boundingBox_, vector<struct orderScore> &bboxScore
 		heros.push_back(order);
 		boundingBox_.at(order).exist = false;//delete it
 
-		for(gint num=0;num<boundingBox_.size();num++){
+		for(guint num=0;num<boundingBox_.size();num++){
 			if(boundingBox_.at(num).exist){
 				//the iou
 				maxX = (boundingBox_.at(num).x1>boundingBox_.at(order).x1)?boundingBox_.at(num).x1:boundingBox_.at(order).x1;
@@ -64,7 +64,7 @@ void nms(vector<struct Bbox> &boundingBox_, vector<struct orderScore> &bboxScore
 				if(IOU>overlap_threshold){
 					boundingBox_.at(num).exist=false;
 					for(vector<orderScore>::iterator it=bboxScore_.begin(); it!=bboxScore_.end();it++){
-						if((*it).oriOrder == num) {
+						if((*it).oriOrder < 0 || (guint)((*it).oriOrder) == num) {
 							(*it).oriOrder = -1;
 							break;
 						}
@@ -73,7 +73,7 @@ void nms(vector<struct Bbox> &boundingBox_, vector<struct orderScore> &bboxScore
 			}
 		}
 	}
-	for(gint i=0;i<heros.size();i++)
+	for(guint i=0;i<heros.size();i++)
 		boundingBox_.at(heros.at(i)).exist = true;
 }
 void refineAndSquareBbox(vector<struct Bbox> &vecBbox, const gint &height, const gint &width, gboolean square = true){

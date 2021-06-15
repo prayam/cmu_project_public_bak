@@ -17,7 +17,6 @@ Pnet_engine::~Pnet_engine() {
 }
 
 void Pnet_engine::init(gint row, gint col) {
-
 	//modifiy the input shape of prototxt, write to temp.prototxt
 	gint first_spce = 16, second_space = 4;
 	fstream protofile;
@@ -27,6 +26,10 @@ void Pnet_engine::init(gint row, gint col) {
 	std::string contents(buffer.str());
 	//    std::cout << "contents = " << contents << std::endl;
 	string::size_type position_h, position_w;
+
+	(void) row;
+	(void) col;
+
 	position_h = contents.find("dim");
 	while (isdigit(contents[position_h + first_spce])) {
 		contents.erase(position_h + first_spce, 1);

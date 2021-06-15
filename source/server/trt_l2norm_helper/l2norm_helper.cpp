@@ -19,7 +19,7 @@ vector<PluginField> L2NormHelperPluginCreator::mPluginAttributes;
 L2NormHelper::L2NormHelper(gint op_type, float eps): op_type(op_type), eps(eps) {}
 
 L2NormHelper::L2NormHelper(gint op_type, float eps, gint C, gint H, gint W):
-  op_type(op_type), eps(eps), C(C), H(H), W(W) {}
+  C(C), H(H), W(W), op_type(op_type), eps(eps) {}
 
 L2NormHelper::L2NormHelper(const void* buffer, gsize length)
 {
@@ -56,6 +56,7 @@ void L2NormHelper::terminate() {}
 
 gsize L2NormHelper::getWorkspaceSize(gint maxBatchSize) const
 {
+    (void) maxBatchSize;
     return 0;
 }
 
@@ -100,6 +101,7 @@ void L2NormHelper::configureWithFormat(
     const Dims* inputDims, gint nbInputs, const Dims* outputDims, gint nbOutputs,
     DataType type, PluginFormat format, gint maxBatchSize)
 {
+    (void) maxBatchSize;
     ASSERT(format == PluginFormat::kNCHW);
     ASSERT(type == DataType::kFLOAT || type == DataType::kHALF);
     mDataType = type;
@@ -178,6 +180,9 @@ const PluginFieldCollection* L2NormHelperPluginCreator::getFieldNames()
 IPluginV2* L2NormHelperPluginCreator::createPlugin(const gchar* name, const PluginFieldCollection* fc)
 {
     const PluginField* fields = fc->fields;
+
+    (void) name;
+
     for (gint i = 0; i < fc->nbFields; ++i)
     {
         const gchar* attrName = fields[i].name;
@@ -203,6 +208,9 @@ IPluginV2* L2NormHelperPluginCreator::deserializePlugin(
     // This object will be deleted when the network is destroyed, which will
     // call L2NormHelper::destroy()
     L2NormHelper* obj = new L2NormHelper(serialData, serialLength);
+
+    (void) name;
+
     obj->setPluginNamespace(mNamespace.c_str());
     return obj;
 }

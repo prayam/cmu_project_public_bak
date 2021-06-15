@@ -115,7 +115,7 @@ gint main(gint argc, gchar *argv[])
 	std::vector<struct APP_meta> meta;
 	meta.reserve(maxFacesPerScene);
 	gint secure_mode = MODE_SECURE;
-	gint run_mode = MODE_RUN;
+	//gint run_mode = MODE_RUN; //unused vairable
 
 	struct sockaddr_in cli_addr;
 	socklen_t          clilen;
@@ -177,7 +177,7 @@ gint main(gint argc, gchar *argv[])
 	std::vector<struct Paths> paths;
 	cv::Mat image;
 	getFilePaths("../imgs", paths);
-	for(gint i=0; i < paths.size(); i++) {
+	for(gsize i = 0; i < paths.size(); i++) {
 		loadInputImage(paths[i].absPath, image, videoFrameWidth, videoFrameHeight);
 		outputBbox = mtCNN.findFace(image);
 		gsize index = paths[i].fileName.find_last_of(".");
@@ -298,15 +298,23 @@ gint main(gint argc, gchar *argv[])
 				dst_gpu.download(frame);
 			}
 
+#ifdef LOG_TIMES
 			auto startMTCNN = chrono::steady_clock::now();
+#endif
 			outputBbox = mtCNN.findFace(frame);
+#ifdef LOG_TIMES
 			auto endMTCNN = chrono::steady_clock::now();
 			auto startForward = chrono::steady_clock::now();
+#endif
 			faceNet.forward(frame, outputBbox);
+#ifdef LOG_TIMES
 			auto endForward = chrono::steady_clock::now();
 			auto startFeatM = chrono::steady_clock::now();
+#endif
 			faceNet.featureMatching(frame, meta);
+#ifdef LOG_TIMES
 			auto endFeatM = chrono::steady_clock::now();
+#endif
 			faceNet.resetVariables();
 
 			if (TcpSendImageAsJpeg(DataPort,frame)<0)  break;
@@ -421,7 +429,7 @@ exit_req:
 		CloseTcpConnectedPort(&TcpConnectedPort_nsdata);
 		CloseTcpConnectedPort(&TcpConnectedPort_meta);
 		secure_mode = MODE_SECURE;
-		run_mode = MODE_RUN;
+		//run_mode = MODE_RUN; //unused vairable
 		UseCamera=true;
 		videoStreamer = videoStreamer_c;
 
