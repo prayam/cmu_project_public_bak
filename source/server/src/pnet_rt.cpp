@@ -20,30 +20,41 @@ void Pnet_engine::init(gint row, gint col) {
 	//modifiy the input shape of prototxt, write to temp.prototxt
 	gint first_spce = 16, second_space = 4;
 	fstream protofile;
-	protofile.open(prototxt, ios::in);
-	std::stringstream buffer;
-	buffer << protofile.rdbuf();
-	std::string contents(buffer.str());
-	//    std::cout << "contents = " << contents << std::endl;
-	string::size_type position_h, position_w;
+	protofile.exceptions(fstream::failbit | fstream::badbit);
+	try {
+		protofile.open(prototxt, ios::in);
+		std::string contents("");
+		if (protofile.is_open()) {
+			std::stringstream buffer;
+			buffer << protofile.rdbuf();
+			contents = std::string(buffer.str());
+			//    std::cout << "contents = " << contents << std::endl;
+			string::size_type position_h, position_w;
 
-	(void) row;
-	(void) col;
+			(void) row;
+			(void) col;
 
-	position_h = contents.find("dim");
-	while (isdigit(contents[position_h + first_spce])) {
-		contents.erase(position_h + first_spce, 1);
+			position_h = contents.find("dim");
+			while (isdigit(contents[position_h + first_spce])) {
+				contents.erase(position_h + first_spce, 1);
+			}
+			contents.insert(position_h + first_spce, to_string(row));
+			position_w = contents.find("dim", position_h + first_spce);
+			while (isdigit(contents[position_w + second_space])) {
+				contents.erase(position_w + second_space, 1);
+			}
+			contents.insert(position_w + second_space, to_string(col));
+			protofile.close();
+		}
+		protofile.open("temp.prototxt", ios::out);
+		if (protofile.is_open()) {
+			protofile.write(contents.c_str(), contents.size());
+			protofile.close();
+		}
 	}
-	contents.insert(position_h + first_spce, to_string(row));
-	position_w = contents.find("dim", position_h + first_spce);
-	while (isdigit(contents[position_w + second_space])) {
-		contents.erase(position_w + second_space, 1);
+	catch(fstream::failure e) {
+		std::cerr << "Exception opening/writing/closing file\n";
 	}
-	contents.insert(position_w + second_space, to_string(col));
-	protofile.close();
-	protofile.open("temp.prototxt", ios::out);
-	protofile.write(contents.c_str(), contents.size());
-	protofile.close();
 	IHostMemory *gieModelStream{nullptr};
 	//generate Tensorrt model
 	caffeToGIEModel("temp.prototxt", model, std::vector<std::string>{OUTPUT_PROB_NAME, OUTPUT_LOCATION_NAME}, 1,
