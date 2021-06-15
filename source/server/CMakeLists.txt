@@ -98,12 +98,20 @@ file(GLOB DIR_SRCS
         "${CMAKE_SOURCE_DIR}/../common/openssl_hostname_validation.cpp"
 )
 
-file(COPY "${CMAKE_SOURCE_DIR}/../common/keys/ca/ca.crt" "${CMAKE_SOURCE_DIR}/../common/keys/server/server.crt" "${CMAKE_SOURCE_DIR}/../common/keys/server/server.key"
+file(COPY
+		"${CMAKE_SOURCE_DIR}/../common/keys/ca/ca.crt"
+		"${CMAKE_SOURCE_DIR}/../common/keys/server/server.crt"
+		"${CMAKE_SOURCE_DIR}/../common/keys/server/server.key"
     DESTINATION "keys"
 )
 
-file(COPY "${CMAKE_SOURCE_DIR}/credential"
-    DESTINATION "./"
+file(COPY
+		"${CMAKE_SOURCE_DIR}/credential"
+		"${CMAKE_SOURCE_DIR}/facenetModels"
+		"${CMAKE_SOURCE_DIR}/friends640x480.mp4"
+		"${CMAKE_SOURCE_DIR}/mtCNNModels"
+		"${CMAKE_SOURCE_DIR}/imgs"
+    DESTINATION "asset"
 )
 
 message("DIR_SRCS = ${DIR_SRCS}")

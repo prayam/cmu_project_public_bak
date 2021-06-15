@@ -7,7 +7,6 @@ cmake-build-debug
 cmake-build-release
 
 # images for recognition
-imgs/*
 !imgs/README.md
 
 # machine learning models

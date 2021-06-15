@@ -322,7 +322,7 @@ void save_enc_cvimage(cv::Mat &image, std::string name)
 	buf.push_back('\0');
 	buf.insert(buf.end(), pic_buf.begin(), pic_buf.end());
 
-	char path[60] = "../imgs/";
+	char path[60] = "./asset/imgs/";
 	char fn[34];
 	getFileName_leng32(fn);
 	g_strlcat(path, fn, 60);

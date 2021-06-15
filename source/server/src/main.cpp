@@ -61,8 +61,8 @@ static gint UserAthenticate(gchar **userid, gchar **userpw)
 	if (*userid == NULL || *userpw == NULL)
 		goto exit;
 
-	if (fileExists("./credential")) {
-		std::ifstream file("./credential", std::ios::binary);
+	if (fileExists("./asset/credential")) {
+		std::ifstream file("./asset/credential", std::ios::binary);
 		if (file.good())
 		{
 			gchar buf_id[32];
@@ -115,7 +115,7 @@ gint main(gint argc, gchar *argv[])
 	TTcpConnectedPort *TcpConnectedPort_sdata;
 	TTcpConnectedPort *TcpConnectedPort_nsdata;
 	TTcpConnectedPort *TcpConnectedPort_meta;
-	const gchar *testmodefile = "../friends640x480.mp4";
+	const gchar *testmodefile = "./asset/friends640x480.mp4";
 	log_enable("server");
 
 	std::vector<struct APP_meta> meta;

@@ -5,8 +5,8 @@
 #include <fstream>
 
 // stuff we know about the network and the caffe input/output blobs
-Pnet_engine::Pnet_engine() : baseEngine("../mtCNNModels/det1_relu.prototxt",
-		"../mtCNNModels/det1_relu.caffemodel",
+Pnet_engine::Pnet_engine() : baseEngine("./asset/mtCNNModels/det1_relu.prototxt",
+		"./asset/mtCNNModels/det1_relu.caffemodel",
 		"data",
 		"conv4-2",
 		"prob1") {

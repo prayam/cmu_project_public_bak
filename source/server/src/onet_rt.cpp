@@ -4,8 +4,8 @@
 
 #include "onet_rt.h"
 
-Onet_engine::Onet_engine() : baseEngine("../mtCNNModels/det3_relu.prototxt",
-		"../mtCNNModels/det3_relu.caffemodel",
+Onet_engine::Onet_engine() : baseEngine("./asset/mtCNNModels/det3_relu.prototxt",
+		"./asset/mtCNNModels/det3_relu.caffemodel",
 		"data",
 		"conv6-2",
 		"prob1",

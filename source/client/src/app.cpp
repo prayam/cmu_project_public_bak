@@ -319,6 +319,7 @@ gboolean App::connect_server ()
 	const gchar *ca;
 	const gchar *crt;
 	const gchar *key;
+	gint i = 0;
 
 	if (0 != check_client_cert()) {
 		LOG_WARNING("Certificate Error");
@@ -360,10 +361,23 @@ gboolean App::connect_server ()
 
 	// send login info and check
 	TcpSendLoginData(this->port_control, m_Entry_Id.get_text().c_str(), m_Entry_Password.get_text().c_str());
-	recv_ret = TcpRecvRes(this->port_control, &res);
+	show_dialog("Show your face on camera");
 
-	if ((recv_ret == TCP_RECV_PEER_DISCONNECTED || recv_ret == TCP_RECV_ERROR || recv_ret == TCP_RECV_TIMEOUT) ||
-			res != RES_OK) {
+	for (i = 0; i < 5; i++) {
+		recv_ret = TcpRecvRes(this->port_control, &res);
+
+		if (recv_ret == TCP_RECV_TIMEOUT) {
+			continue;
+		}
+
+		if (recv_ret == TCP_RECV_PEER_DISCONNECTED || recv_ret == TCP_RECV_ERROR || res == RES_OK) {
+			break;
+		}
+	}
+
+	m_pDialog->hide();
+
+	if (res != RES_OK) {
 		LOG_WARNING("login fail");
 		disconnect_server();
 		show_dialog("Login Fail");
@@ -726,7 +740,8 @@ void App::on_button_learn_save()
 	guint8 res = 255;
 
 	if (this->connected_server) {
-		if (check_valid_input("^[a-zA-Z0-9 ,._'`-]+$", m_Entry_Name.get_text().c_str())) {
+		if (check_valid_input("^[a-zA-Z0-9 ,._'`-]+$", m_Entry_Name.get_text().c_str()) &&
+			0 != g_ascii_strncasecmp(m_Entry_Name.get_text().c_str(), "admin", sizeof("admin"))) {
 			TcpSendSaveReq(this->port_control, m_Entry_Name.get_text().c_str());
 			recv_ret = TcpRecvRes(this->port_control, &res);
 
@@ -742,7 +757,7 @@ void App::on_button_learn_save()
 			}
 		}
 		else {
-			this->show_dialog("Name is only allowed alphabet, number, and ,._'`- character only");
+			this->show_dialog("Name is only allowed\nalphabet, number, and ,._'`- character only\nalso not allowed 'admin'");
 		}
 	}
 }
