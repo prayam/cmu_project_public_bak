@@ -2,17 +2,17 @@
 #include "CommonStruct.h"
 #include <glib.h>
 
-int FaceNetClassifier::m_classCount = 0;
+gint FaceNetClassifier::m_classCount = 0;
 
 FaceNetClassifier::FaceNetClassifier
-(Logger gLogger, DataType dtype, const string uffFile, const string engineFile, int batchSize, bool serializeEngine,
- float knownPersonThreshold, int maxFacesPerScene, int frameWidth, int frameHeight) {
+(Logger gLogger, DataType dtype, const string uffFile, const string engineFile, gint batchSize, gboolean serializeEngine,
+ float knownPersonThreshold, gint maxFacesPerScene, gint frameWidth, gint frameHeight) {
 
-	m_INPUT_C = static_cast<const int>(3);
-	m_INPUT_H = static_cast<const int>(160);
-	m_INPUT_W = static_cast<const int>(160);
-	m_frameWidth = static_cast<const int>(frameWidth);
-	m_frameHeight = static_cast<const int>(frameHeight);
+	m_INPUT_C = static_cast<const gint>(3);
+	m_INPUT_H = static_cast<const gint>(160);
+	m_INPUT_W = static_cast<const gint>(160);
+	m_frameWidth = static_cast<const gint>(frameWidth);
+	m_frameHeight = static_cast<const gint>(frameHeight);
 	m_gLogger = gLogger;
 	m_dtype = dtype;
 	m_uffFile = static_cast<const string>(uffFile);
@@ -31,8 +31,8 @@ FaceNetClassifier::FaceNetClassifier
 
 void FaceNetClassifier::createOrLoadEngine() {
 	if(fileExists(m_engineFile)) {
-		std::vector<char> trtModelStream_;
-		size_t size{ 0 };
+		std::vector<gchar> trtModelStream_;
+		gsize size{ 0 };
 
 		std::ifstream file(m_engineFile, std::ios::binary);
 		if (file.good())
@@ -93,7 +93,7 @@ void FaceNetClassifier::createOrLoadEngine() {
 			ofstream planFile;
 			planFile.open(m_engineFile);
 			IHostMemory *serializedEngine = m_engine->serialize();
-			planFile.write((char *) serializedEngine->data(), serializedEngine->size());
+			planFile.write((gchar *) serializedEngine->data(), serializedEngine->size());
 			planFile.close();
 		}
 
@@ -125,7 +125,7 @@ void FaceNetClassifier::getCroppedFacesAndAlign(cv::Mat frame, std::vector<struc
 
 void FaceNetClassifier::preprocessFaces() {
 	// preprocess according to facenet training and flatten for input to runtime engine
-	for (int i = 0; i < m_croppedFaces.size(); i++) {
+	for (gint i = 0; i < m_croppedFaces.size(); i++) {
 		//mean and std
 		cv::cvtColor(m_croppedFaces[i].faceMat, m_croppedFaces[i].faceMat, cv::COLOR_RGB2BGR);
 		cv::Mat temp = m_croppedFaces[i].faceMat.reshape(1, m_croppedFaces[i].faceMat.rows * 3);
@@ -154,10 +154,10 @@ void FaceNetClassifier::preprocessFaces() {
 
 
 void FaceNetClassifier::doInference(float* inputData, float* output) {
-	int size_of_single_input = 3 * 160 * 160 * sizeof(float);
-	int size_of_single_output = 128 * sizeof(float);
-	int inputIndex = m_engine->getBindingIndex("input");
-	int outputIndex = m_engine->getBindingIndex("embeddings");
+	gint size_of_single_input = 3 * 160 * 160 * sizeof(float);
+	gint size_of_single_output = 128 * sizeof(float);
+	gint inputIndex = m_engine->getBindingIndex("input");
+	gint outputIndex = m_engine->getBindingIndex("embeddings");
 
 	void* buffers[2];
 
@@ -201,7 +201,7 @@ void FaceNetClassifier::forwardAddFace(cv::Mat image, std::vector<struct Bbox> o
 void FaceNetClassifier::forward(cv::Mat frame, std::vector<struct Bbox> outputBbox) {
 	getCroppedFacesAndAlign(frame, outputBbox); // ToDo align faces according to points
 	preprocessFaces();
-	for(int i = 0; i < m_croppedFaces.size(); i++) {
+	for(gint i = 0; i < m_croppedFaces.size(); i++) {
 		doInference((float*)m_croppedFaces[i].faceMat.ptr<float>(0), m_output);
 		m_embeddings.insert(m_embeddings.end(), m_output, m_output+128);
 	}
@@ -209,11 +209,11 @@ void FaceNetClassifier::forward(cv::Mat frame, std::vector<struct Bbox> outputBb
 
 void FaceNetClassifier::featureMatching(cv::Mat &image, std::vector<struct APP_meta> &meta) {
 
-	for(int i = 0; i < (m_embeddings.size()/128); i++) {
+	for(gint i = 0; i < (m_embeddings.size()/128); i++) {
 		double minDistance = 10.* m_knownPersonThresh;
 		float currDistance = 0.;
-		int winner = -1;
-		for (int j = 0; j < m_knownFaces.size(); j++) {
+		gint winner = -1;
+		for (gint j = 0; j < m_knownFaces.size(); j++) {
 std:vector<float> currEmbedding(128);
     std::copy_n(m_embeddings.begin()+(i*128), 128, currEmbedding.begin());
     currDistance = vectors_distance(currEmbedding, m_knownFaces[j].embeddedFace);
@@ -306,7 +306,7 @@ std:vector<float> currEmbedding(128);
 
 
 
-	inline unsigned int elementSize(nvinfer1::DataType t)
+	inline guint elementSize(nvinfer1::DataType t)
 	{
 		switch (t)
 		{

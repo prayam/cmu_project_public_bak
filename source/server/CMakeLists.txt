@@ -35,7 +35,7 @@ if(CUDA_VERSION_MAJOR GREATER 9)
 
 endif()
 
-set(CMAKE_CXX_FLAGS  "-Wno-deprecated-declarations")
+set(CMAKE_CXX_FLAGS  "-Wall -Wextra")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -s")
 set(CMAKE_SKIP_RPATH TRUE)
 set(CMAKE_INSTALL_RPATH "")

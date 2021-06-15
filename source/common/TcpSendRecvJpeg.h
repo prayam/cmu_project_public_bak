@@ -8,27 +8,28 @@
 #ifndef TcpSendRecvJpegH
 #define TcpSendRecvJpegH
 
+#include <glib.h>
 #include <opencv2/core/core.hpp>
 #include "NetworkTCP.h"
 
-int TcpSendImageAsJpeg(TTcpConnectedPort * TcpConnectedPort, cv::Mat Image);
-ssize_t TcpRecvImageAsJpeg(TTcpConnectedPort * TcpConnectedPort, cv::Mat *Image);
+gint TcpSendImageAsJpeg(TTcpConnectedPort * TcpConnectedPort, cv::Mat Image);
+gssize TcpRecvImageAsJpeg(TTcpConnectedPort * TcpConnectedPort, cv::Mat *Image);
 
-bool TcpSendLoginData(TTcpConnectedPort * TcpConnectedPort, const char* userid, const char* userpw);
-ssize_t TcpRecvLoginData(TTcpConnectedPort * TcpConnectedPort, char** userid, char** userpw);
-bool TcpSendLogoutReq(TTcpConnectedPort * TcpConnectedPort);
-bool TcpSendSecureModeReq(TTcpConnectedPort * TcpConnectedPort);
-bool TcpSendNonSecureModeReq(TTcpConnectedPort * TcpConnectedPort);
-bool TcpSendTestRunModeReq(TTcpConnectedPort * TcpConnectedPort);
-bool TcpSendRunModeReq(TTcpConnectedPort * TcpConnectedPort);
-bool TcpSendCaptureReq(TTcpConnectedPort * TcpConnectedPort);
-bool TcpSendSaveReq(TTcpConnectedPort * TcpConnectedPort, const char *name);
-ssize_t TcpRecvCtrlReq(TTcpConnectedPort * TcpConnectedPort, char *req_id, void **data);
-int TcpSendRes(TTcpConnectedPort * TcpConnectedPort, unsigned char res);
-ssize_t TcpRecvRes(TTcpConnectedPort * TcpConnectedPort, unsigned char *res);
+gboolean TcpSendLoginData(TTcpConnectedPort * TcpConnectedPort, const gchar* userid, const gchar* userpw);
+gssize TcpRecvLoginData(TTcpConnectedPort * TcpConnectedPort, gchar** userid, gchar** userpw);
+gboolean TcpSendLogoutReq(TTcpConnectedPort * TcpConnectedPort);
+gboolean TcpSendSecureModeReq(TTcpConnectedPort * TcpConnectedPort);
+gboolean TcpSendNonSecureModeReq(TTcpConnectedPort * TcpConnectedPort);
+gboolean TcpSendTestRunModeReq(TTcpConnectedPort * TcpConnectedPort);
+gboolean TcpSendRunModeReq(TTcpConnectedPort * TcpConnectedPort);
+gboolean TcpSendCaptureReq(TTcpConnectedPort * TcpConnectedPort);
+gboolean TcpSendSaveReq(TTcpConnectedPort * TcpConnectedPort, const gchar *name);
+gssize TcpRecvCtrlReq(TTcpConnectedPort * TcpConnectedPort, gchar *req_id, void **data);
+gint TcpSendRes(TTcpConnectedPort * TcpConnectedPort, guchar res);
+gssize TcpRecvRes(TTcpConnectedPort * TcpConnectedPort, guchar *res);
 
-bool TcpSendMeta(TTcpConnectedPort * TcpConnectedPort, std::vector<struct APP_meta> meta);
-ssize_t TcpRecvMeta(TTcpConnectedPort * TcpConnectedPort, std::vector<struct APP_meta> &meta);
+gboolean TcpSendMeta(TTcpConnectedPort * TcpConnectedPort, std::vector<struct APP_meta> meta);
+gssize TcpRecvMeta(TTcpConnectedPort * TcpConnectedPort, std::vector<struct APP_meta> &meta);
 
 #endif
 //------------------------------------------------------------------------------------------------

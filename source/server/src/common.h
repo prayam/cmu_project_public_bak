@@ -16,6 +16,7 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
 #include <cuda_runtime_api.h>
+#include <glib.h>
 
 #define CHECK(status)									\
 {														\
@@ -31,7 +32,7 @@
 class Logger : public nvinfer1::ILogger
 {
 	public:
-		void log(nvinfer1::ILogger::Severity severity, const char* msg) override
+		void log(nvinfer1::ILogger::Severity severity, const gchar* msg) override
 		{
 			// suppress info-level messages
 			//if (severity == Severity::kINFO) return;
@@ -55,20 +56,20 @@ struct Paths {
 
 struct KnownID {
 	std::string className;
-	int classNumber;
+	gint classNumber;
 	std::vector<float> embeddedFace;
 };
 
-inline bool fileExists(const std::string &name) {
+inline gboolean fileExists(const std::string &name) {
 	std::ifstream f(name.c_str());
 	return f.good();
 }
 
-void* safeCudaMalloc(size_t memSize);
+void* safeCudaMalloc(gsize memSize);
 inline int64_t volume(const nvinfer1::Dims& d);
 std::vector<std::pair<int64_t, nvinfer1::DataType>>
-calculateBindingBufferSizes(const nvinfer1::ICudaEngine& engine, int nbBindings, int batchSize);
+calculateBindingBufferSizes(const nvinfer1::ICudaEngine& engine, gint nbBindings, gint batchSize);
 void getFilePaths(std::string imagesPath, std::vector<struct Paths>& paths);
-void loadInputImage(std::string inputFilePath, cv::Mat& image, int videoFrameWidth, int videoFrameHeight);
+void loadInputImage(std::string inputFilePath, cv::Mat& image, gint videoFrameWidth, gint videoFrameHeight);
 
 #endif // _TRT_COMMON_H_

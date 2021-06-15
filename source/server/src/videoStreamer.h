@@ -5,25 +5,26 @@
 #include <assert.h>
 #include <opencv2/core.hpp>
 #include <opencv2/videoio.hpp>
+#include <glib.h>
 
 
 
 class VideoStreamer {
 	private:
-		int m_videoWidth;
-		int m_videoHeight;
-		int m_frameRate;
+		gint m_videoWidth;
+		gint m_videoHeight;
+		gint m_frameRate;
 		cv::VideoCapture *m_capture;
 
 	public:
-		VideoStreamer(int nmbrDevice, int videoWidth, int videoHeight, int frameRate, bool isCSICam);
-		VideoStreamer(std::string filename, int videoWidth, int videoHeight);
+		VideoStreamer(gint nmbrDevice, gint videoWidth, gint videoHeight, gint frameRate, gboolean isCSICam);
+		VideoStreamer(std::string filename, gint videoWidth, gint videoHeight);
 		~VideoStreamer();
-		void setResolutionDevice(int width, int height);
-		void setResoltionFile(int width, int height);
+		void setResolutionDevice(gint width, gint height);
+		void setResoltionFile(gint width, gint height);
 		void assertResolution();
 		void getFrame(cv::Mat &frame);
-		std::string gstreamer_pipeline (int capture_width, int capture_height, int display_width, int 	display_height, int frameRate, int flip_method=0);
+		std::string gstreamer_pipeline (gint capture_width, gint capture_height, gint display_width, gint 	display_height, gint frameRate, gint flip_method=0);
 		void release();
 };
 

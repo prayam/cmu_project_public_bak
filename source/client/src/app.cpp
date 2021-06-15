@@ -17,7 +17,7 @@
 using namespace cv;
 using namespace std;
 
-static int readysocket(int fd)
+static gint readysocket(gint fd)
 {
 	struct timeval tv = { 0L, 0L };
 	fd_set fds;
@@ -31,7 +31,7 @@ static gboolean handle_port_secure(gpointer data) {
 	Mat image;
 	float fontScaler;
 	std::vector<struct APP_meta> meta_vector;
-	ssize_t ret;
+	gssize ret;
 	static CLIENT_STATE prev_state = CLIENT_STATE_SECURE_RUN;
 	gint skip_picture_count = 0;
 	gint fd = 0;
@@ -302,7 +302,7 @@ App::~App()
 	LOG_INFO("exit");
 }
 
-void App::show_dialog(const char* contents)
+void App::show_dialog(const gchar* contents)
 {
 	m_pDialog.reset(new Gtk::MessageDialog(*this, contents, false, Gtk::MessageType::MESSAGE_ERROR, Gtk::ButtonsType::BUTTONS_OK, true));
 	m_pDialog->signal_response().connect(sigc::hide(sigc::mem_fun(*m_pDialog, &Gtk::Widget::hide)));
@@ -315,7 +315,7 @@ gboolean App::connect_server ()
 
 	gboolean ret = FALSE;
 	guint8 res = 255;
-	ssize_t recv_ret = 0;
+	gssize recv_ret = 0;
 	const gchar *ca;
 	const gchar *crt;
 	const gchar *key;
@@ -543,7 +543,7 @@ void App::on_button_login()
 
 void App::on_button_logout()
 {
-	ssize_t recv_ret = 0;
+	gssize recv_ret = 0;
 	guint8 res = 255;
 
 	if (this->port_control != NULL) {
@@ -586,7 +586,7 @@ void App::on_button_logout()
 
 void App::on_checkbox_secure_toggled()
 {
-	ssize_t recv_ret = 0;
+	gssize recv_ret = 0;
 	guint8 res = 255;
 
 	if (this->connected_server) {
@@ -625,7 +625,7 @@ void App::on_checkbox_secure_toggled()
 
 void App::on_checkbox_test_toggled()
 {
-	ssize_t recv_ret = 0;
+	gssize recv_ret = 0;
 	guint8 res = 255;
 
 	if (this->connected_server) {
@@ -658,7 +658,7 @@ void App::on_checkbox_test_toggled()
 
 void App::on_button_pause_resume()
 {
-	ssize_t recv_ret = 0;
+	gssize recv_ret = 0;
 	guint8 res = 255;
 
 	if (this->connected_server) {
@@ -720,7 +720,7 @@ void App::on_button_pause_resume()
 
 void App::on_button_learn_save()
 {
-	ssize_t recv_ret = 0;
+	gssize recv_ret = 0;
 	guint8 res = 255;
 
 	if (this->connected_server) {

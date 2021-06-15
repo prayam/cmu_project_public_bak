@@ -4,10 +4,10 @@
 
 #include "baseEngine.h"
 
-int baseEngine::det1_relu_counter = 1;
+gint baseEngine::det1_relu_counter = 1;
 
-baseEngine::baseEngine(const char * prototxt,const char* model,const  char* input_name,const char*location_name,
-        const char* prob_name, const char *point_name) :
+baseEngine::baseEngine(const gchar * prototxt,const gchar* model,const  gchar* input_name,const gchar*location_name,
+        const gchar* prob_name, const gchar *point_name) :
     prototxt(prototxt),
     model(model),
     INPUT_BLOB_NAME(input_name),
@@ -20,16 +20,16 @@ baseEngine::~baseEngine() {
     shutdownProtobufLibrary();
 }
 
-void baseEngine::init(int row,int col) {
+void baseEngine::init(gint row,gint col) {
 
 }
 void baseEngine::caffeToGIEModel(const std::string &deployFile,                // name for caffe prototxt
         const std::string &modelFile,                // name for model
         const std::vector<std::string> &outputs,   // network outputs
-        unsigned int maxBatchSize,                    // batch size - NB must be at least as large as the batch we want to run with)
+        guint maxBatchSize,                    // batch size - NB must be at least as large as the batch we want to run with)
      IHostMemory *&gieModelStream)    // output buffer for the GIE model
 {
-    size_t lastIdx = model.find_last_of(".");
+    gsize lastIdx = model.find_last_of(".");
     string enginePath = model.substr(0, lastIdx);
     if(enginePath.find("det1_relu") != std::string::npos) {
         enginePath.append(std::to_string(det1_relu_counter));
@@ -41,8 +41,8 @@ void baseEngine::caffeToGIEModel(const std::string &deployFile,                /
     }
     std::cout << "rawName = " << enginePath << std::endl;
     if(fileExists(enginePath)) {
-        std::vector<char> trtModelStream_;
-        size_t size{ 0 };
+        std::vector<gchar> trtModelStream_;
+        gsize size{ 0 };
 
         std::ifstream file(enginePath, std::ios::binary);
         if (file.good())
@@ -91,7 +91,7 @@ void baseEngine::caffeToGIEModel(const std::string &deployFile,                /
         ofstream planFile;
         planFile.open(enginePath);
         IHostMemory *serializedEngine = engine->serialize();
-        planFile.write((char *) serializedEngine->data(), serializedEngine->size());
+        planFile.write((gchar *) serializedEngine->data(), serializedEngine->size());
         planFile.close();
 
 

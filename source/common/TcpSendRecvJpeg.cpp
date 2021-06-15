@@ -11,8 +11,8 @@
 #include "CommonStruct.h"
 #include "Logger.h"
 
-static  int init_values[2] = { cv::IMWRITE_JPEG_QUALITY,80 }; //default(95) 0-100
-static  std::vector<int> param (&init_values[0], &init_values[0]+2);
+static  gint init_values[2] = { cv::IMWRITE_JPEG_QUALITY,80 }; //default(95) 0-100
+static  std::vector<gint> param (&init_values[0], &init_values[0]+2);
 static  std::vector<uchar> sendbuff;//buffer for coding
 
 //-----------------------------------------------------------------
@@ -20,12 +20,12 @@ static  std::vector<uchar> sendbuff;//buffer for coding
 // jpeg image in side a TCP Stream on the specified TCP local port
 // and Destination. return bytes sent on success and -1 on failure
 //-----------------------------------------------------------------
-int TcpSendImageAsJpeg(TTcpConnectedPort * TcpConnectedPort,cv::Mat Image)
+gint TcpSendImageAsJpeg(TTcpConnectedPort * TcpConnectedPort,cv::Mat Image)
 {
-	unsigned int imagesize;
+	guint imagesize;
 	cv::imencode(".jpg", Image, sendbuff, param);
 	imagesize=htonl(sendbuff.size()); // convert image size to network format
-	if (WriteDataTcp(TcpConnectedPort,(unsigned char *)&imagesize,sizeof(imagesize))!=sizeof(imagesize))
+	if (WriteDataTcp(TcpConnectedPort,(guchar *)&imagesize,sizeof(imagesize))!=sizeof(imagesize))
 		return(-1);
 	return(WriteDataTcp(TcpConnectedPort,sendbuff.data(), sendbuff.size()));
 }
@@ -38,20 +38,20 @@ int TcpSendImageAsJpeg(TTcpConnectedPort * TcpConnectedPort,cv::Mat Image)
 // jpeg image in side a TCP Stream on the specified TCP local port
 // returns true on success and false on failure
 //-----------------------------------------------------------------
-ssize_t TcpRecvImageAsJpeg(TTcpConnectedPort * TcpConnectedPort,cv::Mat *Image)
+gssize TcpRecvImageAsJpeg(TTcpConnectedPort * TcpConnectedPort,cv::Mat *Image)
 {
-	ssize_t ret;
-	unsigned int imagesize;
-	unsigned char *buff = NULL;	/* receive buffer */
+	gssize ret;
+	guint imagesize;
+	guchar *buff = NULL;	/* receive buffer */
 
-	ret = ReadDataTcp(TcpConnectedPort, (unsigned char *)&imagesize, sizeof(imagesize));
+	ret = ReadDataTcp(TcpConnectedPort, (guchar *)&imagesize, sizeof(imagesize));
 	if (ret != sizeof(imagesize)) {
 		LOG_WARNING("fail ReadDataTcp");
 		goto exit;
 	}
 
 	imagesize = ntohl(imagesize); // convert image size to host format
-	buff = (unsigned char*)g_malloc(imagesize);
+	buff = (guchar*)g_malloc(imagesize);
 	if (buff == NULL) {
 		ret = -1;
 		LOG_WARNING("buffer allocation fail");
@@ -78,12 +78,12 @@ exit:
 //-----------------------------------------------------------------
 
 
-bool TcpSendLoginData(TTcpConnectedPort * TcpConnectedPort, const char* userid, const char* userpw)
+gboolean TcpSendLoginData(TTcpConnectedPort * TcpConnectedPort, const gchar* userid, const gchar* userpw)
 {
-	bool ret = FALSE;
+	gboolean ret = FALSE;
 	struct APP_command_req *req = NULL;
 	guint8 *tmp;
-	size_t userid_len, userpw_len, req_len, write_ret;
+	gsize userid_len, userpw_len, req_len, write_ret;
 
 	if (TcpConnectedPort == NULL) {
 		LOG_WARNING("TcpConnectedPort is NULL");
@@ -128,7 +128,7 @@ bool TcpSendLoginData(TTcpConnectedPort * TcpConnectedPort, const char* userid, 
 	memcpy(tmp, userpw, userpw_len);
 	tmp += userpw_len;
 
-	write_ret = WriteDataTcp(TcpConnectedPort, (unsigned char *)req, req_len);
+	write_ret = WriteDataTcp(TcpConnectedPort, (guchar *)req, req_len);
 	if (write_ret != req_len) {
 		LOG_WARNING("unexpected write len %ld. it should be %ld", write_ret, req_len);
 		goto exit;
@@ -143,10 +143,10 @@ exit:
 }
 
 /* CAUTION: Caller should free userid and userpw after using them. */
-ssize_t TcpRecvLoginData(TTcpConnectedPort * TcpConnectedPort, char** userid, char** userpw)
+gssize TcpRecvLoginData(TTcpConnectedPort * TcpConnectedPort, gchar** userid, gchar** userpw)
 {
-	ssize_t read_len = TCP_RECV_ERROR;
-	ssize_t req_len;
+	gssize read_len = TCP_RECV_ERROR;
+	gssize req_len;
 	struct APP_command_req *req;
 	guint8 *tmp;
 	guint8 userid_len, userpw_len;
@@ -163,7 +163,7 @@ ssize_t TcpRecvLoginData(TTcpConnectedPort * TcpConnectedPort, char** userid, ch
 	}
 
 	req_len = sizeof(struct APP_command_req);
-	read_len = ReadDataTcp(TcpConnectedPort, (unsigned char *)req, req_len);
+	read_len = ReadDataTcp(TcpConnectedPort, (guchar *)req, req_len);
 	if (read_len != req_len) {
 		LOG_WARNING("unexpected read len %ld. it should be %ld", read_len, req_len);
 		goto exit;
@@ -209,11 +209,11 @@ exit:
 	return read_len;
 }
 
-bool TcpSendLogoutReq(TTcpConnectedPort * TcpConnectedPort)
+gboolean TcpSendLogoutReq(TTcpConnectedPort * TcpConnectedPort)
 {
-	bool ret = FALSE;
+	gboolean ret = FALSE;
 	struct APP_command_req *req = NULL;
-	size_t req_len, write_ret;
+	gsize req_len, write_ret;
 
 	if (TcpConnectedPort == NULL) {
 		LOG_WARNING("TcpConnectedPort is NULL");
@@ -229,7 +229,7 @@ bool TcpSendLogoutReq(TTcpConnectedPort * TcpConnectedPort)
 	req->req_id = REQ_LOGOUT;
 
 	req_len = sizeof(struct APP_command_req);
-	write_ret = WriteDataTcp(TcpConnectedPort, (unsigned char *)req, req_len);
+	write_ret = WriteDataTcp(TcpConnectedPort, (guchar *)req, req_len);
 	if (write_ret != req_len) {
 		LOG_WARNING("unexpected write len %ld. it should be %ld", write_ret, req_len);
 		goto exit;
@@ -243,11 +243,11 @@ exit:
 	return ret;
 }
 
-bool TcpSendSecureModeReq(TTcpConnectedPort * TcpConnectedPort)
+gboolean TcpSendSecureModeReq(TTcpConnectedPort * TcpConnectedPort)
 {
-	bool ret = FALSE;
+	gboolean ret = FALSE;
 	struct APP_command_req *req = NULL;
-	size_t req_len, write_ret;
+	gsize req_len, write_ret;
 
 	if (TcpConnectedPort == NULL) {
 		LOG_WARNING("TcpConnectedPort is NULL");
@@ -263,7 +263,7 @@ bool TcpSendSecureModeReq(TTcpConnectedPort * TcpConnectedPort)
 	req->req_id = REQ_SECURE;
 
 	req_len = sizeof(struct APP_command_req);
-	write_ret = WriteDataTcp(TcpConnectedPort, (unsigned char *)req, req_len);
+	write_ret = WriteDataTcp(TcpConnectedPort, (guchar *)req, req_len);
 	if (write_ret != req_len) {
 		LOG_WARNING("unexpected write len %ld. it should be %ld", write_ret, req_len);
 		goto exit;
@@ -277,11 +277,11 @@ exit:
 	return ret;
 }
 
-bool TcpSendNonSecureModeReq(TTcpConnectedPort * TcpConnectedPort)
+gboolean TcpSendNonSecureModeReq(TTcpConnectedPort * TcpConnectedPort)
 {
-	bool ret = FALSE;
+	gboolean ret = FALSE;
 	struct APP_command_req *req = NULL;
-	size_t req_len, write_ret;
+	gsize req_len, write_ret;
 
 	if (TcpConnectedPort == NULL) {
 		LOG_WARNING("TcpConnectedPort is NULL");
@@ -297,7 +297,7 @@ bool TcpSendNonSecureModeReq(TTcpConnectedPort * TcpConnectedPort)
 	req->req_id = REQ_NONSECURE;
 
 	req_len = sizeof(struct APP_command_req);
-	write_ret = WriteDataTcp(TcpConnectedPort, (unsigned char *)req, req_len);
+	write_ret = WriteDataTcp(TcpConnectedPort, (guchar *)req, req_len);
 	if (write_ret != req_len) {
 		LOG_WARNING("unexpected write len %ld. it should be %ld", write_ret, req_len);
 		goto exit;
@@ -311,11 +311,11 @@ exit:
 	return ret;
 }
 
-bool TcpSendTestRunModeReq(TTcpConnectedPort * TcpConnectedPort)
+gboolean TcpSendTestRunModeReq(TTcpConnectedPort * TcpConnectedPort)
 {
-	bool ret = FALSE;
+	gboolean ret = FALSE;
 	struct APP_command_req *req = NULL;
-	size_t req_len, write_ret;
+	gsize req_len, write_ret;
 
 	if (TcpConnectedPort == NULL) {
 		LOG_WARNING("TcpConnectedPort is NULL");
@@ -331,7 +331,7 @@ bool TcpSendTestRunModeReq(TTcpConnectedPort * TcpConnectedPort)
 	req->req_id = REQ_TESTRUN;
 
 	req_len = sizeof(struct APP_command_req);
-	write_ret = WriteDataTcp(TcpConnectedPort, (unsigned char *)req, req_len);
+	write_ret = WriteDataTcp(TcpConnectedPort, (guchar *)req, req_len);
 	if (write_ret != req_len) {
 		LOG_WARNING("unexpected write len %ld. it should be %ld", write_ret, req_len);
 		goto exit;
@@ -345,11 +345,11 @@ exit:
 	return ret;
 }
 
-bool TcpSendRunModeReq(TTcpConnectedPort * TcpConnectedPort)
+gboolean TcpSendRunModeReq(TTcpConnectedPort * TcpConnectedPort)
 {
-	bool ret = FALSE;
+	gboolean ret = FALSE;
 	struct APP_command_req *req = NULL;
-	size_t req_len, write_ret;
+	gsize req_len, write_ret;
 
 	if (TcpConnectedPort == NULL) {
 		LOG_WARNING("TcpConnectedPort is NULL");
@@ -365,7 +365,7 @@ bool TcpSendRunModeReq(TTcpConnectedPort * TcpConnectedPort)
 	req->req_id = REQ_RUN;
 
 	req_len = sizeof(struct APP_command_req);
-	write_ret = WriteDataTcp(TcpConnectedPort, (unsigned char *)req, req_len);
+	write_ret = WriteDataTcp(TcpConnectedPort, (guchar *)req, req_len);
 	if (write_ret != req_len) {
 		LOG_WARNING("unexpected write len %ld. it should be %ld", write_ret, req_len);
 		goto exit;
@@ -379,11 +379,11 @@ exit:
 	return ret;
 }
 
-bool TcpSendCaptureReq(TTcpConnectedPort * TcpConnectedPort)
+gboolean TcpSendCaptureReq(TTcpConnectedPort * TcpConnectedPort)
 {
-	bool ret = FALSE;
+	gboolean ret = FALSE;
 	struct APP_command_req *req = NULL;
-	size_t req_len, write_ret;
+	gsize req_len, write_ret;
 
 	if (TcpConnectedPort == NULL) {
 		LOG_WARNING("TcpConnectedPort is NULL");
@@ -399,7 +399,7 @@ bool TcpSendCaptureReq(TTcpConnectedPort * TcpConnectedPort)
 	req->req_id = REQ_CAPTURE;
 
 	req_len = sizeof(struct APP_command_req);
-	write_ret = WriteDataTcp(TcpConnectedPort, (unsigned char *)req, req_len);
+	write_ret = WriteDataTcp(TcpConnectedPort, (guchar *)req, req_len);
 	if (write_ret != req_len) {
 		LOG_WARNING("unexpected write len %ld. it should be %ld", write_ret, req_len);
 		goto exit;
@@ -413,12 +413,12 @@ exit:
 	return ret;
 }
 
-bool TcpSendSaveReq(TTcpConnectedPort * TcpConnectedPort, const char *name)
+gboolean TcpSendSaveReq(TTcpConnectedPort * TcpConnectedPort, const gchar *name)
 {
-	bool ret = FALSE;
+	gboolean ret = FALSE;
 	struct APP_command_req *req = NULL;
 	guint8 *tmp;
-	size_t name_len, req_len, write_ret;
+	gsize name_len, req_len, write_ret;
 
 	if (TcpConnectedPort == NULL) {
 		LOG_WARNING("TcpConnectedPort is NULL");
@@ -455,7 +455,7 @@ bool TcpSendSaveReq(TTcpConnectedPort * TcpConnectedPort, const char *name)
 	tmp++;
 	memcpy(tmp, name, name_len);
 
-	write_ret = WriteDataTcp(TcpConnectedPort, (unsigned char *)req, req_len);
+	write_ret = WriteDataTcp(TcpConnectedPort, (guchar *)req, req_len);
 	if (write_ret != req_len) {
 		LOG_WARNING("unexpected write len %ld. it should be %ld", write_ret, req_len);
 		goto exit;
@@ -470,10 +470,10 @@ exit:
 }
 
 /* CAUTION: Caller should free data after using it. */
-ssize_t TcpRecvCtrlReq(TTcpConnectedPort * TcpConnectedPort, char *req_id, void **data)
+gssize TcpRecvCtrlReq(TTcpConnectedPort * TcpConnectedPort, gchar *req_id, void **data)
 {
-	ssize_t read_len = TCP_RECV_ERROR;
-	ssize_t req_len;
+	gssize read_len = TCP_RECV_ERROR;
+	gssize req_len;
 	struct APP_command_req *req;
 	guint8 *tmp;
 	guint8 name_len;
@@ -490,7 +490,7 @@ ssize_t TcpRecvCtrlReq(TTcpConnectedPort * TcpConnectedPort, char *req_id, void 
 	}
 
 	req_len = sizeof(struct APP_command_req);
-	read_len = ReadDataTcp(TcpConnectedPort, (unsigned char *)req, req_len);
+	read_len = ReadDataTcp(TcpConnectedPort, (guchar *)req, req_len);
 	if (read_len != req_len) {
 		LOG_WARNING("unexpected read len %ld. it should be %ld", read_len, req_len);
 		goto exit;
@@ -520,19 +520,19 @@ exit:
 	return read_len;
 }
 
-int TcpSendRes(TTcpConnectedPort * TcpConnectedPort, unsigned char res)
+gint TcpSendRes(TTcpConnectedPort * TcpConnectedPort, guchar res)
 {
-	return WriteDataTcp(TcpConnectedPort, &res, sizeof(char));
+	return WriteDataTcp(TcpConnectedPort, &res, sizeof(gchar));
 }
 
-ssize_t TcpRecvRes(TTcpConnectedPort * TcpConnectedPort, unsigned char *res)
+gssize TcpRecvRes(TTcpConnectedPort * TcpConnectedPort, guchar *res)
 {
-	return ReadDataTcp(TcpConnectedPort, res, sizeof(char));
+	return ReadDataTcp(TcpConnectedPort, res, sizeof(gchar));
 }
 
-bool TcpSendMeta(TTcpConnectedPort * TcpConnectedPort, std::vector<struct APP_meta> meta)
+gboolean TcpSendMeta(TTcpConnectedPort * TcpConnectedPort, std::vector<struct APP_meta> meta)
 {
-	size_t write_ret;
+	gsize write_ret;
 	guint8 nr = meta.size();
 
 	if (TcpConnectedPort == NULL) {
@@ -540,13 +540,13 @@ bool TcpSendMeta(TTcpConnectedPort * TcpConnectedPort, std::vector<struct APP_me
 		goto exit;
 	}
 
-	write_ret = WriteDataTcp(TcpConnectedPort, (unsigned char *)&nr, sizeof(guint8));
+	write_ret = WriteDataTcp(TcpConnectedPort, (guchar *)&nr, sizeof(guint8));
 	if (write_ret != sizeof(guint8)) {
 		LOG_WARNING("Meta/nr: unexpected write len %ld. it should be %ld", write_ret, sizeof(guint8));
 		goto exit;
 	}
 
-	for (int i = 0; i < nr; i++) {
+	for (gint i = 0; i < nr; i++) {
 		struct APP_meta tmp;
 
 		g_strlcpy(tmp.name, meta[i].name, MAX_NAME - 1);
@@ -555,7 +555,7 @@ bool TcpSendMeta(TTcpConnectedPort * TcpConnectedPort, std::vector<struct APP_me
 		tmp.x2 = htonl(meta[i].x2);
 		tmp.y2 = htonl(meta[i].y2);
 
-		write_ret = WriteDataTcp(TcpConnectedPort, (unsigned char *)&tmp, sizeof(struct APP_meta));
+		write_ret = WriteDataTcp(TcpConnectedPort, (guchar *)&tmp, sizeof(struct APP_meta));
 		if (write_ret != sizeof(struct APP_meta)) {
 			LOG_WARNING("Meta/item: unexpected write len %ld. it should be %ld", write_ret, sizeof(struct APP_meta));
 			goto exit;
@@ -566,9 +566,9 @@ exit:
 	return FALSE;
 }
 
-ssize_t TcpRecvMeta(TTcpConnectedPort * TcpConnectedPort, std::vector<struct APP_meta> &meta)
+gssize TcpRecvMeta(TTcpConnectedPort * TcpConnectedPort, std::vector<struct APP_meta> &meta)
 {
-	size_t read_ret = TCP_RECV_ERROR;
+	gsize read_ret = TCP_RECV_ERROR;
 	guint8 nr;
 
 	if (TcpConnectedPort == NULL) {
@@ -576,16 +576,16 @@ ssize_t TcpRecvMeta(TTcpConnectedPort * TcpConnectedPort, std::vector<struct APP
 		goto exit;
 	}
 
-	read_ret = ReadDataTcp(TcpConnectedPort, (unsigned char *)&nr, sizeof(guint8));
+	read_ret = ReadDataTcp(TcpConnectedPort, (guchar *)&nr, sizeof(guint8));
 	if (read_ret != sizeof(guint8)) {
 		LOG_WARNING("Meta/nr: unexpected read len %ld. it should be %ld", read_ret, sizeof(guint8));
 		goto exit;
 	}
 
-	for (int i = 0; i < nr; i++) {
+	for (gint i = 0; i < nr; i++) {
 		struct APP_meta tmp;
 
-		read_ret = ReadDataTcp(TcpConnectedPort, (unsigned char *)&tmp, sizeof(struct APP_meta));
+		read_ret = ReadDataTcp(TcpConnectedPort, (guchar *)&tmp, sizeof(struct APP_meta));
 		if (read_ret != sizeof(struct APP_meta)) {
 			LOG_WARNING("Meta/item: unexpected read len %ld. it should be %ld", read_ret, sizeof(struct APP_meta));
 			goto exit;

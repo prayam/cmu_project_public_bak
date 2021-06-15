@@ -23,10 +23,11 @@
 #include <cuda_runtime_api.h>
 #include "NvInfer.h"
 #include "NvCaffeParser.h"
+#include <glib.h>
 
 void image2Matrix(const cv::Mat &image, const struct pBox *pbox);
-bool cmpScore(struct orderScore lsh, struct orderScore rsh);
+gboolean cmpScore(struct orderScore lsh, struct orderScore rsh);
 void nms(vector<struct Bbox> &boundingBox_, vector<struct orderScore> &bboxScore_, const float overlap_threshold, string modelname = "Union");
-void refineAndSquareBbox(vector<struct Bbox> &vecBbox, const int &height, const int &width,bool square);
+void refineAndSquareBbox(vector<struct Bbox> &vecBbox, const gint &height, const gint &width,gboolean square);
 
 #endif

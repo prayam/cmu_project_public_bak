@@ -4,7 +4,7 @@
 #include "Logger.h"
 #include <gtkmm/application.h>
 
-int main (int argc, char *argv[])
+gint main (gint argc, gchar *argv[])
 {
 	log_enable("client");
 
@@ -12,7 +12,7 @@ int main (int argc, char *argv[])
 	App window;
 
 	//Shows the window and returns when it is closed.
-	int ret = app->run(window);
+	gint ret = app->run(window);
 
 	log_disable();
 	return ret;

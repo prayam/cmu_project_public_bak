@@ -7,6 +7,7 @@
 
 #include "baseEngine.h"
 #include "network.h"
+#include <glib.h>
 
 
 class Rnet_engine : public baseEngine {
@@ -14,7 +15,7 @@ class Rnet_engine : public baseEngine {
 	public:
 		Rnet_engine();
 		~Rnet_engine();
-		void init(int row, int col);
+		void init(gint row, gint col);
 		friend class Rnet;
 
 };
@@ -30,15 +31,15 @@ class Rnet {
 		struct pBox *score_;
 		struct pBox *rgb;
 	private:
-		const int BatchSize;
-		const int INPUT_C;
+		const gint BatchSize;
+		const gint INPUT_C;
 		const ICudaEngine &Engine;
 		//must be computed at runtime
-		int INPUT_H;
-		int INPUT_W;
-		int OUT_PROB_SIZE;
-		int OUT_LOCATION_SIZE;
-		int inputIndex,outputProb,outputLocation;
+		gint INPUT_H;
+		gint INPUT_W;
+		gint OUT_PROB_SIZE;
+		gint OUT_LOCATION_SIZE;
+		gint inputIndex,outputProb,outputLocation;
 		void *buffers[3];
 
 };

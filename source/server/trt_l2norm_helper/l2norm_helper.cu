@@ -2,18 +2,18 @@
 
 
 template<typename T>
-__global__ void sqrtKernel(const int n, const T* x, T* y)
+__global__ void sqrtKernel(const gint n, const T* x, T* y)
 {
     printf("Unsupported type.");
 }
 
 template<>
 __global__ void sqrtKernel(
-    const int n,
+    const gint n,
     const float* x,
     float* y)
 {
-    for (int i = blockIdx.x * blockDim.x + threadIdx.x;
+    for (gint i = blockIdx.x * blockDim.x + threadIdx.x;
          i < n; i += gridDim.x * blockDim.x)
     {
         y[i] = sqrtf(x[i]);
@@ -22,11 +22,11 @@ __global__ void sqrtKernel(
 
 template<>
 __global__ void sqrtKernel(
-    const int n,
+    const gint n,
     const __half* x,
     __half* y)
 {
-    for (int i = blockIdx.x * blockDim.x + threadIdx.x;
+    for (gint i = blockIdx.x * blockDim.x + threadIdx.x;
          i < n; i += gridDim.x * blockDim.x)
     {
          y[i] = hsqrt(x[i]);
@@ -34,18 +34,18 @@ __global__ void sqrtKernel(
 }
 
 template<typename T>
-__global__ void rsqrtKernel(const int n, const T* x, T* y)
+__global__ void rsqrtKernel(const gint n, const T* x, T* y)
 {
     printf("Unsupported type.");
 }
 
 template<>
 __global__ void rsqrtKernel(
-    const int n,
+    const gint n,
     const float* x,
     float* y)
 {
-    for (int i = blockIdx.x * blockDim.x + threadIdx.x;
+    for (gint i = blockIdx.x * blockDim.x + threadIdx.x;
          i < n; i += gridDim.x * blockDim.x)
     {
         y[i] = rsqrtf(x[i]);
@@ -54,11 +54,11 @@ __global__ void rsqrtKernel(
 
 template<>
 __global__ void rsqrtKernel(
-    const int n,
+    const gint n,
     const __half* x,
     __half* y)
 {
-    for (int i = blockIdx.x * blockDim.x + threadIdx.x;
+    for (gint i = blockIdx.x * blockDim.x + threadIdx.x;
          i < n; i += gridDim.x * blockDim.x)
     {
          y[i] = hrsqrt(x[i]);
@@ -66,19 +66,19 @@ __global__ void rsqrtKernel(
 }
 
 template<typename T>
-__global__ void maxKernel(const int n, const T eps, const T* x, T* y)
+__global__ void maxKernel(const gint n, const T eps, const T* x, T* y)
 {
     printf("Unsupported type.");
 }
 
 template<>
 __global__ void maxKernel(
-    const int n,
+    const gint n,
     const float eps,
     const float* x,
     float* y)
 {
-    for (int i = blockIdx.x * blockDim.x + threadIdx.x;
+    for (gint i = blockIdx.x * blockDim.x + threadIdx.x;
          i < n; i += gridDim.x * blockDim.x)
     {
         y[i] = fmaxf(x[i], eps);
@@ -87,12 +87,12 @@ __global__ void maxKernel(
 
 template<>
 __global__ void maxKernel(
-    const int n,
+    const gint n,
     const __half eps,
     const __half* x,
     __half* y)
 {
-    for (int i = blockIdx.x * blockDim.x + threadIdx.x;
+    for (gint i = blockIdx.x * blockDim.x + threadIdx.x;
          i < n; i += gridDim.x * blockDim.x)
     {
         if (__hgt(x[i], eps))
@@ -105,19 +105,19 @@ __global__ void maxKernel(
 }
 
 template <typename T>
-bool executeInference(
+gboolean executeInference(
     cudaStream_t stream,
-    int op_type,
+    gint op_type,
     T eps,
-    int batch_size,
-    int C,
-    int H,
-    int W,
+    gint batch_size,
+    gint C,
+    gint H,
+    gint W,
     const T* input,
     T* output)
 {
-    const int length = C * H * W;
-    for (int n = 0; n < batch_size; ++n)
+    const gint length = C * H * W;
+    for (gint n = 0; n < batch_size; ++n)
     {
         switch(op_type)
         {
@@ -140,8 +140,8 @@ bool executeInference(
     return 0;
 }
 
-int L2NormHelper::enqueue(
-    int batchSize,
+gint L2NormHelper::enqueue(
+    gint batchSize,
     const void* const* inputs,
     void** outputs,
     void* workspace,

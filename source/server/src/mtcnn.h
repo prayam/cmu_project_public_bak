@@ -4,10 +4,11 @@
 #include "pnet_rt.h"
 #include "rnet_rt.h"
 #include "onet_rt.h"
+#include <glib.h>
 class mtcnn
 {
 	public:
-		mtcnn(int row, int col);
+		mtcnn(gint row, gint col);
 		~mtcnn();
 		vector<struct Bbox> findFace(cv::Mat &image);
 	private:

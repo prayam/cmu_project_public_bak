@@ -17,9 +17,9 @@ Onet_engine::~Onet_engine() {
 	shutdownProtobufLibrary();
 }
 
-void Onet_engine::init(int row, int col) {
+void Onet_engine::init(gint row, gint col) {
 	IHostMemory *gieModelStream{nullptr};
-	const int max_batch_size = 1;
+	const gint max_batch_size = 1;
 	//generate Tensorrt model
 	caffeToGIEModel(prototxt, model, std::vector<std::string>{OUTPUT_PROB_NAME, OUTPUT_LOCATION_NAME,OUTPUT_POINT_NAME}, max_batch_size,
 			gieModelStream);

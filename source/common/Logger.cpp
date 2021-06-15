@@ -93,7 +93,7 @@ static gboolean is_log_enabled (void)
 	return (log_handler_id == 0) ? FALSE : TRUE;
 }
 
-gboolean log_enable (const char *_log_domain)
+gboolean log_enable (const gchar *_log_domain)
 {
 	gboolean ret = FALSE;
 
@@ -121,7 +121,7 @@ gchar *log_get_domain (void)
 	}
 }
 
-void log_hexdump (const char *log_domain, GLogLevelFlags log_level, const void *data, int count)
+void log_hexdump (const gchar *log_domain, GLogLevelFlags log_level, const void *data, gint count)
 {
 	/* see https://github.com/turon/mantis/blob/master/src/tools/cortex/util/log-hexdump.c */
 	gchar hex[60];
@@ -132,11 +132,11 @@ void log_hexdump (const char *log_domain, GLogLevelFlags log_level, const void *
 	ascii_dst = 0;
 
 	for (byte = 0; byte < count; byte ++) {
-		g_sprintf (&hex[hex_dst], "%02X ", ((unsigned char *)data)[byte]);
+		g_sprintf (&hex[hex_dst], "%02X ", ((guchar *)data)[byte]);
 		hex_dst += 3;
 
-		if (g_ascii_isprint (((unsigned char *)data)[byte])) {
-			g_sprintf (&ascii[ascii_dst], "%c", ((unsigned char *)data)[byte]);
+		if (g_ascii_isprint (((guchar *)data)[byte])) {
+			g_sprintf (&ascii[ascii_dst], "%c", ((guchar *)data)[byte]);
 		} else {
 			g_sprintf (&ascii[ascii_dst], ".");
 		}

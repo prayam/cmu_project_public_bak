@@ -8,13 +8,11 @@
 #ifndef NetworkTCPH
 #define NetworkTCPH
 
-
 #if  defined(_WIN32) || defined(_WIN64)
 #pragma comment (lib, "Ws2_32.lib")
 #include <Winsock2.h>
 #include <ws2tcpip.h>
 #include <BaseTsd.h>
-typedef SSIZE_T ssize_t;
 #define  CLOSE_SOCKET closesocket
 #define  SOCKET_FD_TYPE SOCKET
 #define  BAD_SOCKET_FD INVALID_SOCKET
@@ -26,7 +24,7 @@ typedef SSIZE_T ssize_t;
 #include <arpa/inet.h>
 #include <unistd.h>
 #define  CLOSE_SOCKET close
-#define  SOCKET_FD_TYPE int
+#define  SOCKET_FD_TYPE gint
 #define  BAD_SOCKET_FD  -1
 #endif
 
@@ -67,12 +65,12 @@ TTcpListenPort *OpenTcpListenPort(short localport);
 void CloseTcpListenPort(TTcpListenPort **TcpListenPort);
 TTcpConnectedPort *AcceptTcpConnection(TTcpListenPort *TcpListenPort,
 		struct sockaddr_in *cli_addr,socklen_t *clilen,
-		const char *ca_pem, const char *cert_pem, const char *key_pem);
-TTcpConnectedPort *OpenTcpConnection(const char *remotehostname, const char * remoteportno,
-		const char *ca_pem, const char *cert_pem, const char *key_pem);
+		const gchar *ca_pem, const gchar *cert_pem, const gchar *key_pem);
+TTcpConnectedPort *OpenTcpConnection(const gchar *remotehostname, const gchar * remoteportno,
+		const gchar *ca_pem, const gchar *cert_pem, const gchar *key_pem);
 void CloseTcpConnectedPort(TTcpConnectedPort **TcpConnectedPort);
-ssize_t ReadDataTcp(TTcpConnectedPort *TcpConnectedPort,unsigned char *data, size_t length);
-ssize_t WriteDataTcp(TTcpConnectedPort *TcpConnectedPort,unsigned char *data, size_t length);
+gssize ReadDataTcp(TTcpConnectedPort *TcpConnectedPort,guchar *data, gsize length);
+gssize WriteDataTcp(TTcpConnectedPort *TcpConnectedPort,guchar *data, gsize length);
 #endif
 //------------------------------------------------------------------------------------------------
 //END of Include

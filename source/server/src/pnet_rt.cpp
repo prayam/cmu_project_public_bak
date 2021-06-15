@@ -16,10 +16,10 @@ Pnet_engine::~Pnet_engine() {
 	shutdownProtobufLibrary();
 }
 
-void Pnet_engine::init(int row, int col) {
+void Pnet_engine::init(gint row, gint col) {
 
 	//modifiy the input shape of prototxt, write to temp.prototxt
-	int first_spce = 16, second_space = 4;
+	gint first_spce = 16, second_space = 4;
 	fstream protofile;
 	protofile.open(prototxt, ios::in);
 	std::stringstream buffer;
@@ -49,7 +49,7 @@ void Pnet_engine::init(int row, int col) {
 }
 
 
-Pnet::Pnet(int row, int col, const Pnet_engine &pnet_engine) : BatchSize(1),
+Pnet::Pnet(gint row, gint col, const Pnet_engine &pnet_engine) : BatchSize(1),
 	INPUT_C(3), Engine(pnet_engine.context->getEngine()) {
 		Pthreshold = 0.6;
 		nms_threshold = 0.5;
@@ -59,12 +59,12 @@ Pnet::Pnet(int row, int col, const Pnet_engine &pnet_engine) : BatchSize(1),
 		INPUT_W = col;
 		INPUT_H = row;
 		//calculate output shape
-		this->score_->width = int(ceil((INPUT_W - 2) / 2.) - 4);
-		this->score_->height = int(ceil((INPUT_H - 2) / 2.) - 4);
+		this->score_->width = gint(ceil((INPUT_W - 2) / 2.) - 4);
+		this->score_->height = gint(ceil((INPUT_H - 2) / 2.) - 4);
 		this->score_->channel = 2;
 
-		this->location_->width = int(ceil((INPUT_W - 2) / 2.) - 4);
-		this->location_->height = int(ceil((INPUT_H - 2) / 2.) - 4);
+		this->location_->width = gint(ceil((INPUT_W - 2) / 2.) - 4);
+		this->location_->height = gint(ceil((INPUT_H - 2) / 2.) - 4);
 		this->location_->channel = 4;
 
 		OUT_PROB_SIZE = this->score_->width * this->score_->height * this->score_->channel;
@@ -117,16 +117,16 @@ void Pnet::run(cv::Mat &image, float scale, const Pnet_engine &pnet_engine) {
 
 void Pnet::generateBbox(const struct pBox *score, const struct pBox *location, mydataFmt scale) {
 	//for pooling
-	int stride = 2;
-	int cellsize = 12;
-	int count = 0;
+	gint stride = 2;
+	gint cellsize = 12;
+	gint count = 0;
 	//score p
 	mydataFmt *p = score->pdata + score->width * score->height;
 	mydataFmt *plocal = location->pdata;
 	struct Bbox bbox;
 	struct orderScore order;
-	for (int row = 0; row < score->height; row++) {
-		for (int col = 0; col < score->width; col++) {
+	for (gint row = 0; row < score->height; row++) {
+		for (gint col = 0; col < score->width; col++) {
 			if (*p > Pthreshold) {
 				bbox.score = *p;
 				order.score = *p;
@@ -137,7 +137,7 @@ void Pnet::generateBbox(const struct pBox *score, const struct pBox *location, m
 				bbox.y2 = round((stride * col + 1 + cellsize) / scale);
 				bbox.exist = true;
 				bbox.area = (bbox.x2 - bbox.x1) * (bbox.y2 - bbox.y1);
-				for (int channel = 0; channel < 4; channel++)
+				for (gint channel = 0; channel < 4; channel++)
 					bbox.regreCoord[channel] = *(plocal + channel * location->width * location->height);
 				boundingBox_.push_back(bbox);
 				bboxScore_.push_back(order);

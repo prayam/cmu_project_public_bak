@@ -20,7 +20,7 @@
 #include "server.h"
 
 /* Global variable that indicates work is present */
-static int do_work = 1;
+static gint do_work = 1;
 
 /* Buffer size to be used for transfers */
 #define BUFSIZE 128
@@ -30,7 +30,7 @@ static int do_work = 1;
 void ShowCerts(SSL* ssl)
 {
     X509 *cert;
-    char *line;
+    gchar *line;
     cert = SSL_get_peer_certificate(ssl); /* Get certificates (if available) */
     if ( cert != NULL )
     {
@@ -53,9 +53,9 @@ void ShowCerts(SSL* ssl)
 /*
  * Prepare a SSL context for use by the server
  */
-static SSL_CTX *get_server_context(const char *ca_pem,
-                            const char *cert_pem,
-                            const char *key_pem) {
+static SSL_CTX *get_server_context(const gchar *ca_pem,
+                            const gchar *cert_pem,
+                            const gchar *key_pem) {
     SSL_CTX *ctx;
 
     /* Get a default context */
@@ -111,9 +111,9 @@ fail:
     return NULL;
 }
 
-static int get_socket(int port_num) {
+static gint get_socket(gint port_num) {
     struct sockaddr_in sin;
-    int sock, val;
+    gint sock, val;
 
     /* Create a socket */
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
@@ -152,15 +152,15 @@ fail:
     return -1;
 }
 
-int server(const char *port_str, const char *ca_pem,
-           const char *cert_pem, const char *key_pem) {
-    static char buffer[BUFSIZE];
+gint server(const gchar *port_str, const gchar *ca_pem,
+           const gchar *cert_pem, const gchar *key_pem) {
+    static gchar buffer[BUFSIZE];
     struct sockaddr_in sin;
     socklen_t sin_len;
     SSL_CTX *ctx;
     SSL *ssl;
     X509 *client_cert;
-    int port_num, listen_fd, net_fd, rc, len;
+    gint port_num, listen_fd, net_fd, rc, len;
 
  	// Check OpenSSL PRNG
 	if(RAND_status() != 1) {

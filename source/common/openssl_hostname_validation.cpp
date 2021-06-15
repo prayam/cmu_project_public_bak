@@ -29,11 +29,11 @@
  * Returns MalformedCertificate if the Common Name had a NUL character embedded in it.
  * Returns Error if the Common Name could not be extracted.
  */
-static HostnameValidationResult matches_common_name(const char *hostname, const X509 *server_cert) {
-	int common_name_loc = -1;
+static HostnameValidationResult matches_common_name(const gchar *hostname, const X509 *server_cert) {
+	gint common_name_loc = -1;
 	X509_NAME_ENTRY *common_name_entry = NULL;
 	ASN1_STRING *common_name_asn1 = NULL;
-	char *common_name_str = NULL;
+	gchar *common_name_str = NULL;
 
 	// Find the position of the CN field in the Subject field of the certificate
 	common_name_loc = X509_NAME_get_index_by_NID(X509_get_subject_name((X509 *) server_cert), NID_commonName, -1);
@@ -52,8 +52,8 @@ static HostnameValidationResult matches_common_name(const char *hostname, const 
 	if (common_name_asn1 == NULL) {
 		return Error;
 	}
-	// common_name_str = (char *) ASN1_STRING_data(common_name_asn1); // Deprecated
-	common_name_str = (char *) ASN1_STRING_get0_data(common_name_asn1);
+	// common_name_str = (gchar *) ASN1_STRING_data(common_name_asn1); // Deprecated
+	common_name_str = (gchar *) ASN1_STRING_get0_data(common_name_asn1);
 
 	// Make sure there isn't an embedded NUL character in the CN
 	if (ASN1_STRING_length(common_name_asn1) != strlen(common_name_str)) {
@@ -78,10 +78,10 @@ static HostnameValidationResult matches_common_name(const char *hostname, const 
  * Returns MalformedCertificate if any of the hostnames had a NUL character embedded in it.
  * Returns NoSANPresent if the SAN extension was not present in the certificate.
  */
-static HostnameValidationResult matches_subject_alternative_name(const char *hostname, const X509 *server_cert) {
+static HostnameValidationResult matches_subject_alternative_name(const gchar *hostname, const X509 *server_cert) {
 	HostnameValidationResult result = MatchNotFound;
-	int i;
-	int san_names_nb = -1;
+	gint i;
+	gint san_names_nb = -1;
 	STACK_OF(GENERAL_NAME) *san_names = NULL;
 
 	// Try to extract the names within the SAN extension from the certificate
@@ -101,8 +101,8 @@ static HostnameValidationResult matches_subject_alternative_name(const char *hos
 
 		if (current_name->type == GEN_DNS) {
 			// Current name is a DNS name, let's check it
-			// char *dns_name = (char *) ASN1_STRING_data(current_name->d.dNSName); // Deprecated
-			char *dns_name = (char *) ASN1_STRING_get0_data(current_name->d.dNSName);
+			// gchar *dns_name = (gchar *) ASN1_STRING_data(current_name->d.dNSName); // Deprecated
+			gchar *dns_name = (gchar *) ASN1_STRING_get0_data(current_name->d.dNSName);
 
 			// Make sure there isn't an embedded NUL character in the DNS name
 			if (ASN1_STRING_length(current_name->d.dNSName) != strlen(dns_name)) {
@@ -134,7 +134,7 @@ static HostnameValidationResult matches_subject_alternative_name(const char *hos
  * Returns MalformedCertificate if any of the hostnames had a NUL character embedded in it.
  * Returns Error if there was an error.
  */
-HostnameValidationResult validate_hostname(const char *hostname, const X509 *server_cert) {
+HostnameValidationResult validate_hostname(const gchar *hostname, const X509 *server_cert) {
 	HostnameValidationResult result;
 
 	if((hostname == NULL) || (server_cert == NULL))

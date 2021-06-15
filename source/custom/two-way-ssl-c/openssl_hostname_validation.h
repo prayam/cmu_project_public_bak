@@ -2,14 +2,14 @@
  * Helper functions to perform basic hostname validation using OpenSSL.
  *
  * Please read "everything-you-wanted-to-know-about-openssl.pdf" before
- * attempting to use this code. This whitepaper describes how the code works, 
+ * attempting to use this code. This whitepaper describes how the code works,
  * how it should be used, and what its limitations are.
  *
  * Author:  Alban Diquet
  * License: See LICENSE
  *
  */
- 
+
 typedef enum {
 	MatchFound,
 	MatchNotFound,
@@ -29,4 +29,4 @@ typedef enum {
 * Returns MalformedCertificate if any of the hostnames had a NUL character embedded in it.
 * Returns Error if there was an error.
 */
-HostnameValidationResult validate_hostname(const char *hostname, const X509 *server_cert);
+HostnameValidationResult validate_hostname(const gchar *hostname, const X509 *server_cert);

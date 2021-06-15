@@ -9,9 +9,9 @@
 #ifndef client_h
 #define client_h
 
-int client(const char *conn_str,
-           const char *ca_pem,
-           const char *cert_pem,
-           const char *key_pem);
+gint client(const gchar *conn_str,
+           const gchar *ca_pem,
+           const gchar *cert_pem,
+           const gchar *key_pem);
 
 #endif /* client_h */

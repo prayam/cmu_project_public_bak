@@ -19,20 +19,22 @@
 #include "common.h"
 #include "pBox.h"
 
+#include <glib.h>
+
 using namespace nvinfer1;
 using namespace nvuffparser;
 
 struct CroppedFace {
 	cv::Mat faceMat;
-	int x1, y1, x2, y2;
+	gint x1, y1, x2, y2;
 };
 
 
 class FaceNetClassifier
 {
 	public:
-		FaceNetClassifier(Logger gLogger, DataType dtype, const string uffFile, const string engineFile, int batchSize,
-				bool serializeEngine, float knownPersonThreshold, int maxFacesPerScene, int frameWidth, int frameHeight);
+		FaceNetClassifier(Logger gLogger, DataType dtype, const string uffFile, const string engineFile, gint batchSize,
+				gboolean serializeEngine, float knownPersonThreshold, gint maxFacesPerScene, gint frameWidth, gint frameHeight);
 		~FaceNetClassifier();
 
 		void createOrLoadEngine();
@@ -47,18 +49,18 @@ class FaceNetClassifier
 		void resetVariables();
 
 	private:
-		static int m_classCount;
-		int m_INPUT_C;
-		int m_INPUT_H;
-		int m_INPUT_W;
-		int m_frameWidth, m_frameHeight;
+		static gint m_classCount;
+		gint m_INPUT_C;
+		gint m_INPUT_H;
+		gint m_INPUT_W;
+		gint m_frameWidth, m_frameHeight;
 		Logger m_gLogger;
 		DataType m_dtype;
 		string m_uffFile;
 		string m_engineFile;
-		int m_batchSize;
-		bool m_serializeEngine;
-		int m_maxFacesPerScene;
+		gint m_batchSize;
+		gboolean m_serializeEngine;
+		gint m_maxFacesPerScene;
 		ICudaEngine *m_engine;
 		IExecutionContext *m_context;
 		float m_output[128];
@@ -70,6 +72,6 @@ class FaceNetClassifier
 };
 
 float vectors_distance(const std::vector<float>& a, const std::vector<float>& b);
-inline unsigned int elementSize(nvinfer1::DataType t);
+inline guint elementSize(nvinfer1::DataType t);
 
 #endif //FACE_RECOGNITION_FACENET_H

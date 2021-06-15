@@ -4,6 +4,8 @@ project(trt_l2norm_helper)# LANGUAGES CXX CUDA)
 #find_package(CUDA)
 
 
+include(FindPkgConfig)
+pkg_check_modules(GLIB2 REQUIRED glib-2.0)
 
 # tensorRT
 find_path(TENSORRT_INCLUDE_DIR NvInfer.h
@@ -41,6 +43,7 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES}
   ${TENSORRT_INCLUDE_DIR}
+  ${GLIB2_INCLUDE_DIRS}
 )
 
 # trt_l2norm_plugin library
@@ -50,6 +53,7 @@ cuda_add_library(trt_l2norm_helper STATIC
 )
 target_link_libraries(trt_l2norm_helper
   ${TENSORRT_LIBRARY}
+  ${GLIB2_LIBRARIES}
 )
 
 target_compile_features(trt_l2norm_helper PUBLIC cxx_std_11)

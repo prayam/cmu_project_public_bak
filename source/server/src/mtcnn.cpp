@@ -1,19 +1,19 @@
 #include "mtcnn.h"
 // #define LOG
-mtcnn::mtcnn(int row, int col){
+mtcnn::mtcnn(gint row, gint col){
 	//set NMS thresholds
 	nms_threshold[0] = 0.7;
 	nms_threshold[1] = 0.7;
 	nms_threshold[2] = 0.7;
 	//set minimal face size (weidth in pixels)
-	int minsize = 60;
+	gint minsize = 60;
 	/*config  the pyramids */
 	float minl = row<col?row:col;
-	int MIN_DET_SIZE = 12;
+	gint MIN_DET_SIZE = 12;
 	float m = (float)MIN_DET_SIZE/minsize;
 	minl *= m;
 	float factor = 0.709;
-	int factor_count = 0;
+	gint factor_count = 0;
 	while(minl>MIN_DET_SIZE){
 		if(factor_count>0)m = m*factor;
 		scales_.push_back(m);
@@ -21,7 +21,7 @@ mtcnn::mtcnn(int row, int col){
 		factor_count++;
 	}
 	float minside = row<col ? row : col;
-	int count = 0;
+	gint count = 0;
 	for (vector<float>::iterator it = scales_.begin(); it != scales_.end(); it++){
 		if (*it > 1){
 			cout << "the minsize is too small" << endl;
@@ -39,9 +39,9 @@ mtcnn::mtcnn(int row, int col){
 	pnet_engine = new Pnet_engine[scales_.size()];
 	simpleFace_ = (Pnet**)malloc(sizeof(Pnet*)*scales_.size());
 	// std::cout << "scales.size() = " << scales_.size() << std::endl;
-	for (size_t i = 0; i < scales_.size(); i++) {
-		int changedH = (int)ceil(row*scales_.at(i));
-		int changedW = (int)ceil(col*scales_.at(i));
+	for (gsize i = 0; i < scales_.size(); i++) {
+		gint changedH = (gint)ceil(row*scales_.at(i));
+		gint changedW = (gint)ceil(col*scales_.at(i));
 		std::cout << "changedH = " << changedH << ", changedW = " << changedW << std::endl;
 		pnet_engine[i].init(changedH,changedW);
 		simpleFace_[i] =  new Pnet(changedH,changedW,pnet_engine[i]);
@@ -74,12 +74,12 @@ vector<struct Bbox> mtcnn::findFace(cv::Mat &image){
 	thirdBboxScore_.clear();
 
 	struct orderScore order;
-	int count = 0;
+	gint count = 0;
 
 	clock_t first_time = clock();
-	for (size_t i = 0; i < scales_.size(); i++) {
-		int changedH = (int)ceil(image.rows*scales_.at(i));
-		int changedW = (int)ceil(image.cols*scales_.at(i));
+	for (gsize i = 0; i < scales_.size(); i++) {
+		gint changedH = (gint)ceil(image.rows*scales_.at(i));
+		gint changedW = (gint)ceil(image.cols*scales_.at(i));
 		clock_t run_first_time = clock();
 		resize(image, reImage, cv::Size(changedW, changedH), 0, 0, cv::INTER_LINEAR);
 		(*simpleFace_[i]).run(reImage, scales_.at(i),pnet_engine[i]);
@@ -158,10 +158,10 @@ vector<struct Bbox> mtcnn::findFace(cv::Mat &image){
 				it->area = (it->x2 - it->x1)*(it->y2 - it->y1);
 				it->score = *(outNet->score_->pdata+1);
 				pp = outNet->points_->pdata;
-				for(int num=0;num<5;num++){
+				for(gint num=0;num<5;num++){
 					(it->ppoint)[num] = it->y1 + (it->y2 - it->y1)*(*(pp+num));
 				}
-				for(int num=0;num<5;num++){
+				for(gint num=0;num<5;num++){
 					(it->ppoint)[num+5] = it->x1 + (it->x2 - it->x1)*(*(pp+num+5));
 				}
 				thirdBbox_.push_back(*it);
@@ -187,8 +187,8 @@ vector<struct Bbox> mtcnn::findFace(cv::Mat &image){
 	// for(vector<struct Bbox>::iterator it=thirdBbox_.begin(); it!=thirdBbox_.end();it++){
 	//     if((*it).exist){
 	//         rectangle(image, cv::Point((*it).y1, (*it).x1), cv::Point((*it).y2, (*it).x2), cv::Scalar(0,0,255), 2,8,0);
-	//         for(int num=0;num<5;num++)
-	//             circle(image,cv::Point((int)*(it->ppoint+num), (int)*(it->ppoint+num+5)),3,cv::Scalar(0,255,255), -1);
+	//         for(gint num=0;num<5;num++)
+	//             circle(image,cv::Point((gint)*(it->ppoint+num), (gint)*(it->ppoint+num+5)),3,cv::Scalar(0,255,255), -1);
 	//     }
 	// }
 

@@ -1,6 +1,6 @@
 #include "videoStreamer.h"
 
-VideoStreamer::VideoStreamer(int nmbrDevice, int videoWidth, int videoHeight, int frameRate, bool isCSICam) {
+VideoStreamer::VideoStreamer(gint nmbrDevice, gint videoWidth, gint videoHeight, gint frameRate, gboolean isCSICam) {
 	if(isCSICam) {
 		m_videoWidth = videoWidth;
 		m_videoHeight = videoHeight;
@@ -28,7 +28,7 @@ VideoStreamer::VideoStreamer(int nmbrDevice, int videoWidth, int videoHeight, in
 	}
 }
 
-VideoStreamer::VideoStreamer(std::string filename, int videoWith, int videoHeight) {
+VideoStreamer::VideoStreamer(std::string filename, gint videoWith, gint videoHeight) {
 	m_capture = new cv::VideoCapture(filename);
 	if (!m_capture->isOpened()){
 		//error in opening the video input
@@ -37,14 +37,14 @@ VideoStreamer::VideoStreamer(std::string filename, int videoWith, int videoHeigh
 	// ToDo set filename width+height doesn't work with m_capture.set(...)
 }
 
-void VideoStreamer::setResolutionDevice(int width, int height) {
+void VideoStreamer::setResolutionDevice(gint width, gint height) {
 	m_videoWidth = width;
 	m_videoHeight = height;
 	m_capture->set(cv::CAP_PROP_FRAME_WIDTH, m_videoWidth);
 	m_capture->set(cv::CAP_PROP_FRAME_HEIGHT, m_videoHeight);
 }
 
-void VideoStreamer::setResoltionFile(int width, int height) {
+void VideoStreamer::setResoltionFile(gint width, gint height) {
 	// ToDo set resolution for input files
 }
 
@@ -59,10 +59,10 @@ void VideoStreamer::assertResolution() {
 	assert(m_videoHeight == m_capture->get(cv::CAP_PROP_FRAME_HEIGHT));
 }
 
-std::string VideoStreamer::gstreamer_pipeline (int capture_width, int capture_height, int display_width, int display_height, int frameRate, int flip_method) {
-	return "nvarguscamerasrc ! video/x-raw(memory:NVMM), width=(int)" + std::to_string(capture_width) + ", height=(int)" +
+std::string VideoStreamer::gstreamer_pipeline (gint capture_width, gint capture_height, gint display_width, gint display_height, gint frameRate, gint flip_method) {
+	return "nvarguscamerasrc ! video/x-raw(memory:NVMM), width=(gint)" + std::to_string(capture_width) + ", height=(gint)" +
 		std::to_string(capture_height) + ", format=(string)NV12, framerate=(fraction)" + std::to_string(frameRate) +
-		"/1 ! nvvidconv flip-method=" + std::to_string(flip_method) + " ! video/x-raw, width=(int)" + std::to_string(display_width) + ", height=(int)" +
+		"/1 ! nvvidconv flip-method=" + std::to_string(flip_method) + " ! video/x-raw, width=(gint)" + std::to_string(display_width) + ", height=(gint)" +
 		std::to_string(display_height) + ", format=(string)BGRx ! videoconvert ! video/x-raw, format=(string)BGR ! appsink";
 }
 

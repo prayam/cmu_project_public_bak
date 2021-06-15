@@ -13,20 +13,20 @@
  * @param : void
  * @return : library version number
  */
-const char* get_libcertcheck_version(void);
+const gchar* get_libcertcheck_version(void);
 
 /**
  * @brief : Encrypt file contents
  * @param : input file name (plain), output file name(Encrypted)
  * @return : 0 for success
  */
-int enc_ssl_fp (const char* ifname, const char* ofname);
+gint enc_ssl_fp (const gchar* ifname, const gchar* ofname);
 /**
  * @brief : Decrypt file contents
  * @param : input file name (Encrypted), output file name(plain original)
  * @return : 0 for success
  */
-int dec_ssl_fp (const char* ifname, const char* ofname);
+gint dec_ssl_fp (const gchar* ifname, const gchar* ofname);
 
 
 /**
@@ -34,7 +34,7 @@ int dec_ssl_fp (const char* ifname, const char* ofname);
  * @param : input data & it's size, output file name (save Encrypted data)
  * @return : 0 for success
  */
-int enc_ssl_mf (unsigned char* in, size_t is, const char* ofname);
+gint enc_ssl_mf (guchar* in, gsize is, const gchar* ofname);
 /**
  * @brief : Decrypt file contents to memory buffer
  * @in  param : input file name (has Encrypted data)
@@ -43,7 +43,7 @@ int enc_ssl_mf (unsigned char* in, size_t is, const char* ofname);
  * @caution : caller must be free(*out) after using
  *            because memory assigned internally using malloc.
  */
-int dec_ssl_fm (const char* ifname, unsigned char** out, size_t* os);
+gint dec_ssl_fm (const gchar* ifname, guchar** out, gsize* os);
 
 
 /**
@@ -54,7 +54,7 @@ int dec_ssl_fm (const char* ifname, unsigned char** out, size_t* os);
  * @caution : caller must be free(*out) after using
  *            because memory assigned internally using malloc.
  */
-int enc_ssl (unsigned char* in, size_t is, unsigned char** out, size_t* os);
+gint enc_ssl (guchar* in, gsize is, guchar** out, gsize* os);
 /**
  * @brief : Decrypt memory buffer contents
  * @in  param : input Encrypted data & it's size
@@ -63,7 +63,7 @@ int enc_ssl (unsigned char* in, size_t is, unsigned char** out, size_t* os);
  * @caution : caller must be free(*out) after using
  *            because memory assigned internally using malloc.
  */
-int dec_ssl (unsigned char* in, size_t is, unsigned char** out, size_t* os);
+gint dec_ssl (guchar* in, gsize is, guchar** out, gsize* os);
 
 /**
  * @brief : calculate hash using sha256
@@ -74,7 +74,7 @@ int dec_ssl (unsigned char* in, size_t is, unsigned char** out, size_t* os);
  *            because memory assigned internally using malloc.
  */
 void
-make_sha256_f(const char* fname, unsigned char** hash);
+make_sha256_f(const gchar* fname, guchar** hash);
 
 /**
  * @brief : calculate hash using sha256
@@ -85,7 +85,7 @@ make_sha256_f(const char* fname, unsigned char** hash);
  *            because memory assigned internally using malloc.
  */
 void
-make_sha256_m(const unsigned char* in, size_t is, unsigned char** hash);
+make_sha256_m(const guchar* in, gsize is, guchar** hash);
 
 /**
  * @brief : check client side cert & key file (exist && integrity check)
@@ -98,7 +98,7 @@ make_sha256_m(const unsigned char* in, size_t is, unsigned char** hash);
  *           -201 for client certfile is currupted
  *           -202 for client keyfile is currupted
  */
-int
+gint
 check_client_cert(void);
 
 /**
@@ -112,7 +112,7 @@ check_client_cert(void);
  *           -201 for server certfile is currupted
  *           -202 for server keyfile is currupted
  */
-int
+gint
 check_server_cert(void);
 
 /**
@@ -120,19 +120,19 @@ check_server_cert(void);
  * @in  param : void
  * @return : return file path
  */
-const char* getFilepath_ca_cert(void);
+const gchar* getFilepath_ca_cert(void);
 
-const char* getFilepath_client_cert(void);
-const char* getFilepath_client_key(void);
+const gchar* getFilepath_client_cert(void);
+const gchar* getFilepath_client_key(void);
 
-const char* getFilepath_server_cert(void);
-const char* getFilepath_server_key(void);
+const gchar* getFilepath_server_cert(void);
+const gchar* getFilepath_server_key(void);
 
 /**
  * @brief : return string for file name
  * @out param : buf for file name, length must be 33
  * @return : 0 for success
  */
-int getFileName_leng32(char* fname);
+gint getFileName_leng32(gchar* fname);
 
 #endif /* SRC_SSLCRYPTO_H_ */

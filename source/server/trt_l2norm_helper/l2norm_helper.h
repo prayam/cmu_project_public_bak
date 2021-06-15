@@ -5,6 +5,7 @@
 #include <cuda_fp16.h>
 #include <string>
 #include <vector>
+#include <glib.h>
 
 #define ASSERT(assertion)                                        \
     {                                                            \
@@ -31,55 +32,55 @@ typedef enum
 class L2NormHelper : public IPluginV2
 {
 public:
-    L2NormHelper(int op_type, float eps);
+    L2NormHelper(gint op_type, float eps);
 
-    L2NormHelper(int op_type, float eps, int C, int H, int W);
+    L2NormHelper(gint op_type, float eps, gint C, gint H, gint W);
 
-    L2NormHelper(const void* buffer, size_t length);
+    L2NormHelper(const void* buffer, gsize length);
 
     ~L2NormHelper() override = default;
 
-    int getNbOutputs() const override;
+    gint getNbOutputs() const override;
 
-    Dims getOutputDimensions(int index, const Dims* inputs, int nbInputDims) override;
+    Dims getOutputDimensions(gint index, const Dims* inputs, gint nbInputDims) override;
 
-    int initialize() override;
+    gint initialize() override;
 
     void terminate() override;
 
-    size_t getWorkspaceSize(int maxBatchSize) const override;
+    gsize getWorkspaceSize(gint maxBatchSize) const override;
 
-    int enqueue(
-        int batchSize, const void* const* inputs, void** outputs, void* workspace, cudaStream_t stream) override;
+    gint enqueue(
+        gint batchSize, const void* const* inputs, void** outputs, void* workspace, cudaStream_t stream) override;
 
-    size_t getSerializationSize() const override;
+    gsize getSerializationSize() const override;
 
     void serialize(void* buffer) const override;
 
     bool supportsFormat(DataType type, PluginFormat format) const override;
 
-    const char* getPluginType() const override;
+    const gchar* getPluginType() const override;
 
-    const char* getPluginVersion() const override;
+    const gchar* getPluginVersion() const override;
 
     void destroy() override;
 
     IPluginV2* clone() const;
 
-    void setPluginNamespace(const char* pluginNamespace) override;
+    void setPluginNamespace(const gchar* pluginNamespace) override;
 
-    const char* getPluginNamespace() const override;
+    const gchar* getPluginNamespace() const override;
 
     void configureWithFormat(
-        const Dims* inputDims, int nbInputs, const Dims* outputDims, int nbOutputs,
-        DataType type, PluginFormat format, int maxBatchSize) override;
+        const Dims* inputDims, gint nbInputs, const Dims* outputDims, gint nbOutputs,
+        DataType type, PluginFormat format, gint maxBatchSize) override;
 
 private:
-    int C, H, W;
-    int op_type;
+    gint C, H, W;
+    gint op_type;
     float eps = 1e-12;
     DataType mDataType{DataType::kHALF};
-    const char* mPluginNamespace;
+    const gchar* mPluginNamespace;
 };
 
 class L2NormHelperPluginCreator : public IPluginCreator
@@ -89,23 +90,23 @@ public:
 
     ~L2NormHelperPluginCreator() override = default;
 
-    const char* getPluginName() const override;
+    const gchar* getPluginName() const override;
 
-    const char* getPluginVersion() const override;
+    const gchar* getPluginVersion() const override;
 
-    void setPluginNamespace(const char* ns) override;
+    void setPluginNamespace(const gchar* ns) override;
 
-    const char* getPluginNamespace() const override;
+    const gchar* getPluginNamespace() const override;
 
     const PluginFieldCollection* getFieldNames() override;
 
-    IPluginV2* createPlugin(const char* name, const PluginFieldCollection* fc) override;
+    IPluginV2* createPlugin(const gchar* name, const PluginFieldCollection* fc) override;
 
-    IPluginV2* deserializePlugin(const char* name, const void* serialData, size_t serialLength) override;
+    IPluginV2* deserializePlugin(const gchar* name, const void* serialData, gsize serialLength) override;
 
 private:
     static PluginFieldCollection mFC;
-    int mOpType;
+    gint mOpType;
     float mEps;
     static vector<PluginField> mPluginAttributes;
 
@@ -115,7 +116,7 @@ protected:
 
 // Write values into buffer
 template <typename T>
-void write(char*& buffer, const T& val)
+void write(gchar*& buffer, const T& val)
 {
     *reinterpret_cast<T*>(buffer) = val;
     buffer += sizeof(T);
@@ -123,7 +124,7 @@ void write(char*& buffer, const T& val)
 
 // Read values from buffer
 template <typename T>
-T read(const char*& buffer)
+T read(const gchar*& buffer)
 {
     T val = *reinterpret_cast<const T*>(buffer);
     buffer += sizeof(T);

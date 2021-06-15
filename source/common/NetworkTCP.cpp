@@ -29,7 +29,7 @@ TTcpListenPort *OpenTcpListenPort(short localport)
 
 #if  defined(_WIN32) || defined(_WIN64)
 	WSADATA wsaData;
-	int     iResult;
+	gint     iResult;
 	iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
 	if (iResult != 0)
 	{
@@ -54,9 +54,9 @@ TTcpListenPort *OpenTcpListenPort(short localport)
 		perror("socket failed");
 		return(NULL);
 	}
-	int option = 1;
+	gint option = 1;
 
-	if(setsockopt(TcpListenPort->ListenFd,SOL_SOCKET,SO_REUSEADDR,(char*)&option,sizeof(option)) < 0)
+	if(setsockopt(TcpListenPort->ListenFd,SOL_SOCKET,SO_REUSEADDR,(gchar*)&option,sizeof(option)) < 0)
 	{
 		CloseTcpListenPort(&TcpListenPort);
 		perror("setsockopt failed");
@@ -64,7 +64,7 @@ TTcpListenPort *OpenTcpListenPort(short localport)
 	}
 
 	// bind it to all local addresses and pick any port number
-	memset((char *)&myaddr, 0, sizeof(myaddr));
+	memset((gchar *)&myaddr, 0, sizeof(myaddr));
 	myaddr.sin_family = AF_INET;
 	myaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 	myaddr.sin_port = htons(localport);
@@ -114,7 +114,7 @@ void CloseTcpListenPort(TTcpListenPort **TcpListenPort)
 static void ShowCerts(SSL* ssl)
 {
 	X509 *cert;
-	char *line;
+	gchar *line;
 	cert = SSL_get_peer_certificate(ssl); /* Get certificates (if available) */
 	if ( cert != NULL )
 	{
@@ -134,9 +134,9 @@ static void ShowCerts(SSL* ssl)
 }
 /* [END] by jh.ahn */
 
-static SSL_CTX *get_server_context(const char *ca_pem,
-		const char *cert_pem,
-		const char *key_pem) {
+static SSL_CTX *get_server_context(const gchar *ca_pem,
+		const gchar *cert_pem,
+		const gchar *key_pem) {
 	SSL_CTX *ctx;
 
 	/* Get a default context */
@@ -198,11 +198,11 @@ fail:
 //-----------------------------------------------------------------
 TTcpConnectedPort *AcceptTcpConnection(TTcpListenPort *TcpListenPort,
 		struct sockaddr_in *cli_addr,socklen_t *clilen,
-		const char *ca_pem, const char *cert_pem, const char *key_pem)
+		const gchar *ca_pem, const gchar *cert_pem, const gchar *key_pem)
 {
 	TTcpConnectedPort *TcpConnectedPort;
 	gboolean isSsl = false;
-	int rc = -1;
+	gint rc = -1;
 
 	TcpConnectedPort = g_new0(TTcpConnectedPort, 1);
 
@@ -238,23 +238,23 @@ TTcpConnectedPort *AcceptTcpConnection(TTcpListenPort *TcpListenPort,
 		return NULL;
 	}
 
-	int bufsize = 200 * 1024;
-	if (setsockopt(TcpConnectedPort->ConnectedFd, SOL_SOCKET, SO_RCVBUF, (char *)&bufsize, sizeof(bufsize)) == -1)
+	gint bufsize = 200 * 1024;
+	if (setsockopt(TcpConnectedPort->ConnectedFd, SOL_SOCKET, SO_RCVBUF, (gchar *)&bufsize, sizeof(bufsize)) == -1)
 	{
 		CloseTcpConnectedPort(&TcpConnectedPort);
 		perror("setsockopt SO_SNDBUF failed");
 		return(NULL);
 	}
 
-	if (setsockopt(TcpConnectedPort->ConnectedFd, SOL_SOCKET, SO_SNDBUF, (char *)&bufsize, sizeof(bufsize)) == -1)
+	if (setsockopt(TcpConnectedPort->ConnectedFd, SOL_SOCKET, SO_SNDBUF, (gchar *)&bufsize, sizeof(bufsize)) == -1)
 	{
 		CloseTcpConnectedPort(&TcpConnectedPort);
 		perror("setsockopt SO_SNDBUF failed");
 		return(NULL);
 	}
 
-	int option = 1;
-	if(setsockopt(TcpConnectedPort->ConnectedFd, IPPROTO_TCP, TCP_NODELAY, (char*)&option, sizeof(option)) < 0)
+	gint option = 1;
+	if(setsockopt(TcpConnectedPort->ConnectedFd, IPPROTO_TCP, TCP_NODELAY, (gchar*)&option, sizeof(option)) < 0)
 	{
 		CloseTcpConnectedPort(&TcpConnectedPort);
 		perror("setsockopt failed");
@@ -262,7 +262,7 @@ TTcpConnectedPort *AcceptTcpConnection(TTcpListenPort *TcpListenPort,
 	}
 
 	option = 1;
-	if(setsockopt(TcpConnectedPort->ConnectedFd, IPPROTO_TCP, TCP_QUICKACK, (char*)&option, sizeof(option)) < 0)
+	if(setsockopt(TcpConnectedPort->ConnectedFd, IPPROTO_TCP, TCP_QUICKACK, (gchar*)&option, sizeof(option)) < 0)
 	{
 		CloseTcpConnectedPort(&TcpConnectedPort);
 		perror("setsockopt failed");
@@ -309,9 +309,9 @@ ssl_exit:
 // END AcceptTcpConnection
 //-----------------------------------------------------------------
 
-static SSL_CTX *get_client_context(const char *ca_pem,
-		const char *cert_pem,
-		const char *key_pem) {
+static SSL_CTX *get_client_context(const gchar *ca_pem,
+		const gchar *cert_pem,
+		const gchar *key_pem) {
 	SSL_CTX *ctx;
 
 	/* Create a generic context */
@@ -366,11 +366,11 @@ fail:
 // OpenTCPConnection - Creates a TCP Connection to a TCP port
 // accepting connection requests
 //-----------------------------------------------------------------
-TTcpConnectedPort *OpenTcpConnection(const char *remotehostname, const char * remoteportno,
-		const char *ca_pem, const char *cert_pem, const char *key_pem)
+TTcpConnectedPort *OpenTcpConnection(const gchar *remotehostname, const gchar * remoteportno,
+		const gchar *ca_pem, const gchar *cert_pem, const gchar *key_pem)
 {
 	TTcpConnectedPort *TcpConnectedPort = NULL;
-	int option, sslfd;
+	gint option, sslfd;
 	BIO *sbio = NULL;
 	SSL *ssl = NULL;
 	SSL_CTX *ctx = NULL;
@@ -383,7 +383,7 @@ TTcpConnectedPort *OpenTcpConnection(const char *remotehostname, const char * re
 
 #if  defined(_WIN32) || defined(_WIN64)
 	WSADATA wsaData;
-	int iResult;
+	gint iResult;
 	iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
 	if (iResult != 0)
 	{
@@ -407,28 +407,28 @@ TTcpConnectedPort *OpenTcpConnection(const char *remotehostname, const char * re
 	}
 
 	option = 200 * 1024;
-	if (setsockopt(TcpConnectedPort->ConnectedFd, SOL_SOCKET, SO_SNDBUF, (char *)&option, sizeof(option)) == -1)
+	if (setsockopt(TcpConnectedPort->ConnectedFd, SOL_SOCKET, SO_SNDBUF, (gchar *)&option, sizeof(option)) == -1)
 	{
 		LOG_WARNING("setsockopt SO_SNDBUF failed");
 		goto error;
 	}
 
 	option = 200 * 1024;
-	if (setsockopt(TcpConnectedPort->ConnectedFd, SOL_SOCKET, SO_RCVBUF, (char *)&option, sizeof(option)) == -1)
+	if (setsockopt(TcpConnectedPort->ConnectedFd, SOL_SOCKET, SO_RCVBUF, (gchar *)&option, sizeof(option)) == -1)
 	{
 		LOG_WARNING("setsockopt SO_RCVBUF failed");
 		goto error;
 	}
 
 	option = 1;
-	if(setsockopt(TcpConnectedPort->ConnectedFd, IPPROTO_TCP, TCP_NODELAY, (char*)&option, sizeof(option)) < 0)
+	if(setsockopt(TcpConnectedPort->ConnectedFd, IPPROTO_TCP, TCP_NODELAY, (gchar*)&option, sizeof(option)) < 0)
 	{
 		LOG_WARNING("setsockopt TCP_NODELAY failed");
 		goto error;
 	}
 
 	option = 1;
-	if(setsockopt(TcpConnectedPort->ConnectedFd, IPPROTO_TCP, TCP_QUICKACK, (char*)&option, sizeof(option)) < 0)
+	if(setsockopt(TcpConnectedPort->ConnectedFd, IPPROTO_TCP, TCP_QUICKACK, (gchar*)&option, sizeof(option)) < 0)
 	{
 		LOG_WARNING("setsockopt TCP_QUICKACK failed");
 		goto error;
@@ -482,7 +482,7 @@ TTcpConnectedPort *OpenTcpConnection(const char *remotehostname, const char * re
 			tv.tv_usec = 0;
 
 			if (select(sslfd + 1, NULL, &fdset, NULL, &tv) == 1) { // check write fds
-				int so_error = 0;
+				gint so_error = 0;
 				socklen_t len = sizeof(so_error);
 
 				getsockopt(sslfd, SOL_SOCKET, SO_ERROR, &so_error, &len);
@@ -591,7 +591,7 @@ TTcpConnectedPort *OpenTcpConnection(const char *remotehostname, const char * re
 			tv.tv_usec = 0;
 
 			if (select(TcpConnectedPort->ConnectedFd + 1, NULL, &fdset, NULL, &tv) == 1) { // check write fds
-				int so_error = 0;
+				gint so_error = 0;
 				socklen_t len = sizeof(so_error);
 
 				getsockopt(TcpConnectedPort->ConnectedFd, SOL_SOCKET, SO_ERROR, &so_error, &len);
@@ -687,13 +687,18 @@ void CloseTcpConnectedPort(TTcpConnectedPort **TcpConnectedPort)
 //-----------------------------------------------------------------
 // TCP_RECV_TIMEOUT_VALUE should be microseconds unit G_USEC_PER_SEC = 1,000,000 micro second = 1sec. defined at glib
 #define TCP_RECV_TIMEOUT_VALUE G_USEC_PER_SEC
-ssize_t ReadDataTcp(TTcpConnectedPort *TcpConnectedPort, unsigned char *data, size_t length)
+gssize ReadDataTcp(TTcpConnectedPort *TcpConnectedPort, guchar *data, gsize length)
 {
-	int ret;
-	int sslfd;
+	gint ret;
+	gint sslfd;
 	fd_set fdset;
 	struct timeval tv;
-	ssize_t bytes = 0;
+	gssize bytes = 0;
+
+	if (length > G_MAXINT) {
+		LOG_WARNING("length > G_MAXINT. too long. cannot read it");
+		goto exit;
+	}
 
 	if (TcpConnectedPort->isSsl) {
 		sslfd = SSL_get_fd(TcpConnectedPort->ssl);
@@ -702,7 +707,7 @@ ssize_t ReadDataTcp(TTcpConnectedPort *TcpConnectedPort, unsigned char *data, si
 		}
 	}
 
-	for (size_t i = 0; i < length; i += bytes)
+	for (gsize i = 0; i < length; i += bytes)
 	{
 		FD_ZERO(&fdset);
 		tv.tv_sec = TCP_RECV_TIMEOUT_VALUE / G_USEC_PER_SEC;
@@ -721,7 +726,7 @@ ssize_t ReadDataTcp(TTcpConnectedPort *TcpConnectedPort, unsigned char *data, si
 				return TCP_RECV_TIMEOUT;
 			}
 			else if (FD_ISSET(sslfd, &fdset)) {
-				bytes = SSL_read(TcpConnectedPort->ssl, (char *)(data + i), length - i);
+				bytes = SSL_read(TcpConnectedPort->ssl, (gchar *)(data + i), length - i);
 			}
 			else { // unknown error
 				LOG_DEBUG("select unknown error");
@@ -741,7 +746,7 @@ ssize_t ReadDataTcp(TTcpConnectedPort *TcpConnectedPort, unsigned char *data, si
 				return TCP_RECV_TIMEOUT;
 			}
 			else if (FD_ISSET(TcpConnectedPort->ConnectedFd, &fdset)) {
-				bytes = recv(TcpConnectedPort->ConnectedFd, (char *)(data + i), length - i, 0);
+				bytes = recv(TcpConnectedPort->ConnectedFd, (gchar *)(data + i), length - i, 0);
 			}
 			else { // unknown error
 				LOG_DEBUG("select unknown error");
@@ -759,6 +764,7 @@ ssize_t ReadDataTcp(TTcpConnectedPort *TcpConnectedPort, unsigned char *data, si
 		}
 	}
 
+exit:
 	return length;
 }
 //-----------------------------------------------------------------
@@ -767,20 +773,26 @@ ssize_t ReadDataTcp(TTcpConnectedPort *TcpConnectedPort, unsigned char *data, si
 //-----------------------------------------------------------------
 // WriteDataTcp - Writes the specified amount TCP data
 //-----------------------------------------------------------------
-ssize_t WriteDataTcp(TTcpConnectedPort *TcpConnectedPort,unsigned char *data, size_t length)
+gssize WriteDataTcp(TTcpConnectedPort *TcpConnectedPort,guchar *data, gsize length)
 {
-	ssize_t total_bytes_written = 0;
-	ssize_t bytes_written;
-	while (total_bytes_written != length)
+	gssize total_bytes_written = 0;
+	gssize bytes_written;
+
+	if (length > G_MAXINT) {
+		LOG_WARNING("length > G_MAXINT. too long. cannot write it");
+		goto exit;
+	}
+
+	while (total_bytes_written != (gssize)length)
 	{
 		if (TcpConnectedPort->isSsl) {
 			bytes_written = SSL_write(TcpConnectedPort->ssl,
-					(char *)(data+total_bytes_written),
-					length - total_bytes_written);
+					(gchar *)(data+total_bytes_written),
+					(gint) length - total_bytes_written);
 		}
 		else {
 			bytes_written = send(TcpConnectedPort->ConnectedFd,
-					(char *)(data+total_bytes_written),
+					(gchar *)(data+total_bytes_written),
 					length - total_bytes_written,0);
 
 		}
@@ -789,9 +801,12 @@ ssize_t WriteDataTcp(TTcpConnectedPort *TcpConnectedPort,unsigned char *data, si
 		{
 			return(-1);
 		}
+
 		total_bytes_written += bytes_written;
 	}
-	return(total_bytes_written);
+
+exit:
+	return total_bytes_written;
 }
 //-----------------------------------------------------------------
 // END WriteDataTcp

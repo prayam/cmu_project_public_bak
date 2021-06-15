@@ -9,9 +9,9 @@
 #ifndef server_h
 #define server_h
 
-int server(const char *port_str,
-           const char *ca_pem,
-           const char *cert_pem,
-           const char *key_pem);
+gint server(const gchar *port_str,
+           const gchar *ca_pem,
+           const gchar *cert_pem,
+           const gchar *key_pem);
 
 #endif /* server_h */

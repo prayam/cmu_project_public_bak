@@ -18,9 +18,9 @@
 #define BUFSIZE 128
 #define TARGET_HOST "face.recog.server.Jetson"
 
-static SSL_CTX *get_client_context(const char *ca_pem,
-                              const char *cert_pem,
-                              const char *key_pem) {
+static SSL_CTX *get_client_context(const gchar *ca_pem,
+                              const gchar *cert_pem,
+                              const gchar *key_pem) {
     SSL_CTX *ctx;
 
     /* Create a generic context */
@@ -71,20 +71,20 @@ fail:
     return NULL;
 }
 
-int client(const char *conn_str, const char *ca_pem,
-           const char *cert_pem, const char *key_pem) {
-    static char buffer[BUFSIZE];
+gint client(const gchar *conn_str, const gchar *ca_pem,
+           const gchar *cert_pem, const gchar *key_pem) {
+    static gchar buffer[BUFSIZE];
     SSL_CTX *ctx;
     X509 *server_cert;
     BIO *sbio;
     SSL *ssl;
-    size_t len;
+    gsize len;
     /* Failure till we know it's a success */
-    int rc = -1;
+    gint rc = -1;
 
     /* Initialize OpenSSL */
     SSL_load_error_strings();
-    OpenSSL_add_ssl_algorithms(); 
+    OpenSSL_add_ssl_algorithms();
     // OpenSSL_add_ssl_algorithms() is a synonym for SSL_library_init()
     // and is implemented as a macro.
 
@@ -148,7 +148,7 @@ int client(const char *conn_str, const char *ca_pem,
     len = strlen(buffer);
 
     /* Write the input onto the SSL socket */
-    if ((rc = SSL_write(ssl, buffer, (int) len)) != len) {
+    if ((rc = SSL_write(ssl, buffer, (gint) len)) != len) {
         fprintf(stderr, "Cannot write to the server\n");
         goto fail3;
     }

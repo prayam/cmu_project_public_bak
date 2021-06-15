@@ -8,8 +8,8 @@ void image2Matrix(const cv::Mat &image, const struct pBox *pbox){
 		return;
 	}
 	mydataFmt *p = pbox->pdata;
-	for (int rowI = 0; rowI < image.rows; rowI++){
-		for (int colK = 0; colK < image.cols; colK++){
+	for (gint rowI = 0; rowI < image.rows; rowI++){
+		for (gint colK = 0; colK < image.cols; colK++){
 			*p = (image.at<cv::Vec3b>(rowI, colK)[2] - 127.5)*0.007812;
 			*(p + image.rows*image.cols) = (image.at<cv::Vec3b>(rowI, colK)[1] - 127.5)*0.0078125;
 			*(p + 2*image.rows*image.cols) = (image.at<cv::Vec3b>(rowI, colK)[0] - 127.5)*0.0078125;
@@ -17,7 +17,7 @@ void image2Matrix(const cv::Mat &image, const struct pBox *pbox){
 		}
 	}
 }
-bool cmpScore(struct orderScore lsh, struct orderScore rsh){
+gboolean cmpScore(struct orderScore lsh, struct orderScore rsh){
 	if(lsh.score<rsh.score)
 		return true;
 	else
@@ -27,11 +27,11 @@ void nms(vector<struct Bbox> &boundingBox_, vector<struct orderScore> &bboxScore
 	if(boundingBox_.empty()){
 		return;
 	}
-	std::vector<int> heros;
+	std::vector<gint> heros;
 	//sort the score
 	sort(bboxScore_.begin(), bboxScore_.end(), cmpScore);
 
-	int order = 0;
+	gint order = 0;
 	float IOU = 0;
 	float maxX = 0;
 	float maxY = 0;
@@ -44,7 +44,7 @@ void nms(vector<struct Bbox> &boundingBox_, vector<struct orderScore> &bboxScore
 		heros.push_back(order);
 		boundingBox_.at(order).exist = false;//delete it
 
-		for(int num=0;num<boundingBox_.size();num++){
+		for(gint num=0;num<boundingBox_.size();num++){
 			if(boundingBox_.at(num).exist){
 				//the iou
 				maxX = (boundingBox_.at(num).x1>boundingBox_.at(order).x1)?boundingBox_.at(num).x1:boundingBox_.at(order).x1;
@@ -73,10 +73,10 @@ void nms(vector<struct Bbox> &boundingBox_, vector<struct orderScore> &bboxScore
 			}
 		}
 	}
-	for(int i=0;i<heros.size();i++)
+	for(gint i=0;i<heros.size();i++)
 		boundingBox_.at(heros.at(i)).exist = true;
 }
-void refineAndSquareBbox(vector<struct Bbox> &vecBbox, const int &height, const int &width, bool square = true){
+void refineAndSquareBbox(vector<struct Bbox> &vecBbox, const gint &height, const gint &width, gboolean square = true){
 	if(vecBbox.empty()){
 		cout<<"Bbox is empty!!"<<endl;
 		return;

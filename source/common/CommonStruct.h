@@ -1,6 +1,8 @@
 #ifndef _COMMONSTRUCT_H_
 #define _COMMONSTRUCT_H_
 
+#include <glib.h>
+
 enum {
 	MODE_SECURE,
 	MODE_NONSECURE,	/* Just switch between secure port and non-secure port. */
@@ -55,17 +57,17 @@ enum {
 #define TIMEOUT_OTHERS		5 /* unit: sec */
 
 struct __attribute__ ((packed)) APP_command_req {
-	char req_id;
-	char data[MAX_DATA_LEN];	/* Within the array, consists of set of (len(1byte) + data). */
+	gchar req_id;
+	gchar data[MAX_DATA_LEN];	/* Within the array, consists of set of (len(1byte) + data). */
 };
 
 struct __attribute__ ((packed)) APP_command_res {
-	char res;
+	gchar res;
 };
 
 struct __attribute__ ((packed)) APP_meta {
-	char name[MAX_NAME];
-	int x1, y1, x2, y2;
+	gchar name[MAX_NAME];
+	gint x1, y1, x2, y2;
 };
 
 #endif

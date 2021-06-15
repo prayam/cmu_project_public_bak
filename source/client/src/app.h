@@ -39,7 +39,7 @@ public:
 	TTcpConnectedPort *port_meta;
 
 	void on_button_logout();
-	void show_dialog(const char* contents);
+	void show_dialog(const gchar* contents);
 	CLIENT_STATE get_current_app_state();
 
 	//Signal handlers:

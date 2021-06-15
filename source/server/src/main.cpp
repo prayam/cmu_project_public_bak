@@ -20,7 +20,7 @@
 #include <termios.h>
 
 #define MAXFACES	8
-int kbhit()
+gint kbhit()
 {
 	struct timeval tv = { 0L, 0L };
 	fd_set fds;
@@ -29,7 +29,7 @@ int kbhit()
 	return select(1, &fds, NULL, NULL, &tv);
 }
 
-int readysocket(int fd)
+gint readysocket(gint fd)
 {
 	struct timeval tv = { 0L, 0L };
 	fd_set fds;
@@ -38,10 +38,10 @@ int readysocket(int fd)
 	return select(fd + 1, &fds, NULL, NULL, &tv);
 }
 
-int getch()
+gint getch()
 {
-	int r;
-	unsigned char c;
+	gint r;
+	guchar c;
 	if ((r = read(0, &c, sizeof(c))) < 0) {
 		return r;
 	} else {
@@ -54,19 +54,19 @@ int getch()
 using namespace nvinfer1;
 using namespace nvuffparser;
 
-static int UserAthenticate(char **userid, char **userpw)
+static gint UserAthenticate(gchar **userid, gchar **userpw)
 {
-	int ret = 0;
+	gint ret = 0;
 
 	if(fileExists("../credential")) {
 		std::ifstream file("../credential", std::ios::binary);
 		if (file.good())
 		{
-			char buf_id[32];
-			char buf_pw[32];
-			char user_pw[MAX_ACCOUNT_PW + 2]; /* 2 is for salt */
-			unsigned char *user_hashed_id;
-			unsigned char *user_hashed_pw;
+			gchar buf_id[32];
+			gchar buf_pw[32];
+			gchar user_pw[MAX_ACCOUNT_PW + 2]; /* 2 is for salt */
+			guchar *user_hashed_id;
+			guchar *user_hashed_pw;
 
 			file.read(buf_id, 32);
 			file.read(buf_pw, 32);
@@ -75,8 +75,8 @@ static int UserAthenticate(char **userid, char **userpw)
 			g_strlcpy(user_pw, *userpw, MAX_ACCOUNT_PW + 2);
 			g_strlcat(user_pw, "6^", MAX_ACCOUNT_PW + 2);
 
-			make_sha256_m((unsigned char *)*userid, strlen(*userid), &user_hashed_id);
-			make_sha256_m((unsigned char *)user_pw, strlen(user_pw), &user_hashed_pw);
+			make_sha256_m((guchar *)*userid, strlen(*userid), &user_hashed_id);
+			make_sha256_m((guchar *)user_pw, strlen(user_pw), &user_hashed_pw);
 
 			if (memcmp(buf_id, user_hashed_id, 32) == 0 &&
 			    memcmp(buf_pw, user_hashed_pw, 32) == 0)
@@ -100,26 +100,26 @@ static int UserAthenticate(char **userid, char **userpw)
 	return ret;
 }
 
-int main(int argc, char *argv[])
+gint main(gint argc, gchar *argv[])
 {
-	int maxFacesPerScene = MAXFACES;
+	gint maxFacesPerScene = MAXFACES;
 
 	TTcpListenPort    *TcpListenPort;
 	TTcpConnectedPort *TcpConnectedPort_control;
 	TTcpConnectedPort *TcpConnectedPort_sdata;
 	TTcpConnectedPort *TcpConnectedPort_nsdata;
 	TTcpConnectedPort *TcpConnectedPort_meta;
-	const char *testmodefile = "../friends640x480.mp4";
+	const gchar *testmodefile = "../friends640x480.mp4";
 	log_enable("server");
 
 	std::vector<struct APP_meta> meta;
 	meta.reserve(maxFacesPerScene);
-	int secure_mode = MODE_SECURE;
-	int run_mode = MODE_RUN;
+	gint secure_mode = MODE_SECURE;
+	gint run_mode = MODE_RUN;
 
 	struct sockaddr_in cli_addr;
 	socklen_t          clilen;
-	bool               UseCamera=true;
+	gboolean               UseCamera=true;
 
 	if (argc <2)
 	{
@@ -139,16 +139,16 @@ int main(int argc, char *argv[])
 	const string engineFile="../facenetModels/facenet.engine";
 	DataType dtype = DataType::kHALF;
 	//DataType dtype = DataType::kFLOAT;
-	bool serializeEngine = true;
-	int batchSize = 1;
-	int nbFrames = 0;
-	// int videoFrameWidth =1280;
-	// int videoFrameHeight =720;
-	int videoFrameWidth = 640;
-	int videoFrameHeight = 480;
+	gboolean serializeEngine = true;
+	gint batchSize = 1;
+	gint nbFrames = 0;
+	// gint videoFrameWidth =1280;
+	// gint videoFrameHeight =720;
+	gint videoFrameWidth = 640;
+	gint videoFrameHeight = 480;
 
 	float knownPersonThreshold = 1.;
-	bool isCSICam = true;
+	gboolean isCSICam = true;
 
 	// init facenet
 	FaceNetClassifier faceNet = FaceNetClassifier(gLogger, dtype, uffFile, engineFile, batchSize, serializeEngine,
@@ -177,10 +177,10 @@ int main(int argc, char *argv[])
 	std::vector<struct Paths> paths;
 	cv::Mat image;
 	getFilePaths("../imgs", paths);
-	for(int i=0; i < paths.size(); i++) {
+	for(gint i=0; i < paths.size(); i++) {
 		loadInputImage(paths[i].absPath, image, videoFrameWidth, videoFrameHeight);
 		outputBbox = mtCNN.findFace(image);
-		std::size_t index = paths[i].fileName.find_last_of(".");
+		gsize index = paths[i].fileName.find_last_of(".");
 		std::string rawName = paths[i].fileName.substr(0,index);
 		faceNet.forwardAddFace(image, outputBbox, rawName);
 		faceNet.resetVariables();
@@ -217,8 +217,8 @@ int main(int argc, char *argv[])
 		}
 		printf("Accepted control channel connection Request\n");
 
-		char *userid;
-		char *userpw;
+		gchar *userid;
+		gchar *userpw;
 		if (TcpRecvLoginData(TcpConnectedPort_control,&userid,&userpw) <= 0) { /* Timeout or error */
 			CloseTcpConnectedPort(&TcpConnectedPort_control);
 			continue;
@@ -315,9 +315,9 @@ int main(int argc, char *argv[])
 			nbFrames++;
 			if (readysocket(TcpConnectedPort_control->ConnectedFd))
 			{
-				char req_id;
+				gchar req_id;
 				void *req_parsed_data;
-				int ret;
+				gint ret;
 wait_req:
 				do {
 					ret = TcpRecvCtrlReq(TcpConnectedPort_control,&req_id,&req_parsed_data);
@@ -363,7 +363,7 @@ wait_req:
 					if (req_parsed_data && meta.size()) {
 						if (TcpSendRes(TcpConnectedPort_control, RES_OK) <= 0)
 							break;
-						faceNet.addNewFace_name(frame, outputBbox, (char *)req_parsed_data);
+						faceNet.addNewFace_name(frame, outputBbox, (gchar *)req_parsed_data);
 					} else {
 						if (TcpSendRes(TcpConnectedPort_control, RES_FAIL_OTHERS) <= 0)
 							break;
@@ -381,7 +381,7 @@ exit_req:
 			if (kbhit())
 			{
 				// Stores the pressed key in ch
-				char keyboard =  getch();
+				gchar keyboard =  getch();
 
 				if (keyboard == 'q') break;
 				else if(keyboard == 'n')

@@ -5,7 +5,7 @@
 #include "common.h"
 
 
-void* safeCudaMalloc(size_t memSize)
+void* safeCudaMalloc(gsize memSize)
 {
 	void* deviceMem;
 	CHECK(cudaMalloc(&deviceMem, memSize));
@@ -19,10 +19,10 @@ void* safeCudaMalloc(size_t memSize)
 
 
 	std::vector<std::pair<int64_t, nvinfer1::DataType>>
-calculateBindingBufferSizes(const nvinfer1::ICudaEngine& engine, int nbBindings, int batchSize)
+calculateBindingBufferSizes(const nvinfer1::ICudaEngine& engine, gint nbBindings, gint batchSize)
 {
 	std::vector<std::pair<int64_t, nvinfer1::DataType>> sizes;
-	for (int i = 0; i < nbBindings; ++i)
+	for (gint i = 0; i < nbBindings; ++i)
 	{
 		nvinfer1::Dims dims = engine.getBindingDimensions(i);
 		nvinfer1::DataType dtype = engine.getBindingDataType(i);
@@ -63,7 +63,7 @@ void getFilePaths(std::string imagesPath, std::vector<struct Paths>& paths) {
 }
 
 
-void loadInputImage(std::string inputFilePath, cv::Mat& image, int videoFrameWidth, int videoFrameHeight) {
+void loadInputImage(std::string inputFilePath, cv::Mat& image, gint videoFrameWidth, gint videoFrameHeight) {
 	image = cv::imread(inputFilePath.c_str());
 	cv::resize(image, image, cv::Size(videoFrameWidth, videoFrameHeight));
 }

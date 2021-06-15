@@ -26,7 +26,7 @@ void usage() {
 /*
  * Main routine
  */
-int main(int argc, const char * argv[]) {
+gint main(gint argc, const gchar * argv[]) {
     if (argc != 6) {
         usage(); return -1;
     } else if (!strcmp(argv[1], "server")) {

@@ -8,6 +8,7 @@
 #include "network.h"
 #include "common.h"
 #include "baseEngine.h"
+#include <glib.h>
 #endif //MAIN_PNET_RT_H
 using namespace nvinfer1;
 using namespace nvcaffeparser1;
@@ -18,7 +19,7 @@ class Pnet_engine:public baseEngine
 	public:
 		Pnet_engine();
 		~Pnet_engine();
-		void init(int row,int col);
+		void init(gint row,gint col);
 		friend class Pnet;
 
 };
@@ -28,7 +29,7 @@ class Pnet_engine:public baseEngine
 class Pnet
 {
 	public:
-		Pnet(int row,int col,const Pnet_engine& pnet_engine);
+		Pnet(gint row,gint col,const Pnet_engine& pnet_engine);
 		~Pnet();
 		void run(cv::Mat &image, float scale,const Pnet_engine& engine);
 		float nms_threshold;
@@ -39,15 +40,15 @@ class Pnet
 		vector<orderScore> bboxScore_;
 	private:
 
-		const int BatchSize ;
-		const int INPUT_C ;
+		const gint BatchSize ;
+		const gint INPUT_C ;
 		const ICudaEngine &Engine;
 		//must be computed at runtime
-		int INPUT_H ;
-		int INPUT_W ;
-		int OUT_PROB_SIZE;
-		int OUT_LOCATION_SIZE;
-		int     inputIndex,
+		gint INPUT_H ;
+		gint INPUT_W ;
+		gint OUT_PROB_SIZE;
+		gint OUT_LOCATION_SIZE;
+		gint     inputIndex,
 			outputProb,
 			outputLocation;
 		void *buffers[3];

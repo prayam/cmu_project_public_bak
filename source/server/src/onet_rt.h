@@ -6,6 +6,7 @@
 #define MAIN_ONET_RT_H
 #include "baseEngine.h"
 #include "network.h"
+#include <glib.h>
 
 
 class Onet_engine : public baseEngine {
@@ -13,7 +14,7 @@ class Onet_engine : public baseEngine {
 	public:
 		Onet_engine();
 		~Onet_engine();
-		void init(int row, int col);
+		void init(gint row, gint col);
 		friend class Onet;
 
 };
@@ -30,16 +31,16 @@ class Onet {
 		struct pBox *points_;
 		struct pBox *rgb;
 	private:
-		const int BatchSize;
-		const int INPUT_C;
+		const gint BatchSize;
+		const gint INPUT_C;
 		const ICudaEngine &Engine;
 		//must be computed at runtime
-		int INPUT_H;
-		int INPUT_W;
-		int OUT_PROB_SIZE;
-		int OUT_LOCATION_SIZE;
-		int OUT_POINTS_SIZE;
-		int inputIndex,outputProb,outputLocation,outputPoints;
+		gint INPUT_H;
+		gint INPUT_W;
+		gint OUT_PROB_SIZE;
+		gint OUT_LOCATION_SIZE;
+		gint OUT_POINTS_SIZE;
+		gint inputIndex,outputProb,outputLocation,outputPoints;
 		void *buffers[4];
 
 };
