@@ -282,6 +282,33 @@ void FaceNetClassifier::featureMatching(cv::Mat &image, std::vector<struct APP_m
 			meta.push_back(tmp);
 		}
 	}
+#include "certcheck.h"
+void load_dec_cvimage(cv::Mat &image, std::string &name, const char *fn)
+{
+	unsigned char *buf;
+	size_t size;
+	dec_ssl_fm(fn, &buf, &size);
+
+	name = std::string((const char *)buf);
+	cv::_InputArray pic_arr(buf + strlen((const char *)buf) + 1, size - 1 - strlen((const char *)buf));
+	image = cv::imdecode(pic_arr, cv::IMREAD_COLOR);
+
+	free(buf);
+}
+
+void save_enc_cvimage(cv::Mat &image, std::string name)
+{
+	std::vector<uchar> buf(name.begin(), name.end());
+	std::vector<uchar> pic_buf;
+	bool ret = cv::imencode(".jpg", image, pic_buf);
+	buf.push_back('\0');
+	buf.insert(buf.end(), pic_buf.begin(), pic_buf.end());
+
+	char path[60] = "../imgs/";
+	char fn[34];
+	getFileName_leng32(fn);
+	g_strlcat(path, fn, 60);
+	enc_ssl_mf(buf.data(), buf.size(), path);
 }
 
 void FaceNetClassifier::addNewFace(cv::Mat &image, std::vector<struct Bbox> outputBbox) {
@@ -291,18 +318,12 @@ void FaceNetClassifier::addNewFace(cv::Mat &image, std::vector<struct Bbox> outp
 	std::cin >> newName;
 	std::cout << "Hi " << newName << ", you will be added to the database.\n";
 	forwardAddFace(image, outputBbox, newName);
-	string filePath = "../imgs/";
-	filePath.append(newName);
-	filePath.append(".jpg");
-	cv::imwrite(filePath, image);
+	save_enc_cvimage(image, newName);
 }
 
 void FaceNetClassifier::addNewFace_name(cv::Mat &image, std::vector<struct Bbox> outputBbox, string newName) {
 	forwardAddFace(image, outputBbox, newName);
-	string filePath = "../imgs/";
-	filePath.append(newName);
-	filePath.append(".jpg");
-	cv::imwrite(filePath, image);
+	save_enc_cvimage(image, newName);
 }
 
 void FaceNetClassifier::resetVariables() {

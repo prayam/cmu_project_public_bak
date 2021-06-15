@@ -63,7 +63,8 @@ void getFilePaths(std::string imagesPath, std::vector<struct Paths>& paths) {
 }
 
 
-void loadInputImage(std::string inputFilePath, cv::Mat& image, gint videoFrameWidth, gint videoFrameHeight) {
-	image = cv::imread(inputFilePath.c_str());
+extern void load_dec_cvimage(cv::Mat &image, std::string &name, const char *fn);
+void loadInputImage(std::string inputFilePath, cv::Mat& image, gint videoFrameWidth, gint videoFrameHeight, std::string &name) {
+	load_dec_cvimage(image, name, inputFilePath.c_str());
 	cv::resize(image, image, cv::Size(videoFrameWidth, videoFrameHeight));
 }
