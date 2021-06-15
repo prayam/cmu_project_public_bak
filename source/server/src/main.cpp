@@ -177,11 +177,10 @@ gint main(gint argc, gchar *argv[])
 	std::vector<struct Paths> paths;
 	cv::Mat image;
 	getFilePaths("../imgs", paths);
-	for(gsize i = 0; i < paths.size(); i++) {
-		loadInputImage(paths[i].absPath, image, videoFrameWidth, videoFrameHeight);
+	for(gsize i=0; i < paths.size(); i++) {
+		std::string rawName;
+		loadInputImage(paths[i].absPath, image, videoFrameWidth, videoFrameHeight, rawName);
 		outputBbox = mtCNN.findFace(image);
-		gsize index = paths[i].fileName.find_last_of(".");
-		std::string rawName = paths[i].fileName.substr(0,index);
 		faceNet.forwardAddFace(image, outputBbox, rawName);
 		faceNet.resetVariables();
 	}
