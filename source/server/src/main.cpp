@@ -54,11 +54,60 @@ gint getch()
 using namespace nvinfer1;
 using namespace nvuffparser;
 
-static gint UserAthenticate(gchar **userid, gchar **userpw)
+static gint FaceAuthencticate(gchar *userid, mtcnn &mtCNN, FaceNetClassifier &faceNet, VideoStreamer *videoStreamer)
+{
+	gint maxFacesPerScene = MAXFACES;
+	std::vector<struct APP_meta> meta;
+	meta.reserve(maxFacesPerScene);
+	cv::Mat frame;
+	cv::cuda::GpuMat src_gpu, dst_gpu;
+	std::vector<struct Bbox> outputBbox;
+	outputBbox.reserve(maxFacesPerScene);
+	auto starttime = chrono::steady_clock::now();
+	auto endtime = chrono::steady_clock::now();
+
+	gint cnt = 0;
+	while (std::chrono::duration_cast<chrono::milliseconds>(endtime - starttime).count() < 300) {
+		videoStreamer->getFrame(frame);
+		cnt++;
+		endtime = chrono::steady_clock::now();
+	}
+	LOG_INFO("how many frames dumped out: %d\n", cnt);
+
+	while (std::chrono::duration_cast<chrono::milliseconds>(endtime - starttime).count() < 5000) {
+		meta.clear();
+
+		videoStreamer->getFrame(frame);
+		if (frame.empty())
+			continue;
+
+		/* In case of UseCamera */
+		src_gpu.upload(frame);
+		cv::cuda::rotate(src_gpu, dst_gpu, src_gpu.size(), 180, src_gpu.size().width, src_gpu.size().height);
+		dst_gpu.download(frame);
+
+		outputBbox = mtCNN.findFace(frame);
+		faceNet.forward(frame, outputBbox);
+		faceNet.featureMatching(frame, meta);
+		faceNet.resetVariables();
+
+		outputBbox.clear();
+		frame.release();
+		if (meta.size() == 1 && !strcmp(meta[0].name, userid))
+			return 1;
+		endtime = chrono::steady_clock::now();
+	}
+	return 0;
+}
+
+static gint UserAthenticate(gchar **userid, gchar **userpw, mtcnn &mtCNN, FaceNetClassifier &faceNet, VideoStreamer *videoStreamer_c)
 {
 	gint ret = 0;
 
 	if (*userid == NULL || *userpw == NULL)
+		goto exit;
+
+	if (!FaceAuthencticate(*userid, mtCNN, faceNet, videoStreamer_c))
 		goto exit;
 
 	if (fileExists("./asset/credential")) {
@@ -237,7 +286,9 @@ gint main(gint argc, gchar *argv[])
 			CloseTcpConnectedPort(&TcpConnectedPort_control);
 			continue;
 		}
-		if (!UserAthenticate(&userid, &userpw)) {
+
+
+		if (!UserAthenticate(&userid, &userpw, mtCNN, faceNet, videoStreamer_c)) {
 			if (TcpSendRes(TcpConnectedPort_control, RES_FAIL_AUTH) <= 0) {
 				CloseTcpConnectedPort(&TcpConnectedPort_control);
 				continue;
