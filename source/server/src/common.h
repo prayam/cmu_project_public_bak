@@ -70,6 +70,6 @@ inline int64_t volume(const nvinfer1::Dims& d);
 std::vector<std::pair<int64_t, nvinfer1::DataType>>
 calculateBindingBufferSizes(const nvinfer1::ICudaEngine& engine, gint nbBindings, gint batchSize);
 void getFilePaths(std::string imagesPath, std::vector<struct Paths>& paths);
-void loadInputImage(std::string inputFilePath, cv::Mat& image, gint videoFrameWidth, gint videoFrameHeight, std::string &name);
+gint loadInputImage(std::string inputFilePath, cv::Mat& image, gint videoFrameWidth, gint videoFrameHeight, std::string &name);
 
 #endif // _TRT_COMMON_H_

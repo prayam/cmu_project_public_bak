@@ -1,6 +1,7 @@
 #include "faceNet.h"
 #include "CommonStruct.h"
 #include <glib.h>
+#include "Logger.h"
 
 gint FaceNetClassifier::m_classCount = 0;
 
@@ -285,17 +286,23 @@ void FaceNetClassifier::featureMatching(cv::Mat &image, std::vector<struct APP_m
 }
 
 #include "certcheck.h"
-void load_dec_cvimage(cv::Mat &image, std::string &name, const char *fn)
+gint load_dec_cvimage(cv::Mat &image, std::string &name, const char *fn)
 {
 	unsigned char *buf;
 	size_t size;
-	dec_ssl_fm(fn, &buf, &size);
+	gint ret = dec_ssl_fm(fn, &buf, &size);
+
+	if (ret) {
+		LOG_WARNING("Decrypting and loading jpg image failed\n");
+		return ret;
+	}
 
 	name = std::string((const char *)buf);
 	cv::_InputArray pic_arr(buf + strlen((const char *)buf) + 1, size - 1 - strlen((const char *)buf));
 	image = cv::imdecode(pic_arr, cv::IMREAD_COLOR);
 
 	free(buf);
+	return 0;
 }
 
 void save_enc_cvimage(cv::Mat &image, std::string name)
@@ -310,7 +317,9 @@ void save_enc_cvimage(cv::Mat &image, std::string name)
 	char fn[34];
 	getFileName_leng32(fn);
 	g_strlcat(path, fn, 60);
-	enc_ssl_mf(buf.data(), buf.size(), path);
+	gint ret = enc_ssl_mf(buf.data(), buf.size(), path);
+	if (ret)
+		LOG_WARNING("Encrypting and saving jpg image failed\n");
 }
 
 void FaceNetClassifier::addNewFace(cv::Mat &image, std::vector<struct Bbox> outputBbox) {

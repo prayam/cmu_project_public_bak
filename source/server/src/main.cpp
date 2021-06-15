@@ -179,7 +179,9 @@ gint main(gint argc, gchar *argv[])
 	getFilePaths("../imgs", paths);
 	for(gsize i=0; i < paths.size(); i++) {
 		std::string rawName;
-		loadInputImage(paths[i].absPath, image, videoFrameWidth, videoFrameHeight, rawName);
+		gint ret = loadInputImage(paths[i].absPath, image, videoFrameWidth, videoFrameHeight, rawName);
+		if (ret)
+			continue;
 		outputBbox = mtCNN.findFace(image);
 		faceNet.forwardAddFace(image, outputBbox, rawName);
 		faceNet.resetVariables();
