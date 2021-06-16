@@ -1,0 +1,35 @@
+File, Line, Severity, Id, Summary
+temp\cmu_project\source\server\src\main.cpp,203,style,knownConditionTrueFalse,Condition 'argc==3' is always false
+temp\cmu_project\source\server\src\mtcnn.cpp,39,warning,noCopyConstructor,Class 'mtcnn' does not have a copy constructor which is recommended since it has dynamic memory/resource allocation(s).
+temp\cmu_project\source\server\src\mtcnn.cpp,39,warning,noOperatorEq,Class 'mtcnn' does not have a operator= which is recommended since it has dynamic memory/resource allocation(s).
+temp\cmu_project\source\server\src\onet_rt.cpp,42,warning,noCopyConstructor,Class 'Onet' does not have a copy constructor which is recommended since it has dynamic memory/resource allocation(s).
+temp\cmu_project\source\server\src\onet_rt.cpp,42,warning,noOperatorEq,Class 'Onet' does not have a operator= which is recommended since it has dynamic memory/resource allocation(s).
+temp\cmu_project\source\server\src\pnet_rt.cpp,71,warning,noCopyConstructor,Class 'Pnet' does not have a copy constructor which is recommended since it has dynamic memory/resource allocation(s).
+temp\cmu_project\source\server\src\pnet_rt.cpp,71,warning,noOperatorEq,Class 'Pnet' does not have a operator= which is recommended since it has dynamic memory/resource allocation(s).
+temp\cmu_project\source\server\src\rnet_rt.cpp,38,warning,noCopyConstructor,Class 'Rnet' does not have a copy constructor which is recommended since it has dynamic memory/resource allocation(s).
+temp\cmu_project\source\server\src\rnet_rt.cpp,38,warning,noOperatorEq,Class 'Rnet' does not have a operator= which is recommended since it has dynamic memory/resource allocation(s).
+temp\cmu_project\source\server\src\videoStreamer.cpp,35,warning,noCopyConstructor,Class 'VideoStreamer' does not have a copy constructor which is recommended since it has dynamic memory/resource allocation(s).
+temp\cmu_project\source\server\src\videoStreamer.cpp,35,warning,noOperatorEq,Class 'VideoStreamer' does not have a operator= which is recommended since it has dynamic memory/resource allocation(s).
+temp\cmu_project\source\server\src\videoStreamer.cpp,60,style,unusedFunction,The function 'assertResolution' is never used.
+temp\cmu_project\source\server\src\videoStreamer.cpp,50,style,unusedFunction,The function 'setResoltionFile' is never used.
+temp\cmu_project\source\server\src\videoStreamer.cpp,43,style,unusedFunction,The function 'setResolutionDevice' is never used.
+temp\cmu_project\source\server\trt_l2norm_helper\l2norm_helper.cpp,29,performance,useInitializationList,Variable 'op_type' is assigned in constructor body. Consider performing initialization in initialization list.
+temp\cmu_project\source\server\trt_l2norm_helper\l2norm_helper.cpp,137,style,unusedFunction,The function 'clone' is never used.
+temp\cmu_project\source\server\trt_l2norm_helper\l2norm_helper.cpp,102,style,unusedFunction,The function 'configureWithFormat' is never used.
+temp\cmu_project\source\server\trt_l2norm_helper\l2norm_helper.cpp,184,style,unusedFunction,The function 'createPlugin' is never used.
+temp\cmu_project\source\server\trt_l2norm_helper\l2norm_helper.cpp,209,style,unusedFunction,The function 'deserializePlugin' is never used.
+temp\cmu_project\source\server\trt_l2norm_helper\l2norm_helper.cpp,179,style,unusedFunction,The function 'getFieldNames' is never used.
+temp\cmu_project\source\server\trt_l2norm_helper\l2norm_helper.cpp,38,style,unusedFunction,The function 'getNbOutputs' is never used.
+temp\cmu_project\source\server\trt_l2norm_helper\l2norm_helper.cpp,44,style,unusedFunction,The function 'getOutputDimensions' is never used.
+temp\cmu_project\source\server\trt_l2norm_helper\l2norm_helper.cpp,159,style,unusedFunction,The function 'getPluginName' is never used.
+temp\cmu_project\source\server\trt_l2norm_helper\l2norm_helper.cpp,174,style,unusedFunction,The function 'getPluginNamespace' is never used.
+temp\cmu_project\source\server\trt_l2norm_helper\l2norm_helper.cpp,121,style,unusedFunction,The function 'getPluginType' is never used.
+temp\cmu_project\source\server\trt_l2norm_helper\l2norm_helper.cpp,164,style,unusedFunction,The function 'getPluginVersion' is never used.
+temp\cmu_project\source\server\trt_l2norm_helper\l2norm_helper.cpp,59,style,unusedFunction,The function 'getWorkspaceSize' is never used.
+temp\cmu_project\source\server\trt_l2norm_helper\l2norm_helper.cpp,52,style,unusedFunction,The function 'initialize' is never used.
+temp\cmu_project\source\server\trt_l2norm_helper\l2norm_helper.cpp,84,style,unusedFunction,The function 'supportsFormat' is never used.
+temp\cmu_project\source\server\trt_l2norm_helper\l2norm_helper.cpp,57,style,unusedFunction,The function 'terminate' is never used.
+temp\cmu_project\source\server\src\common.cpp,22,style,unusedFunction,The function 'calculateBindingBufferSizes' is never used.
+temp\cmu_project\source\server\src\common.cpp,8,style,unusedFunction,The function 'safeCudaMalloc' is never used.
+temp\cmu_project\source\server\src\faceNet.cpp,385,style,unusedFunction,The function 'elementSize' is never used.
+temp\cmu_project\source\common\Logger.cpp,124,style,unusedFunction,The function 'log_hexdump' is never used.
