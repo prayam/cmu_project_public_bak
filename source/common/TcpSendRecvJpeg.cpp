@@ -149,7 +149,7 @@ gssize TcpRecvLoginData(TTcpConnectedPort * TcpConnectedPort, gchar** userid, gc
 {
 	gssize read_len = TCP_RECV_ERROR;
 	gssize req_len;
-	struct APP_command_req *req;
+	struct APP_command_req *req = NULL;
 	guint8 *tmp;
 	guint8 userid_len, userpw_len;
 
@@ -485,7 +485,7 @@ gssize TcpRecvCtrlReq(TTcpConnectedPort * TcpConnectedPort, gchar *req_id, void 
 {
 	gssize read_len = TCP_RECV_ERROR;
 	gssize req_len;
-	struct APP_command_req *req;
+	struct APP_command_req *req = NULL;
 	guint8 *tmp;
 	guint8 name_len;
 
