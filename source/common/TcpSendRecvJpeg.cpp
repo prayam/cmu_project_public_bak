@@ -121,18 +121,11 @@ gboolean TcpSendLoginData(TTcpConnectedPort * TcpConnectedPort, const gchar* use
 
 	*tmp = (guint8)userid_len;
 	tmp++;
-
-	if (tmp == NULL) {
-		goto exit;
-	}
 	memcpy(tmp, userid, userid_len);
 	tmp += userid_len;
 
 	*tmp = (guint8)userpw_len;
 	tmp++;
-	if (tmp == NULL) {
-		goto exit;
-	}
 	memcpy(tmp, userpw, userpw_len);
 	tmp += userpw_len;
 
