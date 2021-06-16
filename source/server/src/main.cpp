@@ -202,6 +202,12 @@ gint main(gint argc, gchar *argv[])
 
 	if (argc==3) UseCamera=false;
 
+	gint64 port_parsed = g_ascii_strtoll(argv[1], NULL, 10);
+	if (port_parsed != 5000)
+	{
+		printf("Usage: port should be 5000\n");
+		return(-1);
+	}
 
 	Logger gLogger = Logger();
 	// Register default TRT plugins (e.g. LRelu_TRT)
@@ -260,13 +266,6 @@ gint main(gint argc, gchar *argv[])
 		faceNet.resetVariables();
 	}
 	outputBbox.clear();
-
-	gint64 port_parsed = g_ascii_strtoll(argv[1], NULL, 10);
-	if (port_parsed != 5000)
-	{
-		printf("Usage: port should be 5000\n");
-		return(-1);
-	}
 
 	if  ((TcpListenPort=OpenTcpListenPort((short)port_parsed))==NULL)  // Open TCP Network port
 	{
