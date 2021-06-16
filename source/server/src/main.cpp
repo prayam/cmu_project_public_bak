@@ -194,9 +194,9 @@ gint main(gint argc, gchar *argv[])
 	socklen_t          clilen;
 	gboolean               UseCamera=true;
 
-	if (argc <2)
+	if (argc != 2)
 	{
-		fprintf(stderr,"usage %s [port] [filename]\n", argv[0]);
+		fprintf(stderr,"usage %s [port]\n", argv[0]);
 		exit(0);
 	}
 
