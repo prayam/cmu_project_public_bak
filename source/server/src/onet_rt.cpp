@@ -33,15 +33,15 @@ void Onet_engine::init(gint row, gint col) {
 
 Onet::Onet(const Onet_engine &onet_engine) : BatchSize(1),
 	INPUT_C(3),
-	Engine(onet_engine.context->getEngine()) {
+	Engine(onet_engine.context->getEngine()),
+	INPUT_H(48),
+	INPUT_W(48) {
 
 		Othreshold      = 0.8;
 		this->score_    = new pBox;
 		this->location_ = new pBox;
 		this->rgb       = new pBox;
 		this->points_   = new pBox;
-		INPUT_W = 48;
-		INPUT_H = 48;
 		//calculate output shape
 		this->score_->width         = 1;
 		this->score_->height        = 1;
@@ -90,7 +90,7 @@ Onet::~Onet()  {
 	CHECK(cudaFree(buffers[outputPoints]));
 }
 
-void Onet::run(cv::Mat &image,  const Onet_engine &onet_engine) {
+void Onet::run(const cv::Mat &image,  const Onet_engine &onet_engine) {
 
 
 	//DMA the input to the GPU ,execute the batch asynchronously and DMA it back;

@@ -16,15 +16,17 @@ const gchar* L2NORM_HELPER_PLUGIN_NAME{"L2Norm_Helper_TRT"};
 PluginFieldCollection L2NormHelperPluginCreator::mFC{};
 vector<PluginField> L2NormHelperPluginCreator::mPluginAttributes;
 
-L2NormHelper::L2NormHelper(gint op_type, float eps): op_type(op_type), eps(eps) {}
+L2NormHelper::L2NormHelper(gint op_type, float eps):
+  C(0), H(0), W(0), op_type(op_type), eps(eps), mPluginNamespace("") {}
 
 L2NormHelper::L2NormHelper(gint op_type, float eps, gint C, gint H, gint W):
-  C(C), H(H), W(W), op_type(op_type), eps(eps) {}
+  C(C), H(H), W(W), op_type(op_type), eps(eps), mPluginNamespace("") {}
 
-L2NormHelper::L2NormHelper(const void* buffer, gsize length)
+L2NormHelper::L2NormHelper(const void* buffer, gsize length):
+  mPluginNamespace("")
 {
     const gchar *d = reinterpret_cast<const gchar*>(buffer), *a = d;
-    op_type  = read<gint>(d);
+    op_type = read<gint>(d);
     eps = read<float>(d);
     C = read<gint>(d);
     H = read<gint>(d);
@@ -143,7 +145,9 @@ IPluginV2* L2NormHelper::clone() const
 }
 
 // PluginCreator
-L2NormHelperPluginCreator::L2NormHelperPluginCreator()
+L2NormHelperPluginCreator::L2NormHelperPluginCreator() :
+	mOpType(0),
+	mEps(0.0f)
 {
     mPluginAttributes.emplace_back(PluginField("op_type", nullptr, PluginFieldType::kINT32, 1));
     mPluginAttributes.emplace_back(PluginField("eps", nullptr, PluginFieldType::kFLOAT32, 1));

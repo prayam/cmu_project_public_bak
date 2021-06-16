@@ -34,11 +34,10 @@ static gboolean handle_port_secure(gpointer data) {
 	gssize ret;
 	static CLIENT_STATE prev_state = CLIENT_STATE_SECURE_RUN;
 	gint skip_picture_count = 0;
-	gint fd = 0;
-	gboolean recv_meta = FALSE, recv_photo = FALSE;
 	LOG_INFO("start");
 
 	while (app->connected_server) {
+		gboolean recv_meta = FALSE, recv_photo = FALSE;
 		CLIENT_STATE current_state = app->get_current_app_state();
 		if (prev_state != current_state) {
 			// if mode is changed between *secure* and *non-secure*,
@@ -62,6 +61,7 @@ recv:
 		recv_photo = FALSE;
 
 		if (app->port_recv_photo != NULL) {
+			gint fd = 0;
 			if (app->port_recv_photo->isSsl) {
 				fd = SSL_get_fd(app->port_recv_photo->ssl);
 			}
@@ -315,7 +315,6 @@ gboolean App::connect_server ()
 
 	gboolean ret = FALSE;
 	guint8 res = 255;
-	gssize recv_ret = 0;
 	const gchar *ca;
 	const gchar *crt;
 	const gchar *key;
@@ -366,6 +365,7 @@ gboolean App::connect_server ()
 	while(5.5f >= g_test_timer_elapsed ()) {
 		waitKey(300);
 		if (readysocket(SSL_get_fd(this->port_control->ssl))) {
+			gssize recv_ret = 0;
 			recv_ret = TcpRecvRes(this->port_control, &res);
 
 			if (recv_ret == TCP_RECV_TIMEOUT) {
@@ -561,10 +561,10 @@ void App::on_button_login()
 
 void App::on_button_logout()
 {
-	gssize recv_ret = 0;
 	guint8 res = 255;
 
 	if (this->port_control != NULL) {
+		gssize recv_ret = 0;
 		TcpSendLogoutReq(this->port_control);
 		recv_ret = TcpRecvRes(this->port_control, &res);
 
@@ -606,10 +606,10 @@ void App::on_button_logout()
 
 void App::on_checkbox_secure_toggled()
 {
-	gssize recv_ret = 0;
 	guint8 res = 255;
 
 	if (this->connected_server) {
+		gssize recv_ret = 0;
 		if (m_CheckButton_Secure.get_active()) {
 			// send secure mode
 			TcpSendSecureModeReq(this->port_control);
@@ -645,10 +645,10 @@ void App::on_checkbox_secure_toggled()
 
 void App::on_checkbox_test_toggled()
 {
-	gssize recv_ret = 0;
 	guint8 res = 255;
 
 	if (this->connected_server) {
+		gssize recv_ret = 0;
 		if (m_CheckButton_Test.get_active()) {
 			// send test mode
 			TcpSendTestRunModeReq(this->port_control);
@@ -678,10 +678,10 @@ void App::on_checkbox_test_toggled()
 
 void App::on_button_pause_resume()
 {
-	gssize recv_ret = 0;
 	guint8 res = 255;
 
 	if (this->connected_server) {
+		gssize recv_ret = 0;
 		if (this->learn_mode_state == LEARN_NONE) {
 			// paused
 			this->learn_mode_state = LEARN_REQUESTED;
@@ -740,12 +740,12 @@ void App::on_button_pause_resume()
 
 void App::on_button_learn_save()
 {
-	gssize recv_ret = 0;
 	guint8 res = 255;
 
 	if (this->connected_server) {
 		if (check_valid_input("^[a-zA-Z0-9 ,._'`-]+$", m_Entry_Name.get_text().c_str()) &&
 			0 != g_ascii_strncasecmp(m_Entry_Name.get_text().c_str(), "admin", sizeof("admin"))) {
+			gssize recv_ret = 0;
 			TcpSendSaveReq(this->port_control, m_Entry_Name.get_text().c_str());
 			recv_ret = TcpRecvRes(this->port_control, &res);
 

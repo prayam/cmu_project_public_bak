@@ -52,7 +52,7 @@ void Pnet_engine::init(gint row, gint col) {
 			protofile.close();
 		}
 	}
-	catch(fstream::failure e) {
+	catch(fstream::failure &e) {
 		std::cerr << "Exception opening/writing/closing file\n";
 	}
 	IHostMemory *gieModelStream{nullptr};
@@ -64,14 +64,12 @@ void Pnet_engine::init(gint row, gint col) {
 
 
 Pnet::Pnet(gint row, gint col, const Pnet_engine &pnet_engine) : BatchSize(1),
-	INPUT_C(3), Engine(pnet_engine.context->getEngine()) {
+	INPUT_C(3), Engine(pnet_engine.context->getEngine()), INPUT_H(row), INPUT_W(col) {
 		Pthreshold = 0.6;
 		nms_threshold = 0.5;
 		this->score_ = new pBox;
 		this->location_ = new pBox;
 		this->rgb = new pBox;
-		INPUT_W = col;
-		INPUT_H = row;
 		//calculate output shape
 		this->score_->width = gint(ceil((INPUT_W - 2) / 2.) - 4);
 		this->score_->height = gint(ceil((INPUT_H - 2) / 2.) - 4);
@@ -111,7 +109,7 @@ Pnet::~Pnet() {
 	CHECK(cudaFree(buffers[outputLocation]));
 }
 
-void Pnet::run(cv::Mat &image, float scale, const Pnet_engine &pnet_engine) {
+void Pnet::run(const cv::Mat &image, float scale, const Pnet_engine &pnet_engine) {
 
 
 	//DMA the input to the GPU ,execute the batch asynchronously and DMA it back;

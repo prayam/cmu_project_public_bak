@@ -13,7 +13,8 @@ baseEngine::baseEngine(const gchar * prototxt,const gchar* model,const  gchar* i
     INPUT_BLOB_NAME(input_name),
     OUTPUT_PROB_NAME(prob_name),
     OUTPUT_LOCATION_NAME(location_name),
-    OUTPUT_POINT_NAME(point_name)
+    OUTPUT_POINT_NAME(point_name),
+    context(nullptr)
 {
 };
 
@@ -114,7 +115,7 @@ void baseEngine::caffeToGIEModel(const std::string &deployFile,                /
                 planFile.close();
             }
         }
-        catch(ofstream::failure e) {
+        catch(ofstream::failure &e) {
             std::cerr << "Exception opening/writing/closing file\n";
         }
 

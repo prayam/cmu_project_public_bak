@@ -33,7 +33,7 @@ TTcpListenPort *OpenTcpListenPort(short localport)
 	iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
 	if (iResult != 0)
 	{
-		TcpListenPort;
+		(void) TcpListenPort;
 		printf("WSAStartup failed: %d\n", iResult);
 		return(NULL);
 	}
@@ -114,10 +114,10 @@ void CloseTcpListenPort(TTcpListenPort **TcpListenPort)
 static void ShowCerts(SSL* ssl)
 {
 	X509 *cert;
-	gchar *line;
 	cert = SSL_get_peer_certificate(ssl); /* Get certificates (if available) */
 	if ( cert != NULL )
 	{
+		gchar *line;
 		printf("Server certificates:\n");
 		line = X509_NAME_oneline(X509_get_subject_name(cert), 0, 0);
 		printf("Subject: %s\n", line);
@@ -618,9 +618,7 @@ TTcpConnectedPort *OpenTcpConnection(const gchar *remotehostname, const gchar * 
 			goto error;
 		}
 
-		if (result != NULL) {
-			freeaddrinfo(result);
-		}
+		freeaddrinfo(result);
 
 		LOG_INFO("success TCP connection");
 	}

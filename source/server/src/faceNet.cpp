@@ -6,24 +6,25 @@
 gint FaceNetClassifier::m_classCount = 0;
 
 FaceNetClassifier::FaceNetClassifier
-(Logger gLogger, DataType dtype, const string uffFile, const string engineFile, gint batchSize, gboolean serializeEngine,
- float knownPersonThreshold, gint maxFacesPerScene, gint frameWidth, gint frameHeight) {
-
-	m_INPUT_C = static_cast<const gint>(3);
-	m_INPUT_H = static_cast<const gint>(160);
-	m_INPUT_W = static_cast<const gint>(160);
-	m_frameWidth = static_cast<const gint>(frameWidth);
-	m_frameHeight = static_cast<const gint>(frameHeight);
-	m_gLogger = gLogger;
-	m_dtype = dtype;
-	m_uffFile = static_cast<const string>(uffFile);
-	m_engineFile = static_cast<const string>(engineFile);
-	m_batchSize = batchSize;
-	m_serializeEngine = serializeEngine;
-	m_maxFacesPerScene = maxFacesPerScene;
+(Logger gLogger, DataType dtype, const string& uffFile, const string& engineFile, gint batchSize, gboolean serializeEngine,
+ float knownPersonThreshold, gint maxFacesPerScene, gint frameWidth, gint frameHeight):
+	m_INPUT_C(static_cast<const gint>(3)),
+	m_INPUT_H(static_cast<const gint>(160)),
+	m_INPUT_W(static_cast<const gint>(160)),
+	m_frameWidth(static_cast<const gint>(frameWidth)),
+	m_frameHeight(static_cast<const gint>(frameHeight)),
+	m_gLogger(gLogger),
+	m_dtype(dtype),
+	m_uffFile(static_cast<const string>(uffFile)),
+	m_engineFile(static_cast<const string>(engineFile)),
+	m_batchSize(batchSize),
+	m_serializeEngine(serializeEngine),
+	m_maxFacesPerScene(maxFacesPerScene),
+	m_knownPersonThresh(knownPersonThreshold)
+{
 	m_croppedFaces.reserve(maxFacesPerScene);
 	m_embeddings.reserve(128);
-	m_knownPersonThresh = knownPersonThreshold;
+	m_output[0] = 0.0f;
 
 	// load engine from .engine file or create new engine
 	this->createOrLoadEngine();
@@ -126,7 +127,7 @@ void FaceNetClassifier::createOrLoadEngine() {
 
 				}
 			}
-			catch(ofstream::failure e) {
+			catch(ofstream::failure &e) {
 				std::cerr << "Exception opening/writing/closing file\n";
 			}
 		}
@@ -141,7 +142,7 @@ void FaceNetClassifier::createOrLoadEngine() {
 
 
 void FaceNetClassifier::getCroppedFacesAndAlign(cv::Mat frame, std::vector<struct Bbox> outputBbox) {
-	for(vector<struct Bbox>::iterator it=outputBbox.begin(); it!=outputBbox.end();it++){
+	for(vector<struct Bbox>::iterator it=outputBbox.begin(); it!=outputBbox.end();++it){
 		if((*it).exist){
 			cv::Rect facePos(cv::Point((*it).y1, (*it).x1), cv::Point((*it).y2, (*it).x2));
 			cv::Mat tempCrop = frame(facePos);
@@ -214,8 +215,8 @@ void FaceNetClassifier::doInference(float* inputData, float* output) {
 }
 
 
-void FaceNetClassifier::forwardAddFace(cv::Mat image, std::vector<struct Bbox> outputBbox,
-		const string className) {
+void FaceNetClassifier::forwardAddFace(cv::Mat image, const std::vector<struct Bbox>& outputBbox,
+		const string& className) {
 
 	//cv::resize(image, image, cv::Size(1280, 720), 0, 0, cv::INTER_CUBIC);
 	getCroppedFacesAndAlign(image, outputBbox);
@@ -232,7 +233,7 @@ void FaceNetClassifier::forwardAddFace(cv::Mat image, std::vector<struct Bbox> o
 	m_croppedFaces.clear();
 }
 
-void FaceNetClassifier::forward(cv::Mat frame, std::vector<struct Bbox> outputBbox) {
+void FaceNetClassifier::forward(cv::Mat frame, const std::vector<struct Bbox>& outputBbox) {
 	getCroppedFacesAndAlign(frame, outputBbox); // ToDo align faces according to points
 	preprocessFaces();
 	for(gsize i = 0; i < m_croppedFaces.size(); i++) {
@@ -241,15 +242,15 @@ void FaceNetClassifier::forward(cv::Mat frame, std::vector<struct Bbox> outputBb
 	}
 }
 
-void FaceNetClassifier::featureMatching(cv::Mat &image, std::vector<struct APP_meta> &meta) {
+void FaceNetClassifier::featureMatching(const cv::Mat &image, std::vector<struct APP_meta> &meta) {
 	(void) image;
 
 	for(gsize i = 0; i < (m_embeddings.size()/128); i++) {
 		double minDistance = 10.* m_knownPersonThresh;
-		float currDistance = 0.;
 		gsize winner = 0;
 		gboolean hasWinner = false;
 		for (gsize j = 0; j < m_knownFaces.size(); j++) {
+			float currDistance = 0.;
 			std::vector<float> currEmbedding(128);
 			std::copy_n(m_embeddings.begin()+(i*128), 128, currEmbedding.begin());
 			currDistance = vectors_distance(currEmbedding, m_knownFaces[j].embeddedFace);
@@ -331,7 +332,7 @@ void save_enc_cvimage(cv::Mat &image, std::string name)
 		LOG_WARNING("Encrypting and saving jpg image failed\n");
 }
 
-void FaceNetClassifier::addNewFace(cv::Mat &image, std::vector<struct Bbox> outputBbox) {
+void FaceNetClassifier::addNewFace(cv::Mat &image, const std::vector<struct Bbox>& outputBbox) {
 	std::cout << "Adding new person...\nPlease make sure there is only one face in the current frame.\n"
 		<< "What's your name? ";
 	string newName;
@@ -341,7 +342,7 @@ void FaceNetClassifier::addNewFace(cv::Mat &image, std::vector<struct Bbox> outp
 	save_enc_cvimage(image, newName);
 }
 
-void FaceNetClassifier::addNewFace_name(cv::Mat &image, std::vector<struct Bbox> outputBbox, string newName) {
+void FaceNetClassifier::addNewFace_name(cv::Mat &image, const std::vector<struct Bbox>& outputBbox, const string& newName) {
 	forwardAddFace(image, outputBbox, newName);
 	save_enc_cvimage(image, newName);
 }

@@ -15,16 +15,16 @@ class Rnet_engine : public baseEngine {
 	public:
 		Rnet_engine();
 		~Rnet_engine();
-		void init(gint row, gint col);
+		void init(gint row, gint col) override;
 		friend class Rnet;
 
 };
 
 class Rnet {
 	public:
-		Rnet(const Rnet_engine &rnet_engine);
+		explicit Rnet(const Rnet_engine &rnet_engine);
 		~Rnet();
-		void run(cv::Mat &image, const Rnet_engine &engine);
+		void run(const cv::Mat &image, const Rnet_engine &engine);
 		mydataFmt Rthreshold;
 		cudaStream_t stream;
 		struct pBox *location_;

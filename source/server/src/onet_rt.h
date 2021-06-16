@@ -14,16 +14,16 @@ class Onet_engine : public baseEngine {
 	public:
 		Onet_engine();
 		~Onet_engine();
-		void init(gint row, gint col);
+		void init(gint row, gint col) override;
 		friend class Onet;
 
 };
 
 class Onet {
 	public:
-		Onet(const Onet_engine &onet_engine);
+		explicit Onet(const Onet_engine &onet_engine);
 		~Onet();
-		void run(cv::Mat &image, const Onet_engine &engine);
+		void run(const cv::Mat &image, const Onet_engine &engine);
 		mydataFmt Othreshold;
 		cudaStream_t stream;
 		struct pBox *location_;

@@ -33,7 +33,7 @@ struct CroppedFace {
 class FaceNetClassifier
 {
 	public:
-		FaceNetClassifier(Logger gLogger, DataType dtype, const string uffFile, const string engineFile, gint batchSize,
+		FaceNetClassifier(Logger gLogger, DataType dtype, const string& uffFile, const string& engineFile, gint batchSize,
 				gboolean serializeEngine, float knownPersonThreshold, gint maxFacesPerScene, gint frameWidth, gint frameHeight);
 		~FaceNetClassifier();
 
@@ -41,11 +41,11 @@ class FaceNetClassifier
 		void getCroppedFacesAndAlign(cv::Mat frame, std::vector<struct Bbox> outputBbox);
 		void preprocessFaces();
 		void doInference(float* inputData, float* output);
-		void forwardAddFace(cv::Mat image, std::vector<struct Bbox> outputBbox, const string className);
-		void forward(cv::Mat image, std::vector<struct Bbox> outputBbox);
-		void featureMatching(cv::Mat &image, std::vector<struct APP_meta> &meta);
-		void addNewFace(cv::Mat &image, std::vector<struct Bbox> outputBbox);
-		void addNewFace_name(cv::Mat &image, std::vector<struct Bbox> outputBbox, string name);
+		void forwardAddFace(cv::Mat image, const std::vector<struct Bbox>& outputBbox, const string& className);
+		void forward(cv::Mat image, const std::vector<struct Bbox>& outputBbox);
+		void featureMatching(const cv::Mat &image, std::vector<struct APP_meta> &meta);
+		void addNewFace(cv::Mat &image, const std::vector<struct Bbox>& outputBbox);
+		void addNewFace_name(cv::Mat &image, const std::vector<struct Bbox>& outputBbox, const string& name);
 		void resetVariables();
 
 	private:

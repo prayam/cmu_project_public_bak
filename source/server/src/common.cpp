@@ -47,8 +47,8 @@ inline int64_t volume(const nvinfer1::Dims& d)
 void getFilePaths(std::string imagesPath, std::vector<struct Paths>& paths) {
 	std::cout << "Parsing Directory: " << imagesPath << std::endl;
 	DIR *dir;
-	struct dirent *entry;
 	if ((dir = opendir (imagesPath.c_str())) != NULL) {
+		struct dirent *entry;
 		while ((entry = readdir (dir)) != NULL) {
 			std::string readmeCheck(entry->d_name);
 			if (entry->d_type != DT_DIR && readmeCheck != "README.md") {

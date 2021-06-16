@@ -208,8 +208,8 @@ gint main(gint argc, gchar *argv[])
 	if (!initLibNvInferPlugins(&gLogger, "")) { return 1; }
 
 	// USER DEFINED VALUES
-	const string uffFile="../facenetModels/facenet.uff";
-	const string engineFile="../facenetModels/facenet.engine";
+	const string uffFile="./asset/facenetModels/facenet.uff";
+	const string engineFile="./asset/facenetModels/facenet.engine";
 	DataType dtype = DataType::kHALF;
 	//DataType dtype = DataType::kFLOAT;
 	gboolean serializeEngine = true;
@@ -249,7 +249,7 @@ gint main(gint argc, gchar *argv[])
 	// get embeddings of known faces
 	std::vector<struct Paths> paths;
 	cv::Mat image;
-	getFilePaths("../imgs", paths);
+	getFilePaths("./asset/imgs", paths);
 	for(gsize i=0; i < paths.size(); i++) {
 		std::string rawName;
 		gint ret = loadInputImage(paths[i].absPath, image, videoFrameWidth, videoFrameHeight, rawName);
@@ -514,7 +514,6 @@ exit_req:
 		secure_mode = MODE_SECURE;
 		//run_mode = MODE_RUN; //unused vairable
 		UseCamera=true;
-		videoStreamer = videoStreamer_c;
 
 		auto globalTimeEnd = chrono::steady_clock::now();
 
@@ -528,7 +527,6 @@ exit_req:
 	}
 	videoStreamer_c->release();
 	videoStreamer_v->release();
-	videoStreamer = NULL;
 	log_disable();
 	return 0;
 }

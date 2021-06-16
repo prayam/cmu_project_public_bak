@@ -31,13 +31,13 @@ void nms(vector<struct Bbox> &boundingBox_, vector<struct orderScore> &bboxScore
 	//sort the score
 	sort(bboxScore_.begin(), bboxScore_.end(), cmpScore);
 
-	gint order = 0;
 	float IOU = 0;
 	float maxX = 0;
 	float maxY = 0;
 	float minX = 0;
 	float minY = 0;
 	while(bboxScore_.size()>0){
+		gint order = 0;
 		order = bboxScore_.back().oriOrder;
 		bboxScore_.pop_back();
 		if(order<0)continue;
@@ -63,7 +63,7 @@ void nms(vector<struct Bbox> &boundingBox_, vector<struct orderScore> &bboxScore
 				}
 				if(IOU>overlap_threshold){
 					boundingBox_.at(num).exist=false;
-					for(vector<orderScore>::iterator it=bboxScore_.begin(); it!=bboxScore_.end();it++){
+					for(vector<orderScore>::iterator it=bboxScore_.begin(); it!=bboxScore_.end();++it){
 						if((*it).oriOrder >= 0 && (guint)((*it).oriOrder) == num) {
 							(*it).oriOrder = -1;
 							break;
@@ -81,11 +81,11 @@ void refineAndSquareBbox(vector<struct Bbox> &vecBbox, const gint &height, const
 		cout<<"Bbox is empty!!"<<endl;
 		return;
 	}
-	float bbw=0, bbh=0, maxSide=0;
-	float h = 0, w = 0;
-	float x1=0, y1=0, x2=0, y2=0;
-	for(vector<struct Bbox>::iterator it=vecBbox.begin(); it!=vecBbox.end();it++){
+	for(vector<struct Bbox>::iterator it=vecBbox.begin(); it!=vecBbox.end();++it){
 		if((*it).exist){
+			float bbw=0, bbh=0;
+			float h = 0, w = 0;
+			float x1=0, y1=0, x2=0, y2=0;
 			bbh = (*it).x2 - (*it).x1 + 1;
 			bbw = (*it).y2 - (*it).y1 + 1;
 			x1 = (*it).x1 + (*it).regreCoord[1]*bbh;
@@ -100,6 +100,7 @@ void refineAndSquareBbox(vector<struct Bbox> &vecBbox, const gint &height, const
 
 			if(square)
 			{
+				float maxSide=0;
 				maxSide = (h>w)?h:w;
 				x1 = x1 + h*0.5 - maxSide*0.5;
 				y1 = y1 + w*0.5 - maxSide*0.5;

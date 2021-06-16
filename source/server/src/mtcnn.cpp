@@ -22,7 +22,7 @@ mtcnn::mtcnn(gint row, gint col){
 	}
 	float minside = row<col ? row : col;
 	gint count = 0;
-	for (vector<float>::iterator it = scales_.begin(); it != scales_.end(); it++){
+	for (vector<float>::iterator it = scales_.begin(); it != scales_.end(); ++it){
 		if (*it > 1){
 			cout << "the minsize is too small" << endl;
 			while (1);
@@ -94,7 +94,7 @@ vector<struct Bbox> mtcnn::findFace(cv::Mat &image){
 #endif
 		nms((*simpleFace_[i]).boundingBox_, (*simpleFace_[i]).bboxScore_, (*simpleFace_[i]).nms_threshold);
 
-		for(vector<struct Bbox>::iterator it=(*simpleFace_[i]).boundingBox_.begin(); it!= (*simpleFace_[i]).boundingBox_.end();it++){
+		for(vector<struct Bbox>::iterator it=(*simpleFace_[i]).boundingBox_.begin(); it!= (*simpleFace_[i]).boundingBox_.end();++it){
 			if((*it).exist){
 				firstBbox_.push_back(*it);
 				order.score = (*it).score;
@@ -114,11 +114,11 @@ vector<struct Bbox> mtcnn::findFace(cv::Mat &image){
 #ifdef LOG
 	first_time = clock() - first_time;
 	cout<<"first time is  "<<1000*(double)first_time/CLOCKS_PER_SEC<<endl;
+	clock_t second_time = clock();
 #endif
 	//second stage
 	count = 0;
-	clock_t second_time = clock();
-	for(vector<struct Bbox>::iterator it=firstBbox_.begin(); it!=firstBbox_.end();it++){
+	for(vector<struct Bbox>::iterator it=firstBbox_.begin(); it!=firstBbox_.end();++it){
 		if((*it).exist){
 			cv::Rect temp((*it).y1, (*it).x1, (*it).y2-(*it).y1, (*it).x2-(*it).x1);
 			cv::Mat secImage;
@@ -142,8 +142,8 @@ vector<struct Bbox> mtcnn::findFace(cv::Mat &image){
 	if(count<1)return emptyBbox;
 	nms(secondBbox_, secondBboxScore_, nms_threshold[1]);
 	refineAndSquareBbox(secondBbox_, image.rows, image.cols,true);
-	second_time = clock() - second_time;
 #ifdef LOG
+	second_time = clock() - second_time;
 	cout<<"second time is  "<<1000*(double)second_time/CLOCKS_PER_SEC<<endl;
 #endif
 	//third stage
@@ -151,7 +151,7 @@ vector<struct Bbox> mtcnn::findFace(cv::Mat &image){
 #ifdef LOG
 	clock_t third_time = clock();
 #endif
-	for(vector<struct Bbox>::iterator it=secondBbox_.begin(); it!=secondBbox_.end();it++){
+	for(vector<struct Bbox>::iterator it=secondBbox_.begin(); it!=secondBbox_.end();++it){
 		if((*it).exist){
 			cv::Rect temp((*it).y1, (*it).x1, (*it).y2-(*it).y1, (*it).x2-(*it).x1);
 			cv::Mat thirdImage;
@@ -190,7 +190,7 @@ vector<struct Bbox> mtcnn::findFace(cv::Mat &image){
 #endif
 
 	// This draws the rectangle and points on the input frame
-	// for(vector<struct Bbox>::iterator it=thirdBbox_.begin(); it!=thirdBbox_.end();it++){
+	// for(vector<struct Bbox>::iterator it=thirdBbox_.begin(); it!=thirdBbox_.end();++it){
 	//     if((*it).exist){
 	//         rectangle(image, cv::Point((*it).y1, (*it).x1), cv::Point((*it).y2, (*it).x2), cv::Scalar(0,0,255), 2,8,0);
 	//         for(gint num=0;num<5;num++)

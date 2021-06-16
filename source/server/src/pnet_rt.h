@@ -19,7 +19,7 @@ class Pnet_engine:public baseEngine
 	public:
 		Pnet_engine();
 		~Pnet_engine();
-		void init(gint row,gint col);
+		void init(gint row,gint col) override;
 		friend class Pnet;
 
 };
@@ -31,7 +31,7 @@ class Pnet
 	public:
 		Pnet(gint row,gint col,const Pnet_engine& pnet_engine);
 		~Pnet();
-		void run(cv::Mat &image, float scale,const Pnet_engine& engine);
+		void run(const cv::Mat &image, float scale,const Pnet_engine& engine);
 		float nms_threshold;
 		mydataFmt Pthreshold;
 		cudaStream_t stream;
