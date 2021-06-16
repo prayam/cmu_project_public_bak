@@ -323,13 +323,20 @@ void save_enc_cvimage(cv::Mat &image, std::string name)
 	buf.push_back('\0');
 	buf.insert(buf.end(), pic_buf.begin(), pic_buf.end());
 
-	char path[60] = "./asset/imgs/";
-	char fn[34];
+	gchar *path = NULL;
+	gchar *fn = (gchar*)g_malloc(34);
+	if (fn == NULL) {
+		LOG_WARNING("g_malloc failed");
+		return;
+	}
 	getFileName_leng32(fn);
-	g_strlcat(path, fn, 60);
+	path = g_strdup_printf ("./asset/imgs/%s", fn);
 	gint ret = enc_ssl_mf(buf.data(), buf.size(), path);
 	if (ret)
 		LOG_WARNING("Encrypting and saving jpg image failed\n");
+
+	g_free(fn);
+	g_free(path);
 }
 
 void FaceNetClassifier::addNewFace(cv::Mat &image, const std::vector<struct Bbox>& outputBbox) {

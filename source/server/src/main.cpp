@@ -261,15 +261,14 @@ gint main(gint argc, gchar *argv[])
 	}
 	outputBbox.clear();
 
-	gint port = atoi(argv[1]);
-	if (port != 5000)
+	gint64 port_parsed = g_ascii_strtoll(argv[1], NULL, 10);
+	if (port_parsed != 5000)
 	{
 		printf("Usage: port should be 5000\n");
 		return(-1);
 	}
 
-
-	if  ((TcpListenPort=OpenTcpListenPort(port))==NULL)  // Open TCP Network port
+	if  ((TcpListenPort=OpenTcpListenPort((short)port_parsed))==NULL)  // Open TCP Network port
 	{
 		printf("OpenTcpListenPortFailed\n");
 		return(-1);
