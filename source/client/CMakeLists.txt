@@ -11,7 +11,8 @@ project (client)
 include(FindPkgConfig)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -s")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIE -fstack-protector")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -s -z noexecstack -z relro -z now")
 set(CMAKE_SKIP_RPATH TRUE)
 set(CMAKE_INSTALL_RPATH "")
 
