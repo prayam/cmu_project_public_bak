@@ -178,6 +178,28 @@ fail:
 	return NULL;
 }
 
+static const gchar *get_ssl_version_str(const SSL *s)
+{
+	if (s != NULL) {
+		gint ver = -1;
+		ver = SSL_version(s);
+		switch (ver) {
+			case TLS1_3_VERSION:
+				return "TLS1_3_VERSION";
+			case TLS1_2_VERSION:
+				return "TLS1_2_VERSION";
+			case TLS1_1_VERSION:
+				return "TLS1_1_VERSION";
+			case TLS1_VERSION:
+				return "TLS1_VERSION";
+			case SSL3_VERSION:
+				return "SSL3_VERSION";
+			default:
+				return "unknown";
+		}
+	}
+	return "unknown";
+}
 
 //-----------------------------------------------------------------
 // AcceptTcpConnection -Accepts a TCP Connection request from a
@@ -294,8 +316,8 @@ TTcpConnectedPort *AcceptTcpConnection(TTcpListenPort *TcpListenPort,
 		}
 
 		/* Print success connection message on the server */
-		LOG_INFO("SSL handshake successful with %s:%d",
-				inet_ntoa(cli_addr->sin_addr), ntohs(cli_addr->sin_port));
+		LOG_INFO("SSL handshake successful with %s:%d, %s",
+				inet_ntoa(cli_addr->sin_addr), ntohs(cli_addr->sin_port), get_ssl_version_str(TcpConnectedPort->ssl));
 
 		TcpConnectedPort->isSsl = isSsl;
 	}
@@ -566,7 +588,7 @@ TTcpConnectedPort *OpenTcpConnection(const gchar *remotehostname, const gchar * 
 		}
 
 		/* Inform the user that we've successfully connected */
-		LOG_INFO("SSL handshake successful with %s", conn_str);
+		LOG_INFO("SSL handshake successful with %s. %s", conn_str, get_ssl_version_str(ssl));
 		TcpConnectedPort->isSsl = true;
 		TcpConnectedPort->ssl = ssl;
 		TcpConnectedPort->ctx = ctx;
