@@ -15,6 +15,7 @@
 #include "NetworkTCP.h"
 #include "Logger.h"
 #include "openssl_hostname_validation.h"
+#include "certcheck.h"
 
 #define TARGET_SERVER "face.recog.server.Jetson"
 
@@ -34,7 +35,7 @@ TTcpListenPort *OpenTcpListenPort(short localport)
 	if (iResult != 0)
 	{
 		(void) TcpListenPort;
-		printf("WSAStartup failed: %d\n", iResult);
+		LOG_INFO("WSAStartup failed: %d", iResult);
 		return(NULL);
 	}
 #endif
@@ -42,7 +43,7 @@ TTcpListenPort *OpenTcpListenPort(short localport)
 
 	if (TcpListenPort==NULL)
 	{
-		fprintf(stderr, "TUdpPort memory allocation failed\n");
+		LOG_WARNING("TUdpPort memory allocation failed");
 		return(NULL);
 	}
 	TcpListenPort->ListenFd=BAD_SOCKET_FD;
@@ -118,18 +119,18 @@ static void ShowCerts(SSL* ssl)
 	if ( cert != NULL )
 	{
 		gchar *line;
-		printf("Server certificates:\n");
+		LOG_INFO("Server certificates:");
 		line = X509_NAME_oneline(X509_get_subject_name(cert), 0, 0);
-		printf("Subject: %s\n", line);
+		LOG_INFO("Subject: %s", line);
 		free(line);
 		line = X509_NAME_oneline(X509_get_issuer_name(cert), 0, 0);
-		printf("Issuer: %s\n", line);
+		LOG_INFO("Issuer: %s", line);
 		free(line);
 		X509_free(cert);
 	}
 	else
 	{
-		printf("No certificates.\n");
+		LOG_INFO("No certificates.");
 	}
 }
 /* [END] by jh.ahn */
@@ -137,19 +138,19 @@ static void ShowCerts(SSL* ssl)
 static SSL_CTX *get_server_context(const gchar *ca_pem,
 		const gchar *cert_pem,
 		const gchar *key_pem) {
-	SSL_CTX *ctx;
-	guchar* pkey;
-	gsize pkey_size;
+	SSL_CTX *ctx = NULL;
+	guchar* pkey = NULL;
+	gsize pkey_size = 0;
 
 	/* Get a default context */
 	if (!(ctx = SSL_CTX_new(TLS_server_method()))) {
-		fprintf(stderr, "SSL_CTX_new failed\n");
+		LOG_WARNING("SSL_CTX_new failed");
 		return NULL;
 	}
 
 	/* Set the CA file location for the server */
 	if (SSL_CTX_load_verify_locations(ctx, ca_pem, NULL) != 1) {
-		fprintf(stderr, "Could not set the CA file location\n");
+		LOG_WARNING("Could not set the CA file location");
 		goto fail;
 	}
 
@@ -158,24 +159,25 @@ static SSL_CTX *get_server_context(const gchar *ca_pem,
 
 	/* Set the server's certificate signed by the CA */
 	if (SSL_CTX_use_certificate_file(ctx, cert_pem, SSL_FILETYPE_PEM) != 1) {
-		fprintf(stderr, "Could not set the server's certificate\n");
+		LOG_WARNING("Could not set the server's certificate");
 		goto fail;
 	}
 
 	/* Load the server's key from encrypted file */
 	if (dec_ssl_fm (key_pem, &pkey, &pkey_size)) {
-		fprintf(stderr, "Could not load the server's key from der file\n");
+		LOG_WARNING("Could not load the server's key from der file");
+		goto fail;
 	}
 
 	/* Set the server's key for the above certificate */
 	if (SSL_CTX_use_PrivateKey_ASN1(EVP_PKEY_EC , ctx, pkey, pkey_size) != 1) {
-		fprintf(stderr, "Could not set the server's key\n");
+		LOG_WARNING("Could not set the server's key");
 		goto fail;
 	}
 
 	/* We've loaded both certificate and the key, check if they match */
 	if (SSL_CTX_check_private_key(ctx) != 1) {
-		fprintf(stderr, "Server's certificate and the key don't match\n");
+		LOG_WARNING("Server's certificate and the key don't match");
 		goto fail;
 	}
 
@@ -191,9 +193,11 @@ static SSL_CTX *get_server_context(const gchar *ca_pem,
 	SSL_CTX_set_verify_depth(ctx, 1);
 
 	/* Done, return the context */
+	g_free(pkey);
 	return ctx;
 
 fail:
+	g_free(pkey);
 	SSL_CTX_free(ctx);
 	return NULL;
 }
@@ -215,7 +219,7 @@ TTcpConnectedPort *AcceptTcpConnection(TTcpListenPort *TcpListenPort,
 
 	if (TcpConnectedPort==NULL)
 	{
-		fprintf(stderr, "TUdpPort memory allocation failed\n");
+		LOG_WARNING("TUdpPort memory allocation failed");
 		return(NULL);
 	}
 
@@ -230,7 +234,7 @@ TTcpConnectedPort *AcceptTcpConnection(TTcpListenPort *TcpListenPort,
 
 		/* Get a server context for our use */
 		if (!(TcpConnectedPort->ctx = get_server_context(ca_pem, cert_pem, key_pem))) {
-			fprintf(stderr, "get_server_context failed\n");
+			LOG_WARNING("get_server_context failed");
 			return(NULL);
 		}
 	}
@@ -279,7 +283,7 @@ TTcpConnectedPort *AcceptTcpConnection(TTcpListenPort *TcpListenPort,
 	if(isSsl) {
 		/* Get an SSL handle from the context */
 		if (!(TcpConnectedPort->ssl = SSL_new(TcpConnectedPort->ctx))) {
-			fprintf(stderr, "Could not get an SSL handle from the context\n");
+			LOG_WARNING("Could not get an SSL handle from the context");
 			goto ssl_exit;
 		}
 
@@ -288,7 +292,7 @@ TTcpConnectedPort *AcceptTcpConnection(TTcpListenPort *TcpListenPort,
 
 		/* Now perform handshake */
 		if ((rc = SSL_accept(TcpConnectedPort->ssl)) != 1) {
-			fprintf(stderr, "Could not perform SSL handshake\n");
+			LOG_WARNING("Could not perform SSL handshake");
 			if (rc != 0) {
 				SSL_shutdown(TcpConnectedPort->ssl);
 			}
@@ -298,7 +302,7 @@ TTcpConnectedPort *AcceptTcpConnection(TTcpListenPort *TcpListenPort,
 
 		ShowCerts(TcpConnectedPort->ssl);
 		/* Print success connection message on the server */
-		printf("SSL handshake successful with %s:%d\n",
+		LOG_INFO("SSL handshake successful with %s:%d",
 				inet_ntoa(cli_addr->sin_addr), ntohs(cli_addr->sin_port));
 
 		TcpConnectedPort->isSsl = isSsl;
@@ -319,43 +323,44 @@ ssl_exit:
 static SSL_CTX *get_client_context(const gchar *ca_pem,
 		const gchar *cert_pem,
 		const gchar *key_pem) {
-	SSL_CTX *ctx;
-	guchar* pkey;
-	gsize pkey_size;
+	SSL_CTX *ctx = NULL;
+	guchar* pkey = NULL;
+	gsize pkey_size = 0;
 
 	/* Create a generic context */
 	// if (!(ctx = SSL_CTX_new(SSLv23_client_method()))) {
 	if (!(ctx = SSL_CTX_new(TLS_client_method()))) {
-		fprintf(stderr, "Cannot create a client context\n");
+		LOG_WARNING("Cannot create a client context");
 		return NULL;
 	}
 
 	/* Load the client's CA file location */
 	if (SSL_CTX_load_verify_locations(ctx, ca_pem, NULL) != 1) {
-		fprintf(stderr, "Cannot load client's CA file\n");
+		LOG_WARNING("Cannot load client's CA file");
 		goto fail;
 	}
 
 	/* Load the client's certificate */
 	if (SSL_CTX_use_certificate_file(ctx, cert_pem, SSL_FILETYPE_PEM) != 1) {
-		fprintf(stderr, "Cannot load client's certificate file\n");
+		LOG_WARNING("Cannot load client's certificate file");
 		goto fail;
 	}
 
 	/* Load the client's key from encrypted file */
 	if (dec_ssl_fm (key_pem, &pkey, &pkey_size)) {
-		fprintf(stderr, "Could not load the server's key from der file\n");
+		LOG_WARNING("Could not load the server's key from der file");
+		goto fail;
 	}
 
 	/* Load the client's key */
 	if (SSL_CTX_use_PrivateKey_ASN1(EVP_PKEY_EC, ctx, pkey, pkey_size) != 1) {
-		fprintf(stderr, "Cannot load client's key file\n");
+		LOG_WARNING("Cannot load client's key file");
 		goto fail;
 	}
 
 	/* Verify that the client's certificate and the key match */
 	if (SSL_CTX_check_private_key(ctx) != 1) {
-		fprintf(stderr, "Client's certificate and key don't match\n");
+		LOG_WARNING("Client's certificate and key don't match");
 		goto fail;
 	}
 
@@ -369,9 +374,11 @@ static SSL_CTX *get_client_context(const gchar *ca_pem,
 	SSL_CTX_set_verify_depth(ctx, 1);
 
 	/* Done, return the context */
+	g_free(pkey);
 	return ctx;
 
 fail:
+	g_free(pkey);
 	SSL_CTX_free(ctx);
 	return NULL;
 }
@@ -402,7 +409,7 @@ TTcpConnectedPort *OpenTcpConnection(const gchar *remotehostname, const gchar * 
 	if (iResult != 0)
 	{
 		g_free(TcpConnectedPort);
-		printf("WSAStartup failed: %d\n", iResult);
+		LOG_INFO("WSAStartup failed: %d", iResult);
 		return(NULL);
 	}
 #endif

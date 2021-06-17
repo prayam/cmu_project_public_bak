@@ -196,7 +196,7 @@ gint main(gint argc, gchar *argv[])
 
 	if (argc != 2)
 	{
-		fprintf(stderr,"usage %s [port]\n", argv[0]);
+		LOG_WARNING("usage %s [port]", argv[0]);
 		exit(0);
 	}
 
@@ -205,7 +205,7 @@ gint main(gint argc, gchar *argv[])
 	gint64 port_parsed = g_ascii_strtoll(argv[1], NULL, 10);
 	if (port_parsed != 5000)
 	{
-		printf("Usage: port should be 5000\n");
+		LOG_WARNING("Usage: port should be 5000");
 		return(-1);
 	}
 
@@ -269,20 +269,20 @@ gint main(gint argc, gchar *argv[])
 
 	if  ((TcpListenPort=OpenTcpListenPort((short)port_parsed))==NULL)  // Open TCP Network port
 	{
-		printf("OpenTcpListenPortFailed\n");
+		LOG_WARNING("OpenTcpListenPortFailed");
 		return(-1);
 	}
 
 
 	clilen = sizeof(cli_addr);
 
-	printf("Listening for connections\n");
+	LOG_INFO("Listening for connections");
 
 	while (1) {
 		videoStreamer = UseCamera ? videoStreamer_c : videoStreamer_v;
 
 		if (check_server_cert()) {
-			printf("Cert error\n");
+			LOG_WARNING("Cert error");
 			return(-1);
 		}
 		/* 1. Establish control channel */
@@ -291,10 +291,10 @@ gint main(gint argc, gchar *argv[])
 						getFilepath_server_cert(),
 						getFilepath_server_key()))==NULL)
 		{
-			printf("AcceptTcpConnection Failed\n");
+			LOG_WARNING("AcceptTcpConnection Failed");
 			return(-1);
 		}
-		printf("Accepted control channel connection Request\n");
+		LOG_INFO("Accepted control channel connection Request");
 
 		gchar *userid = NULL;
 		gchar *userpw = NULL;
@@ -325,10 +325,10 @@ gint main(gint argc, gchar *argv[])
 						getFilepath_server_cert(),
 						getFilepath_server_key()))==NULL)
 		{
-			printf("AcceptTcpConnection Failed\n");
+			LOG_WARNING("AcceptTcpConnection Failed");
 			return(-1);
 		}
-		printf("Accepted secure data channel connection Request\n");
+		LOG_INFO("Accepted secure data channel connection Request\n");
 
 		/* 3. Establish non-secure channel */
 		if  ((TcpConnectedPort_nsdata=AcceptTcpConnection(TcpListenPort,&cli_addr,&clilen,
@@ -336,10 +336,10 @@ gint main(gint argc, gchar *argv[])
 						NULL,
 						NULL))==NULL)
 		{
-			printf("AcceptTcpConnection Failed\n");
+			LOG_WARNING("AcceptTcpConnection Failed");
 			return(-1);
 		}
-		printf("Accepted non-secure data channel connection Request\n");
+		LOG_INFO("Accepted non-secure data channel connection Request\n");
 
 		/* 4. Establish meta channel */
 		if  ((TcpConnectedPort_meta=AcceptTcpConnection(TcpListenPort,&cli_addr,&clilen,
@@ -347,10 +347,10 @@ gint main(gint argc, gchar *argv[])
 						getFilepath_server_cert(),
 						getFilepath_server_key()))==NULL)
 		{
-			printf("AcceptTcpConnection Failed\n");
+			LOG_WARNING("AcceptTcpConnection Failed");
 			return(-1);
 		}
-		printf("Accepted meta channel connection Request\n");
+		LOG_INFO("Accepted meta channel connection Request");
 
 		cv::cuda::GpuMat src_gpu, dst_gpu;
 		cv::Mat dst_img;

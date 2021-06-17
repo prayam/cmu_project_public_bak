@@ -359,7 +359,7 @@ gboolean App::connect_server ()
 
 	// send login info and check
 	TcpSendLoginData(this->port_control, m_Entry_Id.get_text().c_str(), m_Entry_Password.get_text().c_str());
-	show_dialog("Show your face on camera");
+	show_dialog("Show your face on camera within 5sec");
 
 	g_test_timer_start ();
 	while(5.5f >= g_test_timer_elapsed ()) {
