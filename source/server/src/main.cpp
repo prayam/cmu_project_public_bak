@@ -103,37 +103,38 @@ static gint FaceAuthencticate(gchar *userid, mtcnn &mtCNN, FaceNetClassifier &fa
 static gint __UserAthenticate(gchar *userid, gchar *userpw)
 {
 	gint ret = 0;
+	guchar* cred = NULL;
+	gsize cred_size = 0;
 
 	if (userid == NULL || userpw == NULL)
 		goto exit;
 
-	if (fileExists("./asset/credential")) {
-		std::ifstream file("./asset/credential", std::ios::binary);
-		if (file.good())
-		{
-			gchar buf_id[32];
-			gchar buf_pw[32];
-			gchar user_pw[MAX_ACCOUNT_PW + 2]; /* 2 is for salt */
-			guchar *user_hashed_id;
-			guchar *user_hashed_pw;
+	if (dec_ssl_fm("./asset/credential", &cred, &cred_size)) {
+		LOG_WARNING("Could not load credential file");
+		goto exit;
+	} else {
+		gchar buf_id[32];
+		gchar buf_pw[32];
+		gchar user_pw[MAX_ACCOUNT_PW + 2]; /* 2 is for salt */
+		guchar *user_hashed_id;
+		guchar *user_hashed_pw;
 
-			file.read(buf_id, 32);
-			file.read(buf_pw, 32);
-			file.close();
+		memcpy(buf_id, cred, 32);
+		memcpy(buf_pw, cred+32, 32);
 
-			g_strlcpy(user_pw, userpw, MAX_ACCOUNT_PW + 2);
-			g_strlcat(user_pw, "6^", MAX_ACCOUNT_PW + 2);
+		g_strlcpy(user_pw, userpw, MAX_ACCOUNT_PW + 2);
+		g_strlcat(user_pw, "6^", MAX_ACCOUNT_PW + 2);
 
-			make_sha256_m((guchar *)userid, strlen(userid), &user_hashed_id);
-			make_sha256_m((guchar *)user_pw, strlen(user_pw), &user_hashed_pw);
+		make_sha256_m((guchar *)userid, strlen(userid), &user_hashed_id);
+		make_sha256_m((guchar *)user_pw, strlen(user_pw), &user_hashed_pw);
 
-			if (memcmp(buf_id, user_hashed_id, 32) == 0 &&
-			    memcmp(buf_pw, user_hashed_pw, 32) == 0)
-				ret = 1;
+		if (memcmp(buf_id, user_hashed_id, 32) == 0 &&
+			memcmp(buf_pw, user_hashed_pw, 32) == 0)
+			ret = 1;
 
-			g_free(user_hashed_id);
-			g_free(user_hashed_pw);
-		}
+		g_free(cred);
+		g_free(user_hashed_id);
+		g_free(user_hashed_pw);
 	}
 
 exit:
