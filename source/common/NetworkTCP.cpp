@@ -16,7 +16,7 @@
 #include "Logger.h"
 #include "openssl_hostname_validation.h"
 
-#define TARGET_HOST "face.recog.server.Jetson"
+#define TARGET_SERVER "face.recog.server.Jetson"
 
 //-----------------------------------------------------------------
 // OpenTCPListenPort - Creates a Listen TCP port to accept
@@ -138,6 +138,8 @@ static SSL_CTX *get_server_context(const gchar *ca_pem,
 		const gchar *cert_pem,
 		const gchar *key_pem) {
 	SSL_CTX *ctx;
+	guchar* pkey;
+	gsize pkey_size;
 
 	/* Get a default context */
 	if (!(ctx = SSL_CTX_new(TLS_server_method()))) {
@@ -160,8 +162,13 @@ static SSL_CTX *get_server_context(const gchar *ca_pem,
 		goto fail;
 	}
 
+	/* Load the server's key from encrypted file */
+	if (dec_ssl_fm (key_pem, &pkey, &pkey_size)) {
+		fprintf(stderr, "Could not load the server's key from der file\n");
+	}
+
 	/* Set the server's key for the above certificate */
-	if (SSL_CTX_use_PrivateKey_file(ctx, key_pem, SSL_FILETYPE_PEM) != 1) {
+	if (SSL_CTX_use_PrivateKey_ASN1(EVP_PKEY_EC , ctx, pkey, pkey_size) != 1) {
 		fprintf(stderr, "Could not set the server's key\n");
 		goto fail;
 	}
@@ -313,6 +320,8 @@ static SSL_CTX *get_client_context(const gchar *ca_pem,
 		const gchar *cert_pem,
 		const gchar *key_pem) {
 	SSL_CTX *ctx;
+	guchar* pkey;
+	gsize pkey_size;
 
 	/* Create a generic context */
 	// if (!(ctx = SSL_CTX_new(SSLv23_client_method()))) {
@@ -333,8 +342,13 @@ static SSL_CTX *get_client_context(const gchar *ca_pem,
 		goto fail;
 	}
 
+	/* Load the client's key from encrypted file */
+	if (dec_ssl_fm (key_pem, &pkey, &pkey_size)) {
+		fprintf(stderr, "Could not load the server's key from der file\n");
+	}
+
 	/* Load the client's key */
-	if (SSL_CTX_use_PrivateKey_file(ctx, key_pem, SSL_FILETYPE_PEM) != 1) {
+	if (SSL_CTX_use_PrivateKey_ASN1(EVP_PKEY_EC, ctx, pkey, pkey_size) != 1) {
 		fprintf(stderr, "Cannot load client's key file\n");
 		goto fail;
 	}
@@ -543,7 +557,7 @@ TTcpConnectedPort *OpenTcpConnection(const gchar *remotehostname, const gchar * 
 		}
 
 		// Validate the hostname
-		if (validate_hostname(TARGET_HOST, server_cert) != MatchFound) {
+		if (validate_hostname(TARGET_SERVER, server_cert) != MatchFound) {
 			LOG_WARNING("Hostname validation failed");
 			goto error_verify_hostname;
 		}
