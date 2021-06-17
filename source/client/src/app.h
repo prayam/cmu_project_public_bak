@@ -37,6 +37,7 @@ public:
 	TTcpConnectedPort *port_secure;
 	TTcpConnectedPort *port_nonsecure;
 	TTcpConnectedPort *port_meta;
+	gchar *remote_ip;
 
 	void on_button_logout();
 	void show_dialog(const gchar* contents);

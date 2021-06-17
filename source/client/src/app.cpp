@@ -213,6 +213,8 @@ App::App()
 	  m_CheckButton_Secure("Secure Mode"),
 	  m_CheckButton_Test("Test Mode")
 {
+	gsize len = 0;
+
 	this->port_recv_photo = NULL;
 	this->port_control = NULL;
 	this->port_secure = NULL;
@@ -221,10 +223,38 @@ App::App()
 	this->handle_recv_data = 0;
 	this->connected_server = false;
 	this->learn_mode_state = LEARN_NONE;
+	this->remote_ip = NULL;
 
 	if (0 != check_client_cert()) {
 		LOG_WARNING("certificate error");
 		exit(-1);
+	}
+
+	if (!g_file_get_contents("./remote.config", &this->remote_ip, &len, NULL)) {
+		LOG_WARNING("cannot read remote.config file");
+		exit(-1);
+	}
+	else {
+		if (len < 7) {
+			LOG_WARNING("not enough contents length in remote.config file");
+			g_free(this->remote_ip);
+			exit(-1);
+		}
+
+		g_strstrip(this->remote_ip);
+
+		if (!g_hostname_is_ip_address(this->remote_ip)) {
+			gchar *escape_str;
+
+			escape_str = g_strescape(this->remote_ip, NULL);
+			LOG_WARNING("not valid ipaddr in remote.config file %s", escape_str);
+
+			g_free(this->remote_ip);
+			g_free(escape_str);
+			exit(-1);
+		}
+
+		LOG_INFO("remote ipaddr: %s", this->remote_ip);
 	}
 
 	set_title("Team6 Client App");
@@ -297,6 +327,7 @@ App::App()
 
 App::~App()
 {
+	g_free(this->remote_ip);
 	LOG_INFO("exit app");
 }
 
@@ -346,7 +377,7 @@ gboolean App::connect_server ()
 		goto exit;
 	}
 
-	if ((this->port_control = OpenTcpConnection("192.168.0.228", "5000", ca, crt, key)) == NULL) // Open TCP TLS port for control data
+	if ((this->port_control = OpenTcpConnection(this->remote_ip, "5000", ca, crt, key)) == NULL) // Open TCP TLS port for control data
 	{
 		LOG_WARNING("error open port_control");
 		show_dialog("Connection Fail");
@@ -384,7 +415,7 @@ gboolean App::connect_server ()
 		goto exit;
 	}
 
-	if ((this->port_secure = OpenTcpConnection("192.168.0.228", "5000", ca, crt, key)) == NULL)	// Open TCP TLS port for secure mode
+	if ((this->port_secure = OpenTcpConnection(this->remote_ip, "5000", ca, crt, key)) == NULL)	// Open TCP TLS port for secure mode
 	{
 		LOG_WARNING("error open port_secure");
 		disconnect_server();
@@ -392,7 +423,7 @@ gboolean App::connect_server ()
 		goto exit;
 	}
 
-	if ((this->port_nonsecure = OpenTcpConnection("192.168.0.228", "5000", NULL, NULL, NULL)) == NULL) // Open TCP TLS port for non_secure mode
+	if ((this->port_nonsecure = OpenTcpConnection(this->remote_ip, "5000", NULL, NULL, NULL)) == NULL) // Open TCP TLS port for non_secure mode
 	{
 		LOG_WARNING("error open port_nonsecure");
 		disconnect_server();
@@ -400,7 +431,7 @@ gboolean App::connect_server ()
 		goto exit;
 	}
 
-	if ((this->port_meta = OpenTcpConnection("192.168.0.228", "5000", ca, crt, key)) == NULL) // Open TCP TLS port for meta data
+	if ((this->port_meta = OpenTcpConnection(this->remote_ip, "5000", ca, crt, key)) == NULL) // Open TCP TLS port for meta data
 	{
 		LOG_WARNING("error open port_meta");
 		disconnect_server();

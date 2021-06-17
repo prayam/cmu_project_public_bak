@@ -69,3 +69,7 @@ target_link_libraries(client
 file(COPY "${CMAKE_SOURCE_DIR}/../common/keys/ca/ca.crt" "${CMAKE_SOURCE_DIR}/../common/keys/client/client.crt" "${CMAKE_SOURCE_DIR}/../common/keys/client/client.key"
     DESTINATION "keys"
 )
+
+file(COPY "${CMAKE_SOURCE_DIR}/src/remote.config"
+    DESTINATION "./"
+)
