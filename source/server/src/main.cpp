@@ -119,6 +119,11 @@ static gint __UserAthenticate(gchar *userid, gchar *userpw)
 		guchar *user_hashed_id;
 		guchar *user_hashed_pw;
 
+		if (cred_size != 64) {
+			LOG_WARNING("length error. credential file");
+			goto exit;
+		}
+
 		memcpy(buf_id, cred, 32);
 		memcpy(buf_pw, cred+32, 32);
 
