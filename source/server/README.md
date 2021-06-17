@@ -109,12 +109,17 @@ Done you are ready to build the project!
 
 #### 5. Build the project
 ```bash
-mkdir build && cd build
-cmake -DCMAKE_BUILD_TYPE=Release ..
-make -j${nproc}
+git clone https://github.com/prayam/cmu_project_public.git
+cd cmu_project/source/server
+python3 step01_pb_to_uff.py
+rm -rf MTCNN_FaceDetection_TensorRT/
+git clone https://github.com/PKUZHOU/MTCNN_FaceDetection_TensorRT
+mv MTCNN_FaceDetection_TensorRT/det* ./mtCNNModels
+mkdir build; cd build
+cmake ..
+make
+sudo systemctl restart nvargus-daemon && ./LgFaceRecDemoTCP_Jetson_NanoV2 5000
 ```
-If **not** run on Jetson platform set the path to your CUDA and TensorRT installation
-using _-DCUDA_TOOLKIT_ROOTDIR=path/to/cuda_ and _-DTENSORRT_ROOT=path/to/tensorRT_.
 
 ## NOTE
 **.uff and .engine files are GPU specific**, so if you use want to run
