@@ -93,8 +93,7 @@ file(GLOB DIR_SRCS
         "src/*.cpp"
         "${CMAKE_SOURCE_DIR}/../common/Logger.cpp"
         "${CMAKE_SOURCE_DIR}/../common/NetworkTCP.cpp"
-        "${CMAKE_SOURCE_DIR}/../common/TcpSendRecvJpeg.cpp"
-        "${CMAKE_SOURCE_DIR}/../common/TcpSendRecvJpeg.cpp"
+        "${CMAKE_SOURCE_DIR}/../common/TcpSendRecv.cpp"
         "${CMAKE_SOURCE_DIR}/../common/openssl_hostname_validation.cpp"
 )
 

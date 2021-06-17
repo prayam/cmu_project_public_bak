@@ -18,6 +18,7 @@
 #include "certcheck.h"
 
 #define TARGET_SERVER "face.recog.server.Jetson"
+#define TARGET_CLIENT "face.recog.client.PC"
 
 //-----------------------------------------------------------------
 // OpenTCPListenPort - Creates a Listen TCP port to accept
@@ -110,31 +111,6 @@ void CloseTcpListenPort(TTcpListenPort **TcpListenPort)
 // END CloseTcpListenPort
 //-----------------------------------------------------------------
 
-
-/* [START] by jh.ahn */
-static void ShowCerts(SSL* ssl)
-{
-	X509 *cert;
-	cert = SSL_get_peer_certificate(ssl); /* Get certificates (if available) */
-	if ( cert != NULL )
-	{
-		gchar *line;
-		LOG_INFO("Server certificates:");
-		line = X509_NAME_oneline(X509_get_subject_name(cert), 0, 0);
-		LOG_INFO("Subject: %s", line);
-		free(line);
-		line = X509_NAME_oneline(X509_get_issuer_name(cert), 0, 0);
-		LOG_INFO("Issuer: %s", line);
-		free(line);
-		X509_free(cert);
-	}
-	else
-	{
-		LOG_INFO("No certificates.");
-	}
-}
-/* [END] by jh.ahn */
-
 static SSL_CTX *get_server_context(const gchar *ca_pem,
 		const gchar *cert_pem,
 		const gchar *key_pem) {
@@ -214,6 +190,7 @@ TTcpConnectedPort *AcceptTcpConnection(TTcpListenPort *TcpListenPort,
 	TTcpConnectedPort *TcpConnectedPort;
 	gboolean isSsl = false;
 	gint rc = -1;
+	X509 *client_cert = NULL;
 
 	TcpConnectedPort = g_new0(TTcpConnectedPort, 1);
 
@@ -300,7 +277,22 @@ TTcpConnectedPort *AcceptTcpConnection(TTcpListenPort *TcpListenPort,
 			goto ssl_exit;
 		}
 
-		ShowCerts(TcpConnectedPort->ssl);
+		/* Host name Verification is required!!!*/
+		// Recover the client's certificate
+		client_cert =  SSL_get_peer_certificate(TcpConnectedPort->ssl);
+		if (client_cert == NULL) {
+			// The handshake was successful although the server did not provide a certificate
+			// Most likely using an insecure anonymous cipher suite... get out!
+			LOG_WARNING("SSL_get_peer_certificate failed");
+			goto ssl_exit;
+		}
+
+		// Validate the hostname
+		if (validate_hostname(TARGET_CLIENT, client_cert) != MatchFound) {
+			LOG_WARNING("Hostname validation failed");
+			goto error_verify_hostname;
+		}
+
 		/* Print success connection message on the server */
 		LOG_INFO("SSL handshake successful with %s:%d",
 				inet_ntoa(cli_addr->sin_addr), ntohs(cli_addr->sin_port));
@@ -310,6 +302,10 @@ TTcpConnectedPort *AcceptTcpConnection(TTcpListenPort *TcpListenPort,
 
 	return TcpConnectedPort;
 
+error_verify_hostname:
+	if (client_cert) {
+		X509_free(client_cert);
+	}
 ssl_exit:
 	if(isSsl) {
 		SSL_CTX_free(TcpConnectedPort->ctx);
@@ -648,7 +644,9 @@ TTcpConnectedPort *OpenTcpConnection(const gchar *remotehostname, const gchar * 
 
 	/* Cleanup and error */
 error_verify_hostname:
-	X509_free(server_cert);
+	if (server_cert) {
+		X509_free(server_cert);
+	}
 error_verify_cert:
 	BIO_ssl_shutdown(sbio);
 error_connect:

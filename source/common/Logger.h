@@ -29,8 +29,7 @@
  */
 #define LOG_PRINT(log_level, sub_domain, fmt, args...) g_log (log_get_domain (),          \
                                                             G_PASTE (G_LOG_LEVEL_, log_level),     \
-                                                            "%d %s (%s) " fmt,                     \
-                                                            log_get_pid (), sub_domain, G_STRFUNC, ##args)
+                                                            "%s " fmt, sub_domain, ##args)
 
 #define LOG_ERROR(fmt, args...)            LOG_PRINT (ERROR,    "", fmt, ##args)
 #define LOG_CRITICAL(fmt, args...)         LOG_PRINT (CRITICAL, "", fmt, ##args)

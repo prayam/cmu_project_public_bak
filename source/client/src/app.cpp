@@ -1,5 +1,5 @@
 #include "app.h"
-#include "TcpSendRecvJpeg.h"
+#include "TcpSendRecv.h"
 #include "CommonStruct.h"
 #include "Logger.h"
 #include "certcheck.h"
@@ -34,7 +34,6 @@ static gboolean handle_port_secure(gpointer data) {
 	gssize ret;
 	static CLIENT_STATE prev_state = CLIENT_STATE_SECURE_RUN;
 	gint skip_picture_count = 0;
-	LOG_INFO("start");
 
 	while (app->connected_server) {
 		gboolean recv_meta = FALSE, recv_photo = FALSE;
@@ -194,7 +193,6 @@ recv:
 		waitKey(10);
 	}
 
-	LOG_INFO("end func");
 	app->m_Image.clear();
 	app->handle_recv_data = 0;
 	app->on_button_logout();
@@ -299,7 +297,7 @@ App::App()
 
 App::~App()
 {
-	LOG_INFO("exit");
+	LOG_INFO("exit app");
 }
 
 void App::show_dialog(const gchar* contents)
@@ -311,8 +309,6 @@ void App::show_dialog(const gchar* contents)
 
 gboolean App::connect_server ()
 {
-	LOG_INFO("start");
-
 	gboolean ret = FALSE;
 	guint8 res = 255;
 	const gchar *ca;
@@ -418,14 +414,11 @@ gboolean App::connect_server ()
 	ret = TRUE;
 
 exit:
-	LOG_INFO("end");
 	return ret;
 }
 
 gboolean App::disconnect_server ()
 {
-	LOG_INFO("start");
-
 	this->connected_server = false;
 
 	if (this->port_control != NULL) {
@@ -455,7 +448,6 @@ gboolean App::disconnect_server ()
 
 	this->port_recv_photo = NULL;
 
-	LOG_INFO("end");
 	return TRUE;
 }
 

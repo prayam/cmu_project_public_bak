@@ -7,7 +7,7 @@
 //------------------------------------------------------------------------------------------------
 #include <glib.h>
 #include <opencv2/highgui/highgui.hpp>
-#include "TcpSendRecvJpeg.h"
+#include "TcpSendRecv.h"
 #include "CommonStruct.h"
 #include "Logger.h"
 

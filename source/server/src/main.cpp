@@ -13,7 +13,7 @@
 #include "Logger.h"
 
 #include "NetworkTCP.h"
-#include "TcpSendRecvJpeg.h"
+#include "TcpSendRecv.h"
 #include "CommonStruct.h"
 #include "certcheck.h"
 #include "common.h"
